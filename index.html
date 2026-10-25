@@ -195,7 +195,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         let db = null;
-        let unsubscribe = null;
         let localData = { inbox: [], recurring: [], contact: [], training: [], todo: [], project: [], it: [] };
 
         window.onload = function() {
@@ -250,8 +249,7 @@
         }
 
         function setupListeners() {
-            const collections = ['inbox', 'recurring', 'contact', 'training', 'todo', 'project', 'it'];
-            collections.forEach(colName => {
+            ['inbox', 'recurring', 'contact', 'training', 'todo', 'project', 'it'].forEach(colName => {
                 onSnapshot(collection(db, colName), (snapshot) => {
                     localData[colName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderAll();
@@ -261,21 +259,19 @@
             });
         }
 
-        // Actions globales
         window.handleInboxSubmit = async function(e) {
             e.preventDefault();
             const input = document.getElementById('inbox-input');
             const val = input.value.trim();
             if(!val) return;
 
-            // Smart triage simple keyword detection
             let target = 'todo';
-            let extra = {};
             const lower = val.toLowerCase();
             if(lower.includes('form') || lower.includes('travailleur')) target = 'training';
             else if(lower.includes('contact') || lower.includes('appel') || lower.includes('email') || lower.includes('teams')) target = 'contact';
             else if(lower.includes('it') || lower.includes('bug') || lower.includes('ordi')) target = 'it';
             else if(lower.includes('projet')) target = 'project';
+            else if(lower.includes('tous les') || lower.includes('chaque')) target = 'recurring';
 
             if(db) {
                 await addDoc(collection(db, 'inbox'), { text: val, suggested: target, timestamp: Date.now() });
@@ -286,17 +282,27 @@
             input.value = '';
         }
 
+        // CORRECTION DE LA FONCTION DE TRI
         window.triageItem = async function(id, text, targetCollection) {
+            let payload = { title: text, completed: false };
+            
+            if(targetCollection === 'contact') {
+                payload = { title: text, channel: 'Teams', message: '', status: 'À contacter' };
+            } else if(targetCollection === 'training') {
+                payload = { title: text, worker: 'À assigner', status: 'À vérifier' };
+            } else if(targetCollection === 'it') {
+                payload = { title: text, status: 'À transmettre', notes: '' };
+            } else if(targetCollection === 'project') {
+                payload = { title: text, progress: 0 };
+            }
+
             if(db) {
-                // Ajouter dans la cible
-                let payload = { title: text, completed: false };
-                if(targetCollection === 'contact') payload = { title: text, channel: 'Teams', message: '', status: 'À contacter' };
-                if(targetCollection === 'training') payload = { title: text, worker: 'À assigner', status: 'À vérifier' };
-                if(targetCollection === 'it') payload = { title: text, status: 'À transmettre', notes: '' };
-                if(targetCollection === 'project') payload = { title: text, progress: 0 };
-                
                 await addDoc(collection(db, targetCollection), payload);
                 await deleteDoc(doc(db, 'inbox', id));
+            } else {
+                localData.inbox = localData.inbox.filter(x => x.id !== id);
+                localData[targetCollection].push({ id: 'local_' + Math.random(), ...payload });
+                renderAll();
             }
         }
 
@@ -312,10 +318,13 @@
         window.toggleCheck = async function(col, id, currentVal) {
             if(db) {
                 await updateDoc(doc(db, col, id), { completed: !currentVal });
+            } else {
+                const item = localData[col].find(x => x.id === id);
+                if(item) item.completed = !currentVal;
+                renderAll();
             }
         }
 
-        // Modale d'ajout
         window.openModal = function(type) {
             document.getElementById('universal-modal').classList.remove('hidden');
             document.getElementById('modal-type').value = type;
@@ -374,24 +383,23 @@
         }
 
         function renderAll() {
-            // Inbox
             const inboxEl = document.getElementById('inbox-list');
             inboxEl.innerHTML = localData.inbox.length === 0 ? '<p class="text-xs text-slate-400 italic">Inbox vide. Tout est trié !</p>' : '';
             localData.inbox.forEach(item => {
+                const safeText = item.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 inboxEl.innerHTML += `
                     <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs">
                         <span class="font-medium text-slate-700 flex-1 pr-2">${item.text}</span>
                         <div class="flex items-center space-x-1">
-                            <button onclick="triageItem('${item.id}', '${item.text.replace(/'/g, "\\'")}', '${item.suggested}')" class="px-2 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg font-medium">Trier vers → ${item.suggested}</button>
+                            <button onclick="triageItem('${item.id}', '${safeText}', '${item.suggested}')" class="px-2.5 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg font-medium transition">Trier → ${item.suggested}</button>
                             <button onclick="deleteItem('inbox', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                         </div>
                     </div>
                 `;
             });
 
-            // Recurring
             renderSimpleList('recurring', 'recurring-list', true);
-            // Contact
+
             const contactEl = document.getElementById('contact-list');
             contactEl.innerHTML = localData.contact.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun contact en attente.</p>' : '';
             localData.contact.forEach(item => {
@@ -409,7 +417,6 @@
                 `;
             });
 
-            // Training
             const trainEl = document.getElementById('training-list');
             trainEl.innerHTML = localData.training.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune formation à vérifier.</p>' : '';
             localData.training.forEach(item => {
@@ -424,10 +431,8 @@
                 `;
             });
 
-            // Todo
             renderSimpleList('todo', 'todo-list', true);
 
-            // Project
             const projEl = document.getElementById('project-list');
             projEl.innerHTML = localData.project.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet en cours.</p>' : '';
             localData.project.forEach(item => {
@@ -448,7 +453,6 @@
                 `;
             });
 
-            // IT
             const itEl = document.getElementById('it-list');
             itEl.innerHTML = localData.it.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune demande IT en cours.</p>' : '';
             localData.it.forEach(item => {
