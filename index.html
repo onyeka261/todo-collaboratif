@@ -1,875 +1,485 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-slate-100">
+<html lang="fr" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SyncTask Duo - Dashboard Unique Collaboratif</title>
-    <!-- Tailwind CSS CDN -->
+    <title>DuoSync - Tableau de Bord Partagé</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Google Font Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="h-full flex flex-col text-slate-800 antialiased selection:bg-indigo-500 selection:text-white pb-12">
+<body class="h-full flex flex-col text-slate-800 antialiased overflow-x-hidden">
 
-    <!-- HEADER & SYNC CONTROL -->
-    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40">
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <!-- HEADER / NAVIGATION -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="p-2 bg-indigo-600 rounded-xl shadow-inner">
-                    <i data-lucide="layout-grid" class="w-5 h-5 text-white"></i>
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-100">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
                 </div>
                 <div>
-                    <h1 class="text-base font-bold tracking-tight leading-tight flex items-center gap-2">
-                        SyncTask Duo <span class="bg-indigo-500/30 text-indigo-300 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-indigo-400/30">Vue Page Unique</span>
-                    </h1>
-                    <p class="text-xs text-slate-400">Espace de travail synchronisé en temps réel</p>
+                    <h1 class="text-base font-bold text-slate-900 leading-tight">DuoSync Workspace</h1>
+                    <p class="text-xs text-slate-500">Synchronisation collaborative en temps réel</p>
                 </div>
             </div>
-
-            <!-- Firebase Status Indicator & Config Toggle -->
-            <div class="flex items-center space-x-3 text-xs">
-                <div id="sync-status" class="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300">
-                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" id="sync-dot"></span>
-                    <span id="sync-text" class="font-medium">Initialisation...</span>
+            
+            <div class="flex items-center space-x-3">
+                <div id="sync-status" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span id="sync-text">Config requise</span>
                 </div>
-
-                <button onclick="toggleConfigModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center gap-1.5 transition-all">
-                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-                    <span class="hidden sm:inline">Config Firebase</span>
+                <button onclick="openConfigModal()" class="flex items-center space-x-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <span>Config Firebase</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- MAIN SINGLE-PAGE DASHBOARD CONTAINER -->
-    <main class="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- MAIN DASHBOARD CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
 
-        <!-- 1. FULL WIDTH MODULE: INBOX & AUTO-TRIAGE -->
-        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <i data-lucide="inbox" class="w-5 h-5 text-indigo-600"></i>
-                        1. Boîte de Réception (Inbox) & Tri Intelligent
-                    </h2>
-                    <p class="text-xs text-slate-500">Saisissez rapidement tout élément avant de le classer en 1 clic dans le module adapté.</p>
+        <!-- LIGNE 1 : INBOX & SMART TRIAGE -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                        <i data-lucide="inbox" class="w-5 h-5"></i>
+                    </div>
+                    <h2 class="font-bold text-slate-900 text-base">Inbox & Capture Rapide</h2>
                 </div>
-                <span id="inbox-count-badge" class="self-start md:self-auto bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    0 élément à trier
-                </span>
+                <span class="text-xs text-slate-400">Tapez une idée ou une tâche brute, le système la catégorise</span>
             </div>
-
-            <!-- Quick Inbox Form -->
-            <form id="form-inbox" onsubmit="handleInboxSubmit(event)" class="space-y-3 mb-5">
-                <div class="flex gap-2">
-                    <input type="text" id="inbox-input" placeholder="Ex : Passer un coup de téléphone à Marc, Former Pierre sur le module sécurité, Bug d'affichage..." 
-                           class="flex-1 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-3 transition-all outline-none" required>
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-3 rounded-xl transition-all flex items-center space-x-2 text-sm shadow-sm flex-shrink-0">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span>Capturer</span>
-                    </button>
-                </div>
-                <!-- Smart AI Keyword Suggestion Bar -->
-                <div id="ai-suggestion" class="hidden text-xs text-indigo-700 bg-indigo-50/80 p-2.5 rounded-xl border border-indigo-100 flex items-center gap-2">
-                    <i data-lucide="sparkles" class="w-4 h-4 flex-shrink-0 text-indigo-600"></i>
-                    <span id="ai-suggestion-text"></span>
-                </div>
+            <form id="inbox-form" onsubmit="handleInboxSubmit(event)" class="flex gap-2">
+                <input type="text" id="inbox-input" placeholder="Ex: Appeler Marc pour le point de chantier, ou Vérifier formation Paul..." 
+                    class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-sm transition flex items-center space-x-1.5">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Capturer</span>
+                </button>
             </form>
-
-            <!-- Incoming Items Grid -->
-            <div id="inbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                <!-- Inbox items dynamically rendered -->
-            </div>
+            <!-- Liste Inbox non triée -->
+            <div id="inbox-list" class="mt-4 space-y-2 max-h-48 overflow-y-auto"></div>
         </section>
 
-        <!-- 2-COLUMN GRID FOR ALL OTHER MODULES -->
+        <!-- GRILLE PRINCIPALE (2 COLONNES SUR PC) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            <!-- LEFT COLUMN -->
+            <!-- COLONNE GAUCHE -->
             <div class="space-y-6">
 
-                <!-- 2. RECURRING TASKS -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="repeat" class="w-5 h-5 text-indigo-600"></i>
-                            2. Tâches Récurrentes
-                        </h2>
-                        <span id="count-recurring" class="text-xs font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">0</span>
-                    </div>
-
-                    <form id="form-recurring" onsubmit="handleRecurringSubmit(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <input type="text" id="rec-title" placeholder="Intitulé de la tâche" class="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500" required>
-                        <select id="rec-freq" class="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="Quotidienne">Quotidienne</option>
-                            <option value="Hebdomadaire" selected>Hebdomadaire</option>
-                            <option value="Mensuelle">Mensuelle</option>
-                        </select>
-                        <button type="submit" class="sm:col-span-3 bg-slate-900 hover:bg-slate-800 text-white font-medium p-2 rounded-xl text-xs transition-all">
-                            Ajouter Récurrence
-                        </button>
-                    </form>
-
-                    <div id="recurring-list" class="space-y-2 max-h-72 overflow-y-auto custom-scrollbar pr-1"></div>
-                </section>
-
-                <!-- 3. PEOPLE TO CONTACT -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="phone-call" class="w-5 h-5 text-indigo-600"></i>
-                            3. À Contacter
-                        </h2>
-                        <span id="count-contact" class="text-xs font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">0</span>
-                    </div>
-
-                    <form id="form-contact" onsubmit="handleContactSubmit(event)" class="space-y-2.5">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input type="text" id="contact-name" placeholder="Nom du contact / entreprise" class="rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500" required>
-                            <select id="contact-channel" class="rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="Teams">Microsoft Teams</option>
-                                <option value="Téléphone">Téléphone</option>
-                                <option value="Courriel">Courriel</option>
-                            </select>
+                <!-- 1. TACHES RECOURRENTES -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 text-base">Tâches Récurrentes</h2>
                         </div>
-                        <input type="text" id="contact-msg" placeholder="Message / Sujet exact à aborder..." class="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500" required>
-                        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium p-2 rounded-xl text-xs transition-all">
-                            Enregistrer Contact
-                        </button>
-                    </form>
-
-                    <div id="contact-list" class="space-y-2 max-h-80 overflow-y-auto custom-scrollbar pr-1"></div>
+                        <button onclick="openModal('recurring')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
                 </section>
 
-                <!-- 4. ONGOING PROJECTS & SUBTASKS -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="folder-kanban" class="w-5 h-5 text-indigo-600"></i>
-                            4. Projets en Cours & Avancement
-                        </h2>
-                        <span id="count-projects" class="text-xs font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">0</span>
+                <!-- 2. A CONTACTER -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 text-base">À Contacter</h2>
+                        </div>
+                        <button onclick="openModal('contact')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
                     </div>
+                    <div id="contact-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                </section>
 
-                    <form id="form-project" onsubmit="handleProjectSubmit(event)" class="flex gap-2">
-                        <input type="text" id="project-title" placeholder="Nom du nouveau projet..." class="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500" required>
-                        <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-xl text-xs transition-all flex-shrink-0">
-                            Créer Projet
-                        </button>
-                    </form>
-
-                    <div id="projects-list" class="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-1"></div>
+                <!-- 3. FORMATIONS DES TRAVAILLEURS -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-purple-50 text-purple-600 rounded-lg"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 text-base">Formations à vérifier</h2>
+                        </div>
+                        <button onclick="openModal('training')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="training-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
                 </section>
 
             </div>
 
-            <!-- RIGHT COLUMN -->
+            <!-- COLONNE DROITE -->
             <div class="space-y-6">
 
-                <!-- 5. SIMPLE TASKS -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="check-square" class="w-5 h-5 text-indigo-600"></i>
-                            5. Tâches Simples à Faire
-                        </h2>
-                        <span id="count-tasks" class="text-xs font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">0</span>
+                <!-- 4. SIMPLE TO-DO -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 text-base">Simple To-Do</h2>
+                        </div>
+                        <button onclick="openModal('todo')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
                     </div>
-
-                    <form id="form-tasks" onsubmit="handleTaskSubmit(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <input type="text" id="task-title" placeholder="Titre de la tâche" class="rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500 sm:col-span-2" required>
-                        <select id="task-priority" class="rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="Basse">Priorité Basse</option>
-                            <option value="Moyenne" selected>Priorité Moyenne</option>
-                            <option value="Haute">Priorité Haute</option>
-                        </select>
-                        <input type="date" id="task-due" class="rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500 sm:col-span-2">
-                        <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-medium p-2 rounded-xl text-xs transition-all">
-                            Ajouter Tâche
-                        </button>
-                    </form>
-
-                    <div id="tasks-list" class="space-y-2 max-h-72 overflow-y-auto custom-scrollbar pr-1"></div>
+                    <div id="todo-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
                 </section>
 
-                <!-- 6. WORKER TRAINING TRACKER -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-600"></i>
-                            6. Suivi Formations Travailleurs
-                        </h2>
-                        <span id="count-trainings" class="text-xs font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">0</span>
+                <!-- 5. PROJETS EN COURS -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-cyan-50 text-cyan-600 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 text-base">Projets en cours</h2>
+                        </div>
+                        <button onclick="openModal('project')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Nouveau Projet</button>
                     </div>
-
-                    <form id="form-training" onsubmit="handleTrainingSubmit(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <input type="text" id="train-worker" placeholder="Nom du travailleur" class="rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500" required>
-                        <input type="text" id="train-module" placeholder="Module / Certification" class="rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500" required>
-                        <input type="date" id="train-date" class="rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500" required>
-                        <button type="submit" class="sm:col-span-3 bg-slate-900 hover:bg-slate-800 text-white font-medium p-2 rounded-xl text-xs transition-all">
-                            Ajouter au Registre
-                        </button>
-                    </form>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50">
-                                    <th class="p-2">Travailleur</th>
-                                    <th class="p-2">Module</th>
-                                    <th class="p-2">Échéance</th>
-                                    <th class="p-2">Statut</th>
-                                    <th class="p-2 text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="trainings-list" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
+                    <div id="project-list" class="space-y-3 max-h-72 overflow-y-auto"></div>
                 </section>
 
-                <!-- 7. IT REQUEST BOARD -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="terminal" class="w-5 h-5 text-indigo-600"></i>
-                            7. Support IT & Suivi des Demandes
-                        </h2>
-                        <span id="count-it" class="text-xs font-semibold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">0</span>
+                <!-- 6. TABLEAU IT (PRIVÉ) -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 bg-slate-900 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-slate-800 text-indigo-400 rounded-lg"><i data-lucide="terminal" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-white text-base">Tableau IT & Suivi</h2>
+                                <p class="text-xs text-slate-400">Pense-bête personnel demandes techniques</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('it')" class="text-xs text-indigo-300 font-semibold hover:underline">+ Demande</button>
                     </div>
-
-                    <form id="form-it" onsubmit="handleITSubmit(event)" class="space-y-2">
-                        <input type="text" id="it-title" placeholder="Sujet / Panne / Demande IT" class="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500" required>
-                        <input type="text" id="it-notes" placeholder="Précisions techniques / Réponse du support..." class="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium p-2 rounded-xl text-xs transition-all">
-                            Soumettre au Support IT
-                        </button>
-                    </form>
-
-                    <div id="it-list" class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-1"></div>
+                    <div id="it-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
                 </section>
 
             </div>
-        </div>
 
+        </div>
     </main>
 
-    <!-- FIREBASE CONFIG MODAL -->
-    <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="database" class="w-5 h-5 text-indigo-600"></i>
-                    Configuration Firebase Sync
-                </h3>
-                <button onclick="toggleConfigModal()" class="text-slate-400 hover:text-slate-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <p class="text-xs text-slate-500">Collez votre clé de configuration Firebase pour synchroniser instantanément avec votre collègue.</p>
-            
-            <textarea id="firebase-config-input" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' 
-                      class="w-full h-32 text-xs font-mono p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="saveFirebaseConfig()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-medium rounded-xl hover:bg-indigo-700 transition-all">
-                    Enregistrer et Reconnecter
-                </button>
+    <!-- MODALE DE CONFIGURATION FIREBASE -->
+    <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Configuration Firebase</h3>
+            <p class="text-xs text-slate-500 mb-4">Collez ci-dessous l'objet JSON fourni par Firebase pour activer la synchro temps réel.</p>
+            <textarea id="config-json-input" rows="7" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-4"></textarea>
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Annuler</button>
+                <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer & Connecter</button>
             </div>
         </div>
     </div>
 
-    <!-- FIREBASE INIT & SYNC LOGIC -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- MODALE D'AJOUT UNIVERSELLE -->
+    <div id="universal-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+            <h3 id="modal-title" class="text-lg font-bold text-slate-900 mb-4">Ajouter un élément</h3>
+            <form id="universal-form" onsubmit="handleUniversalSubmit(event)" class="space-y-3">
+                <input type="hidden" id="modal-type">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Intitulé / Titre</label>
+                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div id="extra-field-container"></div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        // Application Identification
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'synctask-duo-singlepage';
-        
-        let firebaseConfig = null;
-        if (typeof __firebase_config !== 'undefined') {
-            try { firebaseConfig = JSON.parse(__firebase_config); } catch(e){}
-        }
-        if (!firebaseConfig) {
-            const savedConfig = localStorage.getItem('custom_firebase_config');
-            if (savedConfig) {
-                try { firebaseConfig = JSON.parse(savedConfig); } catch(e){}
-            }
-        }
+    <!-- SCRIPTS FIREBASE & LOGIQUE APP -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         let db = null;
-        let auth = null;
-        let isFirebaseActive = false;
+        let unsubscribe = null;
+        let localData = { inbox: [], recurring: [], contact: [], training: [], todo: [], project: [], it: [] };
 
-        // In-memory application state
-        window.appState = {
-            inbox: [],
-            recurring: [],
-            contact: [],
-            projects: [],
-            tasks: [],
-            trainings: [],
-            it: []
-        };
-
-        const collections = ['inbox', 'recurring', 'contact', 'projects', 'tasks', 'trainings', 'it'];
-
-        async function initSyncEngine() {
-            if (firebaseConfig && firebaseConfig.projectId) {
-                try {
-                    const app = initializeApp(firebaseConfig);
-                    auth = getAuth(app);
-                    db = getFirestore(app);
-
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-
-                    onAuthStateChanged(auth, (user) => {
-                        if (user) {
-                            isFirebaseActive = true;
-                            updateSyncUI('cloud');
-                            bindFirestoreSubscriptions();
-                        }
-                    });
-                } catch (err) {
-                    console.warn("Firebase failed, fallback to LocalStorage:", err);
-                    setupLocalStorageFallback();
-                }
-            } else {
-                setupLocalStorageFallback();
-            }
-        }
-
-        function setupLocalStorageFallback() {
-            isFirebaseActive = false;
-            updateSyncUI('local');
-            collections.forEach(col => {
-                const stored = localStorage.getItem(`synctask_${col}`);
-                window.appState[col] = stored ? JSON.parse(stored) : [];
-            });
-            window.renderDashboard();
-        }
-
-        function bindFirestoreSubscriptions() {
-            collections.forEach(col => {
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', col);
-                onSnapshot(colRef, (snapshot) => {
-                    window.appState[col] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    window.renderDashboard();
-                }, (err) => {
-                    console.error(`Subscription error on ${col}:`, err);
-                });
-            });
-        }
-
-        // Global Operations (Firebase + LocalStorage Fallback)
-        window.addItem = async (col, itemData) => {
-            if (isFirebaseActive && auth.currentUser) {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', col), {
-                    ...itemData,
-                    createdAt: serverTimestamp()
-                });
-            } else {
-                const newItem = { id: Date.now().toString(), ...itemData };
-                window.appState[col].unshift(newItem);
-                saveLocalStorage(col);
-                window.renderDashboard();
-            }
-        };
-
-        window.updateItem = async (col, id, updatedFields) => {
-            if (isFirebaseActive && auth.currentUser) {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', col, id), updatedFields);
-            } else {
-                const idx = window.appState[col].findIndex(i => i.id === id);
-                if (idx !== -1) {
-                    window.appState[col][idx] = { ...window.appState[col][idx], ...updatedFields };
-                    saveLocalStorage(col);
-                    window.renderDashboard();
-                }
-            }
-        };
-
-        window.deleteItem = async (col, id) => {
-            if (isFirebaseActive && auth.currentUser) {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, id));
-            } else {
-                window.appState[col] = window.appState[col].filter(i => i.id !== id);
-                saveLocalStorage(col);
-                window.renderDashboard();
-            }
-        };
-
-        function saveLocalStorage(col) {
-            localStorage.setItem(`synctask_${col}`, JSON.stringify(window.appState[col]));
-        }
-
-        function updateSyncUI(mode) {
-            const dot = document.getElementById('sync-dot');
-            const text = document.getElementById('sync-text');
-            if (mode === 'cloud') {
-                dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-                text.textContent = "Synchro Temps Réel Active";
-            } else {
-                dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-                text.textContent = "Mode Local (Sans Clé Config)";
-            }
-        }
-
-        window.saveFirebaseConfig = () => {
-            const raw = document.getElementById('firebase-config-input').value.trim();
-            if (!raw) return;
-            try {
-                JSON.parse(raw);
-                localStorage.setItem('custom_firebase_config', raw);
-                location.reload();
-            } catch (e) {
-                alert("Format JSON invalide. Vérifiez la syntaxe.");
-            }
-        };
-
-        window.onload = () => {
-            initSyncEngine();
+        window.onload = function() {
             lucide.createIcons();
-
-            // Real-time AI keyword detection for Smart Triage
-            const inboxInput = document.getElementById('inbox-input');
-            if (inboxInput) {
-                inboxInput.addEventListener('input', (e) => {
-                    const text = e.target.value.toLowerCase();
-                    const sugBox = document.getElementById('ai-suggestion');
-                    const sugText = document.getElementById('ai-suggestion-text');
-
-                    if (!text.trim()) {
-                        sugBox.classList.add('hidden');
-                        return;
-                    }
-
-                    let target = "";
-                    if (text.includes('mail') || text.includes('appel') || text.includes('contact') || text.includes('tel') || text.includes('teams')) {
-                        target = "3. À Contacter";
-                    } else if (text.includes('bug') || text.includes('it') || text.includes('panne') || text.includes('support')) {
-                        target = "7. Support IT";
-                    } else if (text.includes('formation') || text.includes('stage') || text.includes('certif') || text.includes('cours')) {
-                        target = "6. Formations Travailleurs";
-                    } else if (text.includes('projet') || text.includes('chantier') || text.includes('lancement')) {
-                        target = "4. Projets en Cours";
-                    } else if (text.includes('chaque') || text.includes('hebdo') || text.includes('mensuel') || text.includes('quotidien')) {
-                        target = "2. Tâches Récurrentes";
-                    }
-
-                    if (target) {
-                        sugText.textContent = `Tri suggéré : Redirection recommandée vers "${target}"`;
-                        sugBox.classList.remove('hidden');
-                    } else {
-                        sugBox.classList.add('hidden');
-                    }
-                });
+            const savedConfig = localStorage.getItem('duo_firebase_config');
+            if (savedConfig) {
+                try {
+                    initFirebase(JSON.parse(savedConfig));
+                } catch (e) {
+                    console.error("Config invalide");
+                }
             }
         };
-    </script>
 
-    <!-- DASHBOARD RENDERING & EVENT HANDLERS -->
-    <script>
-        // Modal Controls
-        function toggleConfigModal() {
-            document.getElementById('config-modal').classList.toggle('hidden');
+        window.openConfigModal = function() {
+            document.getElementById('config-modal').classList.remove('hidden');
+            const current = localStorage.getItem('duo_firebase_config');
+            if (current) document.getElementById('config-json-input').value = current;
         }
 
-        // 1. INBOX SUBMIT
-        async function handleInboxSubmit(e) {
+        window.closeConfigModal = function() {
+            document.getElementById('config-modal').classList.add('hidden');
+        }
+
+        window.saveConfig = function() {
+            const val = document.getElementById('config-json-input').value.trim();
+            try {
+                const configObj = JSON.parse(val);
+                localStorage.setItem('duo_firebase_config', JSON.stringify(configObj));
+                closeConfigModal();
+                initFirebase(configObj);
+            } catch(e) {
+                alert("Format JSON invalide. Vérifiez les guillemets.");
+            }
+        }
+
+        function initFirebase(config) {
+            try {
+                const app = initializeApp(config);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+                signInAnonymously(auth).then(() => {
+                    document.getElementById('sync-status').className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200";
+                    document.getElementById('sync-text').innerText = "Connecté & Synchronisé";
+                    setupListeners();
+                }).catch(err => {
+                    alert("Erreur d'authentification Firebase : " + err.message);
+                });
+            } catch (e) {
+                alert("Erreur d'initialisation Firebase : " + e.message);
+            }
+        }
+
+        function setupListeners() {
+            const collections = ['inbox', 'recurring', 'contact', 'training', 'todo', 'project', 'it'];
+            collections.forEach(colName => {
+                onSnapshot(collection(db, colName), (snapshot) => {
+                    localData[colName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderAll();
+                }, (error) => {
+                    console.error("Erreur sync collection " + colName, error);
+                });
+            });
+        }
+
+        // Actions globales
+        window.handleInboxSubmit = async function(e) {
             e.preventDefault();
             const input = document.getElementById('inbox-input');
-            const text = input.value.trim();
-            if (!text) return;
+            const val = input.value.trim();
+            if(!val) return;
 
-            await window.addItem('inbox', { text });
+            // Smart triage simple keyword detection
+            let target = 'todo';
+            let extra = {};
+            const lower = val.toLowerCase();
+            if(lower.includes('form') || lower.includes('travailleur')) target = 'training';
+            else if(lower.includes('contact') || lower.includes('appel') || lower.includes('email') || lower.includes('teams')) target = 'contact';
+            else if(lower.includes('it') || lower.includes('bug') || lower.includes('ordi')) target = 'it';
+            else if(lower.includes('projet')) target = 'project';
+
+            if(db) {
+                await addDoc(collection(db, 'inbox'), { text: val, suggested: target, timestamp: Date.now() });
+            } else {
+                localData.inbox.push({ id: 'local_' + Math.random(), text: val, suggested: target });
+                renderAll();
+            }
             input.value = '';
-            document.getElementById('ai-suggestion').classList.add('hidden');
         }
 
-        // Quick Triage Action Handler (Move directly from Inbox to Module)
-        async function triageMove(inboxId, text, targetModule) {
-            if (targetModule === 'recurring') {
-                await window.addItem('recurring', { title: text, frequency: 'Hebdomadaire', completed: false });
-            } else if (targetModule === 'contact') {
-                await window.addItem('contact', { name: text, channel: 'Teams', message: 'Sujet à préciser', status: 'À contacter' });
-            } else if (targetModule === 'projects') {
-                await window.addItem('projects', { title: text, subtasks: [] });
-            } else if (targetModule === 'tasks') {
-                await window.addItem('tasks', { title: text, priority: 'Moyenne', due: '', done: false });
-            } else if (targetModule === 'trainings') {
-                await window.addItem('trainings', { worker: 'A désigner', module: text, dueDate: new Date().toISOString().split('T')[0], status: 'À planifier' });
-            } else if (targetModule === 'it') {
-                await window.addItem('it', { title: text, notes: '', status: 'Soumis' });
+        window.triageItem = async function(id, text, targetCollection) {
+            if(db) {
+                // Ajouter dans la cible
+                let payload = { title: text, completed: false };
+                if(targetCollection === 'contact') payload = { title: text, channel: 'Teams', message: '', status: 'À contacter' };
+                if(targetCollection === 'training') payload = { title: text, worker: 'À assigner', status: 'À vérifier' };
+                if(targetCollection === 'it') payload = { title: text, status: 'À transmettre', notes: '' };
+                if(targetCollection === 'project') payload = { title: text, progress: 0 };
+                
+                await addDoc(collection(db, targetCollection), payload);
+                await deleteDoc(doc(db, 'inbox', id));
+            }
+        }
+
+        window.deleteItem = async function(col, id) {
+            if(db) {
+                await deleteDoc(doc(db, col, id));
+            } else {
+                localData[col] = localData[col].filter(x => x.id !== id);
+                renderAll();
+            }
+        }
+
+        window.toggleCheck = async function(col, id, currentVal) {
+            if(db) {
+                await updateDoc(doc(db, col, id), { completed: !currentVal });
+            }
+        }
+
+        // Modale d'ajout
+        window.openModal = function(type) {
+            document.getElementById('universal-modal').classList.remove('hidden');
+            document.getElementById('modal-type').value = type;
+            const container = document.getElementById('extra-field-container');
+            container.innerHTML = '';
+            
+            if(type === 'contact') {
+                document.getElementById('modal-title').innerText = "Ajouter un contact";
+                container.innerHTML = `
+                    <div><label class="block text-xs font-semibold text-slate-600 mb-1">Canal</label>
+                    <select id="m-channel" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"><option>Teams</option><option>Téléphone</option><option>Courriel</option></select></div>
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 mb-1">Message / Notes</label><input type="text" id="m-message" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>
+                `;
+            } else if(type === 'training') {
+                document.getElementById('modal-title').innerText = "Vérification Formation";
+                container.innerHTML = `<div><label class="block text-xs font-semibold text-slate-600 mb-1">Nom du travailleur</label><input type="text" id="m-worker" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>`;
+            } else if(type === 'it') {
+                document.getElementById('modal-title').innerText = "Nouvelle demande IT";
+                container.innerHTML = `<div><label class="block text-xs font-semibold text-slate-600 mb-1">Notes de suivi</label><input type="text" id="m-notes" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>`;
+            } else if(type === 'project') {
+                document.getElementById('modal-title').innerText = "Nouveau Projet";
+                container.innerHTML = `<div><label class="block text-xs font-semibold text-slate-600 mb-1">Avancement (%)</label><input type="number" id="m-progress" value="0" min="0" max="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>`;
+            } else {
+                document.getElementById('modal-title').innerText = "Ajouter un élément";
+            }
+        }
+
+        window.closeModalWindow = function() {
+            document.getElementById('universal-modal').classList.add('hidden');
+            document.getElementById('m-title').value = '';
+        }
+
+        window.handleUniversalSubmit = async function(e) {
+            e.preventDefault();
+            const type = document.getElementById('modal-type').value;
+            const title = document.getElementById('m-title').value;
+            let payload = { title, completed: false };
+
+            if(type === 'contact') {
+                payload = { title, channel: document.getElementById('m-channel').value, message: document.getElementById('m-message').value, status: 'À contacter' };
+            } else if(type === 'training') {
+                payload = { title, worker: document.getElementById('m-worker').value, status: 'À vérifier' };
+            } else if(type === 'it') {
+                payload = { title, notes: document.getElementById('m-notes').value || '', status: 'À transmettre' };
+            } else if(type === 'project') {
+                payload = { title, progress: parseInt(document.getElementById('m-progress').value) || 0 };
             }
 
-            await window.deleteItem('inbox', inboxId);
+            if(db) {
+                await addDoc(collection(db, type), payload);
+            } else {
+                localData[type].push({ id: 'local_' + Math.random(), ...payload });
+                renderAll();
+            }
+            closeModalWindow();
         }
 
-        // 2. RECURRING SUBMIT
-        async function handleRecurringSubmit(e) {
-            e.preventDefault();
-            const title = document.getElementById('rec-title').value.trim();
-            const frequency = document.getElementById('rec-freq').value;
-            if (!title) return;
-
-            await window.addItem('recurring', { title, frequency, completed: false, lastDone: null });
-            e.target.reset();
-        }
-
-        // 3. CONTACT SUBMIT
-        async function handleContactSubmit(e) {
-            e.preventDefault();
-            const name = document.getElementById('contact-name').value.trim();
-            const channel = document.getElementById('contact-channel').value;
-            const message = document.getElementById('contact-msg').value.trim();
-            if (!name) return;
-
-            await window.addItem('contact', { name, channel, message, status: 'À contacter' });
-            e.target.reset();
-        }
-
-        // 4. PROJECT SUBMIT & SUBTASKS
-        async function handleProjectSubmit(e) {
-            e.preventDefault();
-            const title = document.getElementById('project-title').value.trim();
-            if (!title) return;
-
-            await window.addItem('projects', { title, subtasks: [] });
-            e.target.reset();
-        }
-
-        async function addSubtask(projId) {
-            const input = document.getElementById(`subtask-input-${projId}`);
-            const text = input.value.trim();
-            if (!text) return;
-
-            const proj = window.appState.projects.find(p => p.id === projId);
-            if (!proj) return;
-
-            const subtasks = proj.subtasks || [];
-            subtasks.push({ id: Date.now().toString(), text, done: false });
-
-            await window.updateItem('projects', projId, { subtasks });
-            input.value = '';
-        }
-
-        async function toggleSubtask(projId, subtaskId) {
-            const proj = window.appState.projects.find(p => p.id === projId);
-            if (!proj) return;
-
-            const subtasks = (proj.subtasks || []).map(s => {
-                if (s.id === subtaskId) return { ...s, done: !s.done };
-                return s;
+        function renderAll() {
+            // Inbox
+            const inboxEl = document.getElementById('inbox-list');
+            inboxEl.innerHTML = localData.inbox.length === 0 ? '<p class="text-xs text-slate-400 italic">Inbox vide. Tout est trié !</p>' : '';
+            localData.inbox.forEach(item => {
+                inboxEl.innerHTML += `
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                        <span class="font-medium text-slate-700 flex-1 pr-2">${item.text}</span>
+                        <div class="flex items-center space-x-1">
+                            <button onclick="triageItem('${item.id}', '${item.text.replace(/'/g, "\\'")}', '${item.suggested}')" class="px-2 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg font-medium">Trier vers → ${item.suggested}</button>
+                            <button onclick="deleteItem('inbox', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                `;
             });
 
-            await window.updateItem('projects', projId, { subtasks });
-        }
-
-        // 5. TASKS SUBMIT
-        async function handleTaskSubmit(e) {
-            e.preventDefault();
-            const title = document.getElementById('task-title').value.trim();
-            const priority = document.getElementById('task-priority').value;
-            const due = document.getElementById('task-due').value;
-            if (!title) return;
-
-            await window.addItem('tasks', { title, priority, due, done: false });
-            e.target.reset();
-        }
-
-        // 6. TRAINING SUBMIT
-        async function handleTrainingSubmit(e) {
-            e.preventDefault();
-            const worker = document.getElementById('train-worker').value.trim();
-            const module = document.getElementById('train-module').value.trim();
-            const dueDate = document.getElementById('train-date').value;
-            if (!worker || !module) return;
-
-            await window.addItem('trainings', { worker, module, dueDate, status: 'À jour' });
-            e.target.reset();
-        }
-
-        // 7. IT SUBMIT
-        async function handleITSubmit(e) {
-            e.preventDefault();
-            const title = document.getElementById('it-title').value.trim();
-            const notes = document.getElementById('it-notes').value.trim();
-            if (!title) return;
-
-            await window.addItem('it', { title, notes, status: 'Soumis' });
-            e.target.reset();
-        }
-
-        // MAIN SINGLE-PAGE RENDERING ENGINE
-        window.renderDashboard = () => {
-            const state = window.appState;
-
-            // Counters Badge Update
-            document.getElementById('inbox-count-badge').textContent = `${state.inbox.length} élément(s) à trier`;
-            document.getElementById('count-recurring').textContent = state.recurring.length;
-            document.getElementById('count-contact').textContent = state.contact.length;
-            document.getElementById('count-projects').textContent = state.projects.length;
-            document.getElementById('count-tasks').textContent = state.tasks.length;
-            document.getElementById('count-trainings').textContent = state.trainings.length;
-            document.getElementById('count-it').textContent = state.it.length;
-
-            // 1. INBOX LIST
-            const inboxEl = document.getElementById('inbox-list');
-            if (state.inbox.length === 0) {
-                inboxEl.innerHTML = `<p class="col-span-full text-xs text-slate-400 italic text-center py-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">Boîte de réception vide. Tous les éléments ont été triés.</p>`;
-            } else {
-                inboxEl.innerHTML = state.inbox.map(item => `
-                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between space-y-3">
-                        <p class="text-xs font-semibold text-slate-800">${escapeHtml(item.text)}</p>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-200">
-                            <select onchange="triageMove('${item.id}', '${escapeHtml(item.text)}', this.value)" class="text-[11px] font-medium bg-white border border-slate-200 rounded-lg p-1 outline-none text-indigo-600">
-                                <option value="" disabled selected>Déplacer vers...</option>
-                                <option value="recurring">2. Récurrente</option>
-                                <option value="contact">3. Contact</option>
-                                <option value="projects">4. Projet</option>
-                                <option value="tasks">5. Tâche Simple</option>
-                                <option value="trainings">6. Formation</option>
-                                <option value="it">7. Support IT</option>
-                            </select>
-                            <button onclick="window.deleteItem('inbox', '${item.id}')" class="text-slate-400 hover:text-rose-600">
-                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // 2. RECURRING
-            const recEl = document.getElementById('recurring-list');
-            if (state.recurring.length === 0) {
-                recEl.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-3">Aucune tâche récurrente.</p>`;
-            } else {
-                recEl.innerHTML = state.recurring.map(item => `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs">
-                        <div class="flex items-center space-x-2.5">
-                            <input type="checkbox" ${item.completed ? 'checked' : ''} 
-                                   onchange="window.updateItem('recurring', '${item.id}', { completed: this.checked, lastDone: new Date().toLocaleDateString() })" 
-                                   class="rounded border-slate-300 text-indigo-600">
-                            <div>
-                                <p class="font-medium ${item.completed ? 'line-through text-slate-400' : 'text-slate-800'}">${escapeHtml(item.title)}</p>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                    <span class="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.2 rounded">${item.frequency}</span>
-                                    ${item.lastDone ? `<span class="text-[10px] text-slate-400">Dernier : ${item.lastDone}</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                        <button onclick="window.deleteItem('recurring', '${item.id}')" class="text-slate-400 hover:text-rose-600">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </div>
-                `).join('');
-            }
-
-            // 3. CONTACTS
+            // Recurring
+            renderSimpleList('recurring', 'recurring-list', true);
+            // Contact
             const contactEl = document.getElementById('contact-list');
-            if (state.contact.length === 0) {
-                contactEl.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-3">Aucun contact en attente.</p>`;
-            } else {
-                contactEl.innerHTML = state.contact.map(item => {
-                    const statusColors = {
-                        'À contacter': 'bg-amber-50 text-amber-700 border-amber-200',
-                        'Contacté': 'bg-blue-50 text-blue-700 border-blue-200',
-                        'En attente': 'bg-purple-50 text-purple-700 border-purple-200'
-                    };
-                    return `
-                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-slate-900">${escapeHtml(item.name)}</span>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full border ${statusColors[item.status] || 'bg-slate-100'} font-semibold">${item.status}</span>
-                            </div>
-                            <p class="text-slate-600 bg-white p-2 rounded-lg border border-slate-100">${escapeHtml(item.message)}</p>
-                            <div class="flex items-center justify-between pt-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[10px] text-slate-500 font-semibold bg-slate-200 px-1.5 py-0.5 rounded">${item.channel}</span>
-                                    <select onchange="window.updateItem('contact', '${item.id}', { status: this.value })" class="text-[10px] border border-slate-200 rounded p-0.5 bg-white">
-                                        <option value="À contacter" ${item.status === 'À contacter' ? 'selected' : ''}>À contacter</option>
-                                        <option value="Contacté" ${item.status === 'Contacté' ? 'selected' : ''}>Contacté</option>
-                                        <option value="En attente" ${item.status === 'En attente' ? 'selected' : ''}>En attente</option>
-                                    </select>
-                                </div>
-                                <button onclick="window.deleteItem('contact', '${item.id}')" class="text-slate-400 hover:text-rose-600">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
+            contactEl.innerHTML = localData.contact.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun contact en attente.</p>' : '';
+            localData.contact.forEach(item => {
+                contactEl.innerHTML += `
+                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs space-y-1">
+                        <div class="flex items-center justify-between font-semibold text-slate-800">
+                            <span>${item.title}</span>
+                            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-[10px]">${item.channel}</span>
                         </div>
-                    `;
-                }).join('');
-            }
-
-            // 4. PROJECTS
-            const projEl = document.getElementById('projects-list');
-            if (state.projects.length === 0) {
-                projEl.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-3">Aucun projet actif.</p>`;
-            } else {
-                projEl.innerHTML = state.projects.map(proj => {
-                    const subtasks = proj.subtasks || [];
-                    const doneCount = subtasks.filter(s => s.done).length;
-                    const percent = subtasks.length > 0 ? Math.round((doneCount / subtasks.length) * 100) : 0;
-
-                    return `
-                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-3 text-xs">
-                            <div class="flex items-center justify-between">
-                                <h4 class="font-bold text-slate-900">${escapeHtml(proj.title)}</h4>
-                                <button onclick="window.deleteItem('projects', '${proj.id}')" class="text-slate-400 hover:text-rose-600">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
-
-                            <div>
-                                <div class="flex justify-between text-[10px] font-semibold text-slate-500 mb-1">
-                                    <span>Avancement</span>
-                                    <span>${percent}%</span>
-                                </div>
-                                <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                                    <div class="h-full bg-indigo-600 transition-all duration-300" style="width: ${percent}%"></div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                ${subtasks.map(s => `
-                                    <div class="flex items-center justify-between bg-white p-1.5 rounded border border-slate-100">
-                                        <div class="flex items-center space-x-2">
-                                            <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleSubtask('${proj.id}', '${s.id}')" class="rounded border-slate-300 text-indigo-600">
-                                            <span class="${s.done ? 'line-through text-slate-400' : 'text-slate-700'}">${escapeHtml(s.text)}</span>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-
-                            <div class="flex gap-1.5">
-                                <input type="text" id="subtask-input-${proj.id}" placeholder="Sous-tâche..." class="flex-1 text-[11px] p-1.5 rounded border border-slate-200 outline-none">
-                                <button onclick="addSubtask('${proj.id}')" class="px-2.5 py-1 bg-indigo-50 text-indigo-700 text-[11px] font-semibold rounded hover:bg-indigo-100">Ajouter</button>
-                            </div>
+                        ${item.message ? `<p class="text-slate-500 italic">"${item.message}"</p>` : ''}
+                        <div class="flex justify-end pt-1">
+                            <button onclick="deleteItem('contact', '${item.id}')" class="text-slate-400 hover:text-rose-600 text-[11px]">Marquer fait / Supprimer</button>
                         </div>
-                    `;
-                }).join('');
-            }
+                    </div>
+                `;
+            });
 
-            // 5. TASKS
-            const tasksEl = document.getElementById('tasks-list');
-            if (state.tasks.length === 0) {
-                tasksEl.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-3">Aucune tâche simple.</p>`;
-            } else {
-                tasksEl.innerHTML = state.tasks.map(item => {
-                    const prioBadge = {
-                        'Haute': 'bg-rose-50 text-rose-700 border-rose-200',
-                        'Moyenne': 'bg-amber-50 text-amber-700 border-amber-200',
-                        'Basse': 'bg-slate-100 text-slate-600 border-slate-200'
-                    };
-                    return `
-                        <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                            <div class="flex items-center space-x-2.5">
-                                <input type="checkbox" ${item.done ? 'checked' : ''} onchange="window.updateItem('tasks', '${item.id}', { done: this.checked })" class="rounded border-slate-300 text-indigo-600">
-                                <div>
-                                    <p class="font-medium ${item.done ? 'line-through text-slate-400' : 'text-slate-800'}">${escapeHtml(item.title)}</p>
-                                    ${item.due ? `<p class="text-[10px] text-slate-400">Échéance : ${item.due}</p>` : ''}
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-[10px] px-2 py-0.5 rounded border font-semibold ${prioBadge[item.priority]}">${item.priority}</span>
-                                <button onclick="window.deleteItem('tasks', '${item.id}')" class="text-slate-400 hover:text-rose-600">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
+            // Training
+            const trainEl = document.getElementById('training-list');
+            trainEl.innerHTML = localData.training.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune formation à vérifier.</p>' : '';
+            localData.training.forEach(item => {
+                trainEl.innerHTML += `
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                        <div>
+                            <span class="font-bold text-slate-800 block">${item.worker}</span>
+                            <span class="text-slate-500">${item.title}</span>
                         </div>
-                    `;
-                }).join('');
-            }
+                        <button onclick="deleteItem('training', '${item.id}')" class="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg font-medium">Validé</button>
+                    </div>
+                `;
+            });
 
-            // 6. TRAININGS
-            const trainEl = document.getElementById('trainings-list');
-            if (state.trainings.length === 0) {
-                trainEl.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-slate-400 italic">Registre vide.</td></tr>`;
-            } else {
-                trainEl.innerHTML = state.trainings.map(item => {
-                    const statusBadge = {
-                        'À jour': 'bg-emerald-100 text-emerald-800',
-                        'En retard': 'bg-rose-100 text-rose-800',
-                        'À planifier': 'bg-amber-100 text-amber-800'
-                    };
-                    return `
-                        <tr class="border-b border-slate-100">
-                            <td class="p-2 font-medium text-slate-900">${escapeHtml(item.worker)}</td>
-                            <td class="p-2 text-slate-600">${escapeHtml(item.module)}</td>
-                            <td class="p-2 text-slate-500">${item.dueDate}</td>
-                            <td class="p-2">
-                                <select onchange="window.updateItem('trainings', '${item.id}', { status: this.value })" class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusBadge[item.status]} border-0 outline-none">
-                                    <option value="À jour" ${item.status === 'À jour' ? 'selected' : ''}>À jour</option>
-                                    <option value="À planifier" ${item.status === 'À planifier' ? 'selected' : ''}>À planifier</option>
-                                    <option value="En retard" ${item.status === 'En retard' ? 'selected' : ''}>En retard</option>
-                                </select>
-                            </td>
-                            <td class="p-2 text-right">
-                                <button onclick="window.deleteItem('trainings', '${item.id}')" class="text-slate-400 hover:text-rose-600">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
+            // Todo
+            renderSimpleList('todo', 'todo-list', true);
 
-            // 7. IT TICKETS
+            // Project
+            const projEl = document.getElementById('project-list');
+            projEl.innerHTML = localData.project.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet en cours.</p>' : '';
+            localData.project.forEach(item => {
+                projEl.innerHTML += `
+                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs space-y-2">
+                        <div class="flex items-center justify-between font-semibold text-slate-800">
+                            <span>${item.title}</span>
+                            <button onclick="deleteItem('project', '${item.id}')" class="text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div class="bg-cyan-500 h-full rounded-full" style="width: ${item.progress}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>Avancement</span>
+                            <span class="font-bold text-cyan-600">${item.progress}%</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // IT
             const itEl = document.getElementById('it-list');
-            if (state.it.length === 0) {
-                itEl.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-3">Aucun ticket IT enregistre.</p>`;
-            } else {
-                itEl.innerHTML = state.it.map(item => {
-                    const statusBadge = {
-                        'Soumis': 'bg-slate-100 text-slate-700',
-                        'En cours IT': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                        'Résolu': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                        'Bloqué': 'bg-rose-50 text-rose-700 border-rose-200'
-                    };
-                    return `
-                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
-                            <div class="flex items-center justify-between">
-                                <h4 class="font-bold text-slate-900">${escapeHtml(item.title)}</h4>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full border font-semibold ${statusBadge[item.status]}">${item.status}</span>
-                            </div>
-                            ${item.notes ? `<p class="text-slate-600 bg-white p-2 rounded border border-slate-100">${escapeHtml(item.notes)}</p>` : ''}
-                            <div class="flex items-center justify-between pt-1">
-                                <select onchange="window.updateItem('it', '${item.id}', { status: this.value })" class="text-[10px] border border-slate-200 rounded p-0.5 bg-white">
-                                    <option value="Soumis" ${item.status === 'Soumis' ? 'selected' : ''}>Soumis</option>
-                                    <option value="En cours IT" ${item.status === 'En cours IT' ? 'selected' : ''}>En cours IT</option>
-                                    <option value="Résolu" ${item.status === 'Résolu' ? 'selected' : ''}>Résolu</option>
-                                    <option value="Bloqué" ${item.status === 'Bloqué' ? 'selected' : ''}>Bloqué</option>
-                                </select>
-                                <button onclick="window.deleteItem('it', '${item.id}')" class="text-slate-400 hover:text-rose-600">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
+            itEl.innerHTML = localData.it.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune demande IT en cours.</p>' : '';
+            localData.it.forEach(item => {
+                itEl.innerHTML += `
+                    <div class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs space-y-1">
+                        <div class="flex items-center justify-between font-medium text-slate-200">
+                            <span>${item.title}</span>
+                            <button onclick="deleteItem('it', '${item.id}')" class="text-slate-400 hover:text-rose-400"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
                         </div>
-                    `;
-                }).join('');
-            }
+                        ${item.notes ? `<p class="text-slate-400 text-[11px]">Suivi : ${item.notes}</p>` : ''}
+                    </div>
+                `;
+            });
 
             lucide.createIcons();
-        };
+        }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        function renderSimpleList(col, elementId, hasCheckbox) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = localData[col].length === 0 ? `<p class="text-xs text-slate-400 italic">Rien pour le moment.</p>` : '';
+            localData[col].forEach(item => {
+                el.innerHTML += `
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                        <div class="flex items-center space-x-2.5">
+                            ${hasCheckbox ? `<input type="checkbox" ${item.completed ? 'checked' : ''} onclick="toggleCheck('${col}', '${item.id}', ${item.completed})" class="w-4 h-4 text-indigo-600 rounded-sm border-slate-300">` : ''}
+                            <span class="font-medium ${item.completed ? 'line-through text-slate-400' : 'text-slate-700'}">${item.title}</span>
+                        </div>
+                        <button onclick="deleteItem('${col}', '${item.id}')" class="text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                `;
+            });
         }
     </script>
 </body>
