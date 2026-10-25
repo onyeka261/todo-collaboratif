@@ -70,13 +70,66 @@
             <div id="inbox-list" class="space-y-2 max-h-56 overflow-y-auto pt-2"></div>
         </section>
 
-        <!-- GRILLE PRINCIPALE -->
+        <!-- GRILLE PRINCIPALE (DISPOSITION REORDONNEE) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- COLONNE GAUCHE -->
             <div class="space-y-6">
 
-                <!-- 1. FORMATIONS DES TRAVAILLEURS (GROUPE UNIQUE / NOM UNIQUEMENT) -->
+                <!-- 1. SIMPLE TO-DO (EN HAUT A GAUCHE) -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 text-base">Simple To-Do</h2>
+                        </div>
+                        <button onclick="openModal('todo')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="todo-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                </section>
+
+                <!-- 2. TACHES RECURRENTES -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 text-base">Tâches Récurrentes</h2>
+                        </div>
+                        <button onclick="openModal('recurring')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                </section>
+
+                <!-- 3. PROJETS EN COURS -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-cyan-50 text-cyan-600 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 text-base">Projets en cours</h2>
+                        </div>
+                        <button onclick="openModal('project')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Nouveau Projet</button>
+                    </div>
+                    <div id="project-list" class="space-y-3.5 max-h-96 overflow-y-auto"></div>
+                </section>
+
+            </div>
+
+            <!-- COLONNE DROITE -->
+            <div class="space-y-6">
+
+                <!-- 4. A CONTACTER (EN HAUT A DROITE) -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 text-base">À Contacter</h2>
+                        </div>
+                        <button onclick="openModal('contact')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="contact-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                </section>
+
+                <!-- 5. FORMATIONS DES TRAVAILLEURS -->
                 <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
@@ -89,59 +142,6 @@
                         <button onclick="openModal('training')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter Travailleur</button>
                     </div>
                     <div id="training-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
-                </section>
-
-                <!-- 2. TACHES RECOURRENTES -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
-                            <h2 class="font-bold text-slate-900 text-base">Tâches Récurrentes</h2>
-                        </div>
-                        <button onclick="openModal('recurring')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
-                    </div>
-                    <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
-                </section>
-
-                <!-- 3. A CONTACTER -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
-                            <h2 class="font-bold text-slate-900 text-base">À Contacter</h2>
-                        </div>
-                        <button onclick="openModal('contact')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
-                    </div>
-                    <div id="contact-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
-                </section>
-
-            </div>
-
-            <!-- COLONNE DROITE -->
-            <div class="space-y-6">
-
-                <!-- 4. PROJETS EN COURS (AVEC DEADLINE ET SOUS-TACHES) -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-cyan-50 text-cyan-600 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
-                            <h2 class="font-bold text-slate-900 text-base">Projets en cours</h2>
-                        </div>
-                        <button onclick="openModal('project')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Nouveau Projet</button>
-                    </div>
-                    <div id="project-list" class="space-y-3.5 max-h-96 overflow-y-auto"></div>
-                </section>
-
-                <!-- 5. SIMPLE TO-DO -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
-                            <h2 class="font-bold text-slate-900 text-base">Simple To-Do</h2>
-                        </div>
-                        <button onclick="openModal('todo')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
-                    </div>
-                    <div id="todo-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
                 </section>
 
                 <!-- 6. TABLEAU IT (PRIVÉ) -->
@@ -163,7 +163,7 @@
 
         </div>
 
-        <!-- SECTION TACHES ET FORMATIONS TERMINÉES (HISTORIQUE) -->
+        <!-- SECTION HISTORIQUE ET TACHES TERMINÉES -->
         <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
             <details class="group">
                 <summary class="flex items-center justify-between cursor-pointer list-none">
@@ -487,9 +487,9 @@
                         <div class="flex items-center space-x-1">
                             <select id="target-${item.id}" class="text-[11px] py-1 px-1.5 bg-white border border-slate-200 rounded-lg">
                                 <option value="todo" ${item.suggested==='todo'?'selected':''}>To-Do</option>
-                                <option value="training" ${item.suggested==='training'?'selected':''}>Formations</option>
                                 <option value="contact" ${item.suggested==='contact'?'selected':''}>À contacter</option>
                                 <option value="recurring" ${item.suggested==='recurring'?'selected':''}>Récurrentes</option>
+                                <option value="training" ${item.suggested==='training'?'selected':''}>Formations</option>
                                 <option value="project" ${item.suggested==='project'?'selected':''}>Projet</option>
                                 <option value="it" ${item.suggested==='it'?'selected':''}>Tableau IT</option>
                             </select>
@@ -551,7 +551,6 @@
                 const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 const subtasks = item.subtasks || [];
                 
-                // Calcul deadline
                 let deadlineBadge = '';
                 if(item.deadline) {
                     const today = new Date().toISOString().slice(0,10);
@@ -570,7 +569,6 @@
                             </div>
                         </div>
 
-                        <!-- Barre de progression -->
                         <div class="space-y-1">
                             <div class="flex justify-between text-[10px] text-slate-500">
                                 <span>Progression</span>
@@ -581,7 +579,6 @@
                             </div>
                         </div>
 
-                        <!-- Sous-tâches -->
                         <div class="pt-1 space-y-1.5 border-t border-slate-200/60">
                             <div class="flex items-center justify-between">
                                 <span class="text-[10px] font-bold text-slate-500 uppercase">Sous-tâches (${subtasks.filter(s=>s.done).length}/${subtasks.length})</span>
@@ -671,11 +668,11 @@
             csvContent += "Module;Intitulé / Travailleur;Détail / Deadline;Statut\n";
 
             localData.inbox.forEach(item => csvContent += `Inbox;"${item.text.replace(/"/g, '""')}";"Suggéré: ${item.suggested}";En attente\n`);
-            localData.training.forEach(item => csvContent += `Formations;"${item.workerName.replace(/"/g, '""')}";"Groupe unique";À vérifier\n`);
-            localData.recurring.forEach(item => csvContent += `Récurrentes;"${item.title.replace(/"/g, '""')}";"-";En cours\n`);
-            localData.contact.forEach(item => csvContent += `Contact;"${item.title.replace(/"/g, '""')}";"Canal: ${item.channel} | ${item.message || ''}";À contacter\n`);
-            localData.project.forEach(item => csvContent += `Projets;"${item.title.replace(/"/g, '""')}";"Deadline: ${item.deadline || 'Aucune'}";"${item.progress}%"\n`);
             localData.todo.forEach(item => csvContent += `To-Do;"${item.title.replace(/"/g, '""')}";"-";En cours\n`);
+            localData.contact.forEach(item => csvContent += `Contact;"${item.title.replace(/"/g, '""')}";"Canal: ${item.channel} | ${item.message || ''}";À contacter\n`);
+            localData.recurring.forEach(item => csvContent += `Récurrentes;"${item.title.replace(/"/g, '""')}";"-";En cours\n`);
+            localData.training.forEach(item => csvContent += `Formations;"${item.workerName.replace(/"/g, '""')}";"Groupe unique";À vérifier\n`);
+            localData.project.forEach(item => csvContent += `Projets;"${item.title.replace(/"/g, '""')}";"Deadline: ${item.deadline || 'Aucune'}";"${item.progress}%"\n`);
             localData.it.forEach(item => csvContent += `IT;"${item.title.replace(/"/g, '""')}";"Notes: ${item.notes || ''}";En cours\n`);
             localData.history.forEach(item => csvContent += `Historique;"${item.title.replace(/"/g, '""')}";"Fait le: ${item.completedAt}";Terminé\n`);
 
