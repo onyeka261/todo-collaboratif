@@ -7,8 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- CDN SortableJS pour le Drag and Drop fluide -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ghost-card { opacity: 0.4; background-color: #f1f5f9; border: 2px dashed #6366f1; }
+        .drag-handle { cursor: grab; }
+        .drag-handle:active { cursor: grabbing; }
     </style>
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased overflow-x-hidden">
@@ -81,11 +86,14 @@
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
                             <div class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
-                            <h2 class="font-bold text-slate-900 text-base">Simple To-Do</h2>
+                            <div>
+                                <h2 class="font-bold text-slate-900 text-base">Simple To-Do</h2>
+                                <p class="text-[10px] text-slate-400">Glisser pour prioriser (Haut = Priorité max)</p>
+                            </div>
                         </div>
                         <button onclick="openModal('todo')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
                     </div>
-                    <div id="todo-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                    <div id="todo-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
                 <!-- 2. TACHES RECURRENTES -->
@@ -97,7 +105,7 @@
                         </div>
                         <button onclick="openModal('recurring')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
                     </div>
-                    <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                    <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
                 <!-- 3. PROJETS EN COURS -->
@@ -109,7 +117,7 @@
                         </div>
                         <button onclick="openModal('project')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Nouveau Projet</button>
                     </div>
-                    <div id="project-list" class="space-y-3.5 max-h-96 overflow-y-auto"></div>
+                    <div id="project-list" class="space-y-3.5 max-h-96 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
             </div>
@@ -126,7 +134,7 @@
                         </div>
                         <button onclick="openModal('contact')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
                     </div>
-                    <div id="contact-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                    <div id="contact-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
                 <!-- 5. FORMATIONS DES TRAVAILLEURS -->
@@ -141,7 +149,7 @@
                         </div>
                         <button onclick="openModal('training')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter Travailleur</button>
                     </div>
-                    <div id="training-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                    <div id="training-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
                 <!-- 6. TABLEAU IT (PRIVÉ) -->
@@ -156,7 +164,7 @@
                         </div>
                         <button onclick="openModal('it')" class="text-xs text-indigo-300 font-semibold hover:underline">+ Demande</button>
                     </div>
-                    <div id="it-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                    <div id="it-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
             </div>
@@ -206,6 +214,15 @@
                     <label id="m-title-label" class="block text-xs font-semibold text-slate-600 mb-1">Intitulé / Titre</label>
                     <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Responsable</label>
+                    <select id="m-assignee" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="Non assigné">Non assigné</option>
+                        <option value="Mickaela">Mickaela</option>
+                        <option value="Collègue">Collègue</option>
+                        <option value="Les deux">Les deux</option>
+                    </select>
+                </div>
                 <div id="extra-field-container"></div>
                 <div class="flex justify-end space-x-2 pt-2">
                     <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Annuler</button>
@@ -223,6 +240,7 @@
 
         let db = null;
         let localData = { inbox: [], recurring: [], contact: [], training: [], todo: [], project: [], it: [], history: [] };
+        let sortableInstances = {};
 
         window.onload = function() {
             lucide.createIcons();
@@ -234,6 +252,7 @@
                     console.error("Config invalide");
                 }
             }
+            initSortable();
         };
 
         window.openConfigModal = function() {
@@ -276,9 +295,39 @@
         function setupListeners() {
             ['inbox', 'recurring', 'contact', 'training', 'todo', 'project', 'it', 'history'].forEach(colName => {
                 onSnapshot(collection(db, colName), (snapshot) => {
-                    localData[colName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    let items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Tri par ordre de priorité si présent
+                    items.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+                    localData[colName] = items;
                     renderAll();
                 }, (error) => console.error("Erreur sync " + colName, error));
+            });
+        }
+
+        // INITIALISATION DU DRAG & DROP (SORTABLEJS)
+        function initSortable() {
+            const collections = ['todo', 'recurring', 'project', 'contact', 'training', 'it'];
+            collections.forEach(col => {
+                const el = document.getElementById(`${col}-list`);
+                if (!el) return;
+                sortableInstances[col] = new Sortable(el, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'ghost-card',
+                    onEnd: async function () {
+                        const newOrderIds = Array.from(el.children).map(child => child.getAttribute('data-id')).filter(Boolean);
+                        
+                        // Mise à jour de l'ordre local
+                        newOrderIds.forEach((id, index) => {
+                            let item = localData[col].find(x => x.id === id);
+                            if (item) item.order = index;
+                            if (db) {
+                                updateDoc(doc(db, col, id), { order: index });
+                            }
+                        });
+                        localData[col].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+                    }
+                });
             });
         }
 
@@ -298,9 +347,9 @@
             else if(lower.includes('tous les') || lower.includes('chaque')) target = 'recurring';
 
             if(db) {
-                await addDoc(collection(db, 'inbox'), { text: val, suggested: target, timestamp: Date.now() });
+                await addDoc(collection(db, 'inbox'), { text: val, suggested: target, timestamp: Date.now(), assignee: 'Non assigné' });
             } else {
-                localData.inbox.push({ id: 'local_' + Math.random(), text: val, suggested: target });
+                localData.inbox.push({ id: 'local_' + Math.random(), text: val, suggested: target, assignee: 'Non assigné' });
                 renderAll();
             }
             input.value = '';
@@ -308,12 +357,13 @@
 
         // TRI INBOX ET MODIFICATION CIBLE
         window.triageItem = async function(id, text, selectedTarget) {
-            let payload = { title: text, completed: false };
+            let maxOrder = localData[selectedTarget].length;
+            let payload = { title: text, completed: false, order: maxOrder, assignee: 'Non assigné' };
             
-            if(selectedTarget === 'contact') payload = { title: text, channel: 'Teams', message: '', status: 'À contacter' };
-            else if(selectedTarget === 'training') payload = { workerName: text, completed: false };
-            else if(selectedTarget === 'it') payload = { title: text, status: 'À transmettre', notes: '' };
-            else if(selectedTarget === 'project') payload = { title: text, progress: 0, deadline: '', subtasks: [] };
+            if(selectedTarget === 'contact') payload = { title: text, channel: 'Teams', message: '', status: 'À contacter', order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'training') payload = { workerName: text, completed: false, order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'it') payload = { title: text, status: 'À transmettre', notes: '', order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'project') payload = { title: text, progress: 0, deadline: '', subtasks: [], order: maxOrder, assignee: 'Non assigné' };
 
             if(db) {
                 await addDoc(collection(db, selectedTarget), payload);
@@ -325,7 +375,7 @@
             }
         }
 
-        // ARCHIVER (MARQUER REUSSI OU VALIDE)
+        // ARCHIVER
         window.completeItem = async function(col, id, titleOrWorker) {
             if(db) {
                 await addDoc(collection(db, 'history'), {
@@ -354,7 +404,7 @@
             }
         }
 
-        // GESTION SOUS-TACHES DU PROJET
+        // SOUS-TACHES DU PROJET
         window.addSubtask = async function(projId) {
             const text = prompt("Titre de la nouvelle sous-tâche :");
             if(!text) return;
@@ -404,6 +454,7 @@
             let existing = editId ? localData[type].find(x => x.id === editId) : null;
             document.getElementById('m-title-label').innerText = type === 'training' ? "Nom du travailleur" : "Intitulé / Titre";
             document.getElementById('m-title').value = existing ? (existing.title || existing.workerName || '') : '';
+            document.getElementById('m-assignee').value = existing?.assignee || 'Non assigné';
 
             if(type === 'contact') {
                 document.getElementById('modal-title').innerText = editId ? "Modifier le contact" : "Ajouter un contact";
@@ -438,10 +489,11 @@
             const type = document.getElementById('modal-type').value;
             const editId = document.getElementById('modal-edit-id').value;
             const titleVal = document.getElementById('m-title').value;
+            const assigneeVal = document.getElementById('m-assignee').value;
 
-            let payload = {};
-            if(type === 'training') payload = { workerName: titleVal };
-            else payload = { title: titleVal };
+            let payload = { assignee: assigneeVal };
+            if(type === 'training') payload.workerName = titleVal;
+            else payload.title = titleVal;
 
             if(type === 'contact') {
                 payload.channel = document.getElementById('m-channel').value;
@@ -456,6 +508,7 @@
                 if(editId) {
                     await updateDoc(doc(db, type, editId), payload);
                 } else {
+                    payload.order = localData[type].length;
                     if(type === 'project') { payload.progress = 0; payload.subtasks = []; }
                     await addDoc(collection(db, type), payload);
                 }
@@ -464,11 +517,23 @@
                     let idx = localData[type].findIndex(x => x.id === editId);
                     if(idx !== -1) localData[type][idx] = { ...localData[type][idx], ...payload };
                 } else {
+                    payload.order = localData[type].length;
                     localData[type].push({ id: 'local_' + Math.random(), ...payload });
                 }
                 renderAll();
             }
             closeModalWindow();
+        }
+
+        // GENERATEUR DE BADGE RESPONSABLE
+        function getAssigneeBadge(assignee) {
+            if (!assignee || assignee === 'Non assigné') return '';
+            let color = 'bg-slate-100 text-slate-600 border-slate-200';
+            if (assignee === 'Mickaela') color = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+            else if (assignee === 'Collègue') color = 'bg-purple-50 text-purple-700 border-purple-200';
+            else if (assignee === 'Les deux') color = 'bg-amber-50 text-amber-700 border-amber-200';
+
+            return `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md border ${color}">👤 ${assignee}</span>`;
         }
 
         // AFFICHAGE GLOBAL
@@ -482,7 +547,7 @@
                 if(query && !item.text.toLowerCase().includes(query)) return;
                 const safeText = item.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 inboxEl.innerHTML += `
-                    <div class="flex flex-wrap items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs gap-2">
+                    <div class="flex flex-wrap items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs gap-2" data-id="${item.id}">
                         <span class="font-medium text-slate-700 flex-1 min-w-[200px]">${item.text}</span>
                         <div class="flex items-center space-x-1">
                             <select id="target-${item.id}" class="text-[11px] py-1 px-1.5 bg-white border border-slate-200 rounded-lg">
@@ -500,17 +565,19 @@
                 `;
             });
 
-            // Formations (Groupe unique / Nom travailleur)
+            // Formations
             const trainEl = document.getElementById('training-list');
             trainEl.innerHTML = localData.training.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun travailleur à vérifier.</p>' : '';
             localData.training.forEach(item => {
                 if(query && !item.workerName.toLowerCase().includes(query)) return;
                 const safeWorker = item.workerName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 trainEl.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs" data-id="${item.id}">
                         <div class="flex items-center space-x-2">
+                            <span class="drag-handle text-slate-300 hover:text-slate-500 font-bold px-0.5">⋮⋮</span>
                             <div class="w-2 h-2 rounded-full bg-purple-500"></div>
                             <span class="font-bold text-slate-800">${item.workerName}</span>
+                            ${getAssigneeBadge(item.assignee)}
                         </div>
                         <div class="flex items-center space-x-1">
                             <button onclick="openModal('training', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
@@ -527,15 +594,19 @@
                 if(query && !item.title.toLowerCase().includes(query)) return;
                 const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 contactEl.innerHTML += `
-                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs space-y-1">
+                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs space-y-1" data-id="${item.id}">
                         <div class="flex items-center justify-between font-semibold text-slate-800">
-                            <span>${item.title}</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="drag-handle text-slate-300 hover:text-slate-500 font-bold px-0.5">⋮⋮</span>
+                                <span>${item.title}</span>
+                                ${getAssigneeBadge(item.assignee)}
+                            </div>
                             <div class="flex items-center space-x-1">
                                 <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-[10px]">${item.channel}</span>
                                 <button onclick="openModal('contact', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
                             </div>
                         </div>
-                        ${item.message ? `<p class="text-slate-500 italic">"${item.message}"</p>` : ''}
+                        ${item.message ? `<p class="text-slate-500 italic pl-5">"${item.message}"</p>` : ''}
                         <div class="flex justify-end pt-1">
                             <button onclick="completeItem('contact', '${item.id}', '${safeTitle}')" class="text-emerald-600 font-semibold hover:underline text-[11px]">Terminé ✓</button>
                         </div>
@@ -559,9 +630,13 @@
                 }
 
                 projEl.innerHTML += `
-                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs space-y-2.5">
+                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs space-y-2.5" data-id="${item.id}">
                         <div class="flex items-center justify-between font-bold text-slate-800">
-                            <span class="text-sm">${item.title}</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="drag-handle text-slate-300 hover:text-slate-500 font-bold px-0.5">⋮⋮</span>
+                                <span class="text-sm">${item.title}</span>
+                                ${getAssigneeBadge(item.assignee)}
+                            </div>
                             <div class="flex items-center space-x-1">
                                 ${deadlineBadge}
                                 <button onclick="openModal('project', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
@@ -606,15 +681,19 @@
                 if(query && !item.title.toLowerCase().includes(query)) return;
                 const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 itEl.innerHTML += `
-                    <div class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs space-y-1">
+                    <div class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs space-y-1" data-id="${item.id}">
                         <div class="flex items-center justify-between font-medium text-slate-200">
-                            <span>${item.title}</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="drag-handle text-slate-600 hover:text-slate-400 font-bold px-0.5">⋮⋮</span>
+                                <span>${item.title}</span>
+                                ${getAssigneeBadge(item.assignee)}
+                            </div>
                             <div class="flex items-center space-x-1">
                                 <button onclick="openModal('it', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-300"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
                                 <button onclick="completeItem('it', '${item.id}', '${safeTitle}')" class="p-1 text-emerald-400 hover:text-emerald-300"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
                             </div>
                         </div>
-                        ${item.notes ? `<p class="text-slate-400 text-[11px]">Suivi : ${item.notes}</p>` : ''}
+                        ${item.notes ? `<p class="text-slate-400 text-[11px] pl-5">Suivi : ${item.notes}</p>` : ''}
                     </div>
                 `;
             });
@@ -648,10 +727,12 @@
                 if(query && !item.title.toLowerCase().includes(query)) return;
                 const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 el.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs" data-id="${item.id}">
                         <div class="flex items-center space-x-2.5">
+                            <span class="drag-handle text-slate-300 hover:text-slate-500 font-bold px-0.5">⋮⋮</span>
                             <input type="checkbox" onclick="completeItem('${col}', '${item.id}', '${safeTitle}')" class="w-4 h-4 text-indigo-600 rounded border-slate-300">
                             <span class="font-medium text-slate-700">${item.title}</span>
+                            ${getAssigneeBadge(item.assignee)}
                         </div>
                         <div class="flex items-center space-x-1">
                             <button onclick="openModal('${col}', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
@@ -665,16 +746,16 @@
         // EXPORTATION EXCEL (CSV)
         window.exportToExcel = function() {
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-            csvContent += "Module;Intitulé / Travailleur;Détail / Deadline;Statut\n";
+            csvContent += "Module;Intitulé / Travailleur;Responsable;Détail / Deadline;Statut\n";
 
-            localData.inbox.forEach(item => csvContent += `Inbox;"${item.text.replace(/"/g, '""')}";"Suggéré: ${item.suggested}";En attente\n`);
-            localData.todo.forEach(item => csvContent += `To-Do;"${item.title.replace(/"/g, '""')}";"-";En cours\n`);
-            localData.contact.forEach(item => csvContent += `Contact;"${item.title.replace(/"/g, '""')}";"Canal: ${item.channel} | ${item.message || ''}";À contacter\n`);
-            localData.recurring.forEach(item => csvContent += `Récurrentes;"${item.title.replace(/"/g, '""')}";"-";En cours\n`);
-            localData.training.forEach(item => csvContent += `Formations;"${item.workerName.replace(/"/g, '""')}";"Groupe unique";À vérifier\n`);
-            localData.project.forEach(item => csvContent += `Projets;"${item.title.replace(/"/g, '""')}";"Deadline: ${item.deadline || 'Aucune'}";"${item.progress}%"\n`);
-            localData.it.forEach(item => csvContent += `IT;"${item.title.replace(/"/g, '""')}";"Notes: ${item.notes || ''}";En cours\n`);
-            localData.history.forEach(item => csvContent += `Historique;"${item.title.replace(/"/g, '""')}";"Fait le: ${item.completedAt}";Terminé\n`);
+            localData.inbox.forEach(item => csvContent += `Inbox;"${item.text.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Suggéré: ${item.suggested}";En attente\n`);
+            localData.todo.forEach(item => csvContent += `To-Do;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";En cours\n`);
+            localData.contact.forEach(item => csvContent += `Contact;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Canal: ${item.channel} | ${item.message || ''}";À contacter\n`);
+            localData.recurring.forEach(item => csvContent += `Récurrentes;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";En cours\n`);
+            localData.training.forEach(item => csvContent += `Formations;"${item.workerName.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Groupe unique";À vérifier\n`);
+            localData.project.forEach(item => csvContent += `Projets;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Deadline: ${item.deadline || 'Aucune'}";"${item.progress}%"\n`);
+            localData.it.forEach(item => csvContent += `IT;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Notes: ${item.notes || ''}";En cours\n`);
+            localData.history.forEach(item => csvContent += `Historique;"${item.title.replace(/"/g, '""')}";"-";"Fait le: ${item.completedAt}";Terminé\n`);
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
