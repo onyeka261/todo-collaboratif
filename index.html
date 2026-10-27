@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-slate-50">
+<html lang="fr" class="h-full bg-slate-50 transition-colors duration-200" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DuoSync - Tableau de Bord Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -15,33 +20,45 @@
         .drag-handle:active { cursor: grabbing; }
     </style>
 </head>
-<body class="h-full flex flex-col text-slate-800 antialiased overflow-x-hidden">
+<body class="h-full flex flex-col text-slate-800 dark:text-slate-100 dark:bg-slate-950 antialiased overflow-x-hidden">
 
     <!-- HEADER / NAVIGATION -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-100">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-100 dark:shadow-none">
                     <i data-lucide="layers" class="w-5 h-5"></i>
                 </div>
                 <div>
-                    <h1 class="text-base font-bold text-slate-900 leading-tight">DuoSync Workspace</h1>
-                    <p class="text-xs text-slate-500">Gestion collaborative & Suivi de projets</p>
+                    <h1 class="text-base font-bold text-slate-900 dark:text-white leading-tight">DuoSync Workspace</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Gestion collaborative & Suivi de projets</p>
                 </div>
             </div>
             
             <div class="flex items-center space-x-2">
-                <button onclick="exportToExcel()" class="flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-semibold transition">
+                <!-- BADGE URGENCES / COMPTEUR D'ÉCHÉANCES -->
+                <div id="urgent-badge" class="hidden items-center space-x-1 px-2.5 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800">
+                    <i data-lucide="bell" class="w-3.5 h-3.5 animate-bounce"></i>
+                    <span id="urgent-text">0 urgence</span>
+                </div>
+
+                <button onclick="exportToExcel()" class="flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-semibold transition">
                     <i data-lucide="download" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">Exporter (Excel)</span>
                 </button>
 
-                <div id="sync-status" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200">
+                <div id="sync-status" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-800">
                     <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                     <span id="sync-text">Config requise</span>
                 </div>
 
-                <button onclick="openConfigModal()" class="flex items-center space-x-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
+                <!-- BASCULE MODE SOMBRE -->
+                <button onclick="toggleDarkMode()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition" title="Changer de thème">
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                </button>
+
+                <button onclick="openConfigModal()" class="flex items-center space-x-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition">
                     <i data-lucide="settings" class="w-4 h-4"></i>
                 </button>
             </div>
@@ -51,22 +68,36 @@
     <!-- MAIN DASHBOARD CONTAINER -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
 
-        <!-- BARRE DE RECHERCHE & INBOX -->
-        <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                        <i data-lucide="inbox" class="w-5 h-5"></i>
-                    </div>
-                    <h2 class="font-bold text-slate-900 text-base">Inbox & Capture Rapide</h2>
+        <!-- FILTRES DE RESPONSABLES ET BARRE DE RECHERCHE -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                
+                <!-- FILTRES RAPIDES PAR RESPONSABLE -->
+                <div class="flex items-center space-x-1.5 overflow-x-auto py-1">
+                    <span class="text-xs font-semibold text-slate-400 mr-1 hidden sm:inline">Filtrer par :</span>
+                    <button onclick="setFilterAssignee('all')" id="filter-all" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition">Tous</button>
+                    <button onclick="setFilterAssignee('Mickaela')" id="filter-Mickaela" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👤 Mickaela</button>
+                    <button onclick="setFilterAssignee('Koloina')" id="filter-Koloina" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👤 Koloina</button>
+                    <button onclick="setFilterAssignee('Les deux')" id="filter-Les-deux" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👥 Les deux</button>
                 </div>
-                <input type="text" id="search-bar" oninput="renderAll()" placeholder="🔎 Rechercher une tâche, un nom..." class="px-3 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg w-48 focus:w-64 transition-all focus:outline-none">
+
+                <input type="text" id="search-bar" oninput="renderAll()" placeholder="🔎 Rechercher une tâche, un nom..." class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+        </section>
+
+        <!-- INBOX & CAPTURE RAPIDE -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-4">
+            <div class="flex items-center space-x-2">
+                <div class="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                    <i data-lucide="inbox" class="w-5 h-5"></i>
+                </div>
+                <h2 class="font-bold text-slate-900 dark:text-white text-base">Inbox & Capture Rapide</h2>
             </div>
 
             <form id="inbox-form" onsubmit="handleInboxSubmit(event)" class="flex gap-2">
                 <input type="text" id="inbox-input" placeholder="Saisir une idée, action ou travailleur..." 
-                    class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
-                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-sm transition flex items-center space-x-1.5">
+                    class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-sm transition flex items-center space-x-1.5 shrink-0">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     <span>Capturer</span>
                 </button>
@@ -81,43 +112,43 @@
             <div class="space-y-6">
 
                 <!-- 1. SIMPLE TO-DO -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+                            <div class="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
                             <div>
-                                <h2 class="font-bold text-slate-900 text-base">Simple To-Do</h2>
-                                <p class="text-[10px] text-slate-400">Glisser pour prioriser (Haut = Priorité max)</p>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Simple To-Do</h2>
+                                <p class="text-[10px] text-slate-400">Avec échéance et priorité par glisser-déposer</p>
                             </div>
                         </div>
-                        <button onclick="openModal('todo')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
+                        <button onclick="openModal('todo')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                     </div>
                     <div id="todo-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
                 <!-- 2. TACHES RECURRENTES -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
+                            <div class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
                             <div>
-                                <h2 class="font-bold text-slate-900 text-base">Tâches Récurrentes</h2>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Tâches Récurrentes</h2>
                                 <p class="text-[10px] text-slate-400">Réinitialisables à volonté</p>
                             </div>
                         </div>
-                        <button onclick="openModal('recurring')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
+                        <button onclick="openModal('recurring')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                     </div>
                     <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
                 <!-- 3. PROJETS EN COURS -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-cyan-50 text-cyan-600 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
-                            <h2 class="font-bold text-slate-900 text-base">Projets en cours</h2>
+                            <div class="p-2 bg-cyan-50 dark:bg-cyan-950/50 text-cyan-600 dark:text-cyan-400 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 dark:text-white text-base">Projets en cours</h2>
                         </div>
-                        <button onclick="openModal('project')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Nouveau Projet</button>
+                        <button onclick="openModal('project')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Nouveau Projet</button>
                     </div>
                     <div id="project-list" class="space-y-3.5 max-h-96 overflow-y-auto min-h-[50px]"></div>
                 </section>
@@ -128,34 +159,37 @@
             <div class="space-y-6">
 
                 <!-- 4. A CONTACTER -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
-                            <h2 class="font-bold text-slate-900 text-base">À Contacter</h2>
+                            <div class="p-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">À Contacter</h2>
+                                <p class="text-[10px] text-slate-400">Avec date de suivi/rappel</p>
+                            </div>
                         </div>
-                        <button onclick="openModal('contact')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter</button>
+                        <button onclick="openModal('contact')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                     </div>
                     <div id="contact-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
                 <!-- 5. FORMATIONS DES TRAVAILLEURS -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-purple-50 text-purple-600 rounded-lg"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
+                            <div class="p-2 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 rounded-lg"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
                             <div>
-                                <h2 class="font-bold text-slate-900 text-base">Formations - Suivi des travailleurs</h2>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Formations - Suivi des travailleurs</h2>
                                 <p class="text-[11px] text-slate-400">Vérification de la validation de la formation du groupe</p>
                             </div>
                         </div>
-                        <button onclick="openModal('training')" class="text-xs text-indigo-600 font-semibold hover:underline">+ Ajouter Travailleur</button>
+                        <button onclick="openModal('training')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Travailleur</button>
                     </div>
                     <div id="training-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
                 </section>
 
                 <!-- 6. TABLEAU IT (PRIVÉ) -->
-                <section class="bg-slate-900 rounded-2xl border border-slate-800 shadow-xs p-5 text-white">
+                <section class="bg-slate-900 dark:bg-slate-900 rounded-2xl border border-slate-800 shadow-xs p-5 text-white">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
                             <div class="p-2 bg-slate-800 text-indigo-400 rounded-lg"><i data-lucide="terminal" class="w-5 h-5"></i></div>
@@ -174,19 +208,19 @@
         </div>
 
         <!-- SECTION HISTORIQUE ET TACHES TERMINÉES -->
-        <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
             <details class="group">
                 <summary class="flex items-center justify-between cursor-pointer list-none">
                     <div class="flex items-center space-x-2">
-                        <div class="p-2 bg-slate-100 text-slate-600 rounded-lg">
+                        <div class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
                             <i data-lucide="archive" class="w-5 h-5"></i>
                         </div>
-                        <h2 class="font-bold text-slate-800 text-base">Historique & Tâches terminées</h2>
-                        <span id="history-count" class="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full">0</span>
+                        <h2 class="font-bold text-slate-800 dark:text-slate-200 text-base">Historique & Tâches terminées</h2>
+                        <span id="history-count" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-full">0</span>
                     </div>
                     <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
                 </summary>
-                <div id="history-list" class="mt-4 pt-4 border-t border-slate-100 space-y-2 max-h-60 overflow-y-auto"></div>
+                <div id="history-list" class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2 max-h-60 overflow-y-auto"></div>
             </details>
         </section>
 
@@ -194,12 +228,12 @@
 
     <!-- MODALE DE CONFIGURATION FIREBASE -->
     <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
-            <h3 class="text-lg font-bold text-slate-900 mb-2">Configuration Firebase</h3>
-            <p class="text-xs text-slate-500 mb-4">Collez l'objet JSON fourni par Firebase pour synchroniser l'appareil.</p>
-            <textarea id="config-json-input" rows="7" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-4"></textarea>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Configuration Firebase</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Collez l'objet JSON fourni par Firebase pour synchroniser l'appareil.</p>
+            <textarea id="config-json-input" rows="7" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-4"></textarea>
             <div class="flex justify-end space-x-2">
-                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Annuler</button>
+                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
                 <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer & Connecter</button>
             </div>
         </div>
@@ -207,18 +241,18 @@
 
     <!-- MODALE UNIVERSELLE (CREATION & MODIFICATION) -->
     <div id="universal-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-            <h3 id="modal-title" class="text-lg font-bold text-slate-900 mb-4">Ajouter un élément</h3>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white mb-4">Ajouter un élément</h3>
             <form id="universal-form" onsubmit="handleUniversalSubmit(event)" class="space-y-3">
                 <input type="hidden" id="modal-type">
                 <input type="hidden" id="modal-edit-id">
                 <div>
-                    <label id="m-title-label" class="block text-xs font-semibold text-slate-600 mb-1">Intitulé / Titre</label>
-                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label id="m-title-label" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Intitulé / Titre</label>
+                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Responsable</label>
-                    <select id="m-assignee" onchange="checkAssigneeCustom(this.value)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Responsable</label>
+                    <select id="m-assignee" onchange="checkAssigneeCustom(this.value)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                         <option value="Non assigné">Non assigné</option>
                         <option value="Mickaela">Mickaela</option>
                         <option value="Koloina">Koloina</option>
@@ -227,11 +261,11 @@
                     </select>
                 </div>
                 <div id="custom-assignee-container" class="hidden">
-                    <input type="text" id="m-custom-assignee" placeholder="Nom du nouveau responsable..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <input type="text" id="m-custom-assignee" placeholder="Nom du nouveau responsable..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div id="extra-field-container"></div>
                 <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Annuler</button>
+                    <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
                 </div>
             </form>
@@ -247,9 +281,15 @@
         let db = null;
         let localData = { inbox: [], recurring: [], contact: [], training: [], todo: [], project: [], it: [], history: [] };
         let sortableInstances = {};
+        let activeAssigneeFilter = 'all';
 
         window.onload = function() {
             lucide.createIcons();
+            
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+
             const savedConfig = localStorage.getItem('duo_firebase_config');
             if (savedConfig) {
                 try {
@@ -261,15 +301,41 @@
             initSortable();
         };
 
+        window.toggleDarkMode = function() {
+            const root = document.documentElement;
+            if (root.classList.contains('dark')) {
+                root.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                root.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        };
+
+        window.setFilterAssignee = function(assignee) {
+            activeAssigneeFilter = assignee;
+            ['all', 'Mickaela', 'Koloina', 'Les-deux'].forEach(name => {
+                const btn = document.getElementById(`filter-${name}`);
+                if (btn) {
+                    if ((name === 'Les-deux' && assignee === 'Les deux') || name === assignee) {
+                        btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition";
+                    } else {
+                        btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition";
+                    }
+                }
+            });
+            renderAll();
+        };
+
         window.openConfigModal = function() {
             document.getElementById('config-modal').classList.remove('hidden');
             const current = localStorage.getItem('duo_firebase_config');
             if (current) document.getElementById('config-json-input').value = current;
-        }
+        };
 
         window.closeConfigModal = function() {
             document.getElementById('config-modal').classList.add('hidden');
-        }
+        };
 
         window.saveConfig = function() {
             const val = document.getElementById('config-json-input').value.trim();
@@ -281,7 +347,7 @@
             } catch(e) {
                 alert("Format JSON invalide.");
             }
-        }
+        };
 
         function initFirebase(config) {
             try {
@@ -289,7 +355,7 @@
                 db = getFirestore(app);
                 const auth = getAuth(app);
                 signInAnonymously(auth).then(() => {
-                    document.getElementById('sync-status').className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200";
+                    document.getElementById('sync-status').className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-800";
                     document.getElementById('sync-text').innerText = "Connecté & Synchronisé";
                     setupListeners();
                 }).catch(err => alert("Erreur d'authentification : " + err.message));
@@ -354,17 +420,18 @@
                 renderAll();
             }
             input.value = '';
-        }
+        };
 
         window.triageItem = async function(id, text, selectedTarget) {
             let maxOrder = localData[selectedTarget].length;
             let payload = { title: text, completed: false, order: maxOrder, assignee: 'Non assigné' };
             
-            if(selectedTarget === 'contact') payload = { title: text, channel: 'Teams', message: '', status: 'À contacter', order: maxOrder, assignee: 'Non assigné' };
+            if(selectedTarget === 'contact') payload = { title: text, channel: 'Teams', message: '', dueDate: '', status: 'À contacter', order: maxOrder, assignee: 'Non assigné' };
             else if(selectedTarget === 'training') payload = { workerName: text, completed: false, order: maxOrder, assignee: 'Non assigné' };
             else if(selectedTarget === 'it') payload = { title: text, status: 'À transmettre', notes: '', order: maxOrder, assignee: 'Non assigné' };
             else if(selectedTarget === 'project') payload = { title: text, progress: 0, deadline: '', subtasks: [], order: maxOrder, assignee: 'Non assigné' };
             else if(selectedTarget === 'recurring') payload = { title: text, frequency: 'Quotidienne', lastDone: '', order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'todo') payload = { title: text, dueDate: '', order: maxOrder, assignee: 'Non assigné' };
 
             if(db) {
                 await addDoc(collection(db, selectedTarget), payload);
@@ -374,7 +441,7 @@
                 localData[selectedTarget].push({ id: 'local_' + Math.random(), ...payload });
                 renderAll();
             }
-        }
+        };
 
         window.completeRecurringItem = async function(id) {
             const todayStr = new Date().toLocaleDateString('fr-FR');
@@ -385,7 +452,7 @@
                 if(item) item.lastDone = todayStr;
                 renderAll();
             }
-        }
+        };
 
         window.resetRecurringItem = async function(id) {
             if(db) {
@@ -395,7 +462,7 @@
                 if(item) item.lastDone = '';
                 renderAll();
             }
-        }
+        };
 
         window.completeItem = async function(col, id, titleOrWorker) {
             if(db) {
@@ -415,7 +482,7 @@
                 });
                 renderAll();
             }
-        }
+        };
 
         window.deleteItem = async function(col, id) {
             if(db) await deleteDoc(doc(db, col, id));
@@ -423,7 +490,7 @@
                 localData[col] = localData[col].filter(x => x.id !== id);
                 renderAll();
             }
-        }
+        };
 
         window.addSubtask = async function(projId) {
             const text = prompt("Titre de la nouvelle sous-tâche :");
@@ -444,7 +511,7 @@
                 proj.progress = progress;
                 renderAll();
             }
-        }
+        };
 
         window.toggleSubtask = async function(projId, subId) {
             const proj = localData.project.find(p => p.id === projId);
@@ -461,7 +528,7 @@
                 proj.progress = progress;
                 renderAll();
             }
-        }
+        };
 
         window.checkAssigneeCustom = function(val) {
             const customContainer = document.getElementById('custom-assignee-container');
@@ -471,7 +538,7 @@
             } else {
                 customContainer.classList.add('hidden');
             }
-        }
+        };
 
         window.openModal = function(type, editId = null) {
             document.getElementById('universal-modal').classList.remove('hidden');
@@ -502,15 +569,21 @@
             if(type === 'contact') {
                 document.getElementById('modal-title').innerText = editId ? "Modifier le contact" : "Ajouter un contact";
                 container.innerHTML = `
-                    <div><label class="block text-xs font-semibold text-slate-600 mb-1">Canal</label>
-                    <select id="m-channel" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"><option ${existing?.channel==='Teams'?'selected':''}>Teams</option><option ${existing?.channel==='Téléphone'?'selected':''}>Téléphone</option><option ${existing?.channel==='Courriel'?'selected':''}>Courriel</option></select></div>
-                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 mb-1">Message / Notes</label><input type="text" id="m-message" value="${existing?.message || ''}" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Canal</label>
+                    <select id="m-channel" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"><option ${existing?.channel==='Teams'?'selected':''}>Teams</option><option ${existing?.channel==='Téléphone'?'selected':''}>Téléphone</option><option ${existing?.channel==='Courriel'?'selected':''}>Courriel</option></select></div>
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date de rappel / suivi</label><input type="date" id="m-duedate" value="${existing?.dueDate || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Message / Notes</label><input type="text" id="m-message" value="${existing?.message || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
+                `;
+            } else if(type === 'todo') {
+                document.getElementById('modal-title').innerText = editId ? "Modifier la To-Do" : "Ajouter une To-Do";
+                container.innerHTML = `
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date d'échéance</label><input type="date" id="m-duedate" value="${existing?.dueDate || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
                 `;
             } else if(type === 'recurring') {
                 document.getElementById('modal-title').innerText = editId ? "Modifier la tâche récurrente" : "Nouvelle tâche récurrente";
                 container.innerHTML = `
-                    <div><label class="block text-xs font-semibold text-slate-600 mb-1">Fréquence</label>
-                    <select id="m-frequency" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Fréquence</label>
+                    <select id="m-frequency" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
                         <option ${existing?.frequency==='Quotidienne'?'selected':''}>Quotidienne</option>
                         <option ${existing?.frequency==='Hebdomadaire'?'selected':''}>Hebdomadaire</option>
                         <option ${existing?.frequency==='Mensuelle'?'selected':''}>Mensuelle</option>
@@ -520,22 +593,22 @@
                 document.getElementById('modal-title').innerText = editId ? "Modifier le travailleur" : "Ajouter un travailleur";
             } else if(type === 'it') {
                 document.getElementById('modal-title').innerText = editId ? "Modifier la demande IT" : "Nouvelle demande IT";
-                container.innerHTML = `<div><label class="block text-xs font-semibold text-slate-600 mb-1">Notes de suivi</label><input type="text" id="m-notes" value="${existing?.notes || ''}" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>`;
+                container.innerHTML = `<div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Notes de suivi</label><input type="text" id="m-notes" value="${existing?.notes || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>`;
             } else if(type === 'project') {
                 document.getElementById('modal-title').innerText = editId ? "Modifier le projet" : "Nouveau Projet";
                 container.innerHTML = `
-                    <div><label class="block text-xs font-semibold text-slate-600 mb-1">Date Limite (Deadline)</label><input type="date" id="m-deadline" value="${existing?.deadline || ''}" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date Limite (Deadline)</label><input type="date" id="m-deadline" value="${existing?.deadline || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
                 `;
             } else {
                 document.getElementById('modal-title').innerText = editId ? "Modifier l'élément" : "Ajouter un élément";
             }
-        }
+        };
 
         window.closeModalWindow = function() {
             document.getElementById('universal-modal').classList.add('hidden');
             document.getElementById('m-title').value = '';
             document.getElementById('modal-edit-id').value = '';
-        }
+        };
 
         window.handleUniversalSubmit = async function(e) {
             e.preventDefault();
@@ -554,7 +627,10 @@
 
             if(type === 'contact') {
                 payload.channel = document.getElementById('m-channel').value;
+                payload.dueDate = document.getElementById('m-duedate')?.value || '';
                 payload.message = document.getElementById('m-message').value;
+            } else if(type === 'todo') {
+                payload.dueDate = document.getElementById('m-duedate')?.value || '';
             } else if(type === 'recurring') {
                 payload.frequency = document.getElementById('m-frequency').value;
                 if(!editId) payload.lastDone = '';
@@ -583,32 +659,71 @@
                 renderAll();
             }
             closeModalWindow();
-        }
+        };
 
         function getAssigneeBadge(assignee) {
             if (!assignee || assignee === 'Non assigné') return '';
-            let color = 'bg-slate-100 text-slate-600 border-slate-200';
-            if (assignee === 'Mickaela') color = 'bg-indigo-50 text-indigo-700 border-indigo-200';
-            else if (assignee === 'Koloina') color = 'bg-purple-50 text-purple-700 border-purple-200';
-            else if (assignee === 'Les deux') color = 'bg-amber-50 text-amber-700 border-amber-200';
+            let color = 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+            if (assignee === 'Mickaela') color = 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
+            else if (assignee === 'Koloina') color = 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
+            else if (assignee === 'Les deux') color = 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
 
             return `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md border ${color} shrink-0">👤 ${assignee}</span>`;
         }
 
+        function getDateBadge(dateStr) {
+            if (!dateStr) return '';
+            const today = new Date().toISOString().slice(0,10);
+            if (dateStr < today) {
+                return `<span class="px-1.5 py-0.5 bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 rounded text-[10px] font-bold shrink-0">⚠️ ${dateStr}</span>`;
+            }
+            return `<span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded text-[10px] shrink-0">🗓️ ${dateStr}</span>`;
+        }
+
+        function filterByAssignee(items) {
+            if (activeAssigneeFilter === 'all') return items;
+            return items.filter(x => (x.assignee || 'Non assigné') === activeAssigneeFilter);
+        }
+
+        function updateUrgentCount() {
+            const today = new Date().toISOString().slice(0,10);
+            let urgentCount = 0;
+
+            const checkDate = (d) => { if(d && d <= today) urgentCount++; };
+
+            localData.todo.forEach(x => checkDate(x.dueDate));
+            localData.contact.forEach(x => checkDate(x.dueDate));
+            localData.project.forEach(x => checkDate(x.deadline));
+
+            const badge = document.getElementById('urgent-badge');
+            const text = document.getElementById('urgent-text');
+
+            if (urgentCount > 0) {
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+                text.innerText = `${urgentCount} urgence${urgentCount > 1 ? 's' : ''}`;
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+        }
+
         function renderAll() {
             const query = (document.getElementById('search-bar')?.value || '').toLowerCase();
+            updateUrgentCount();
 
             // Inbox
             const inboxEl = document.getElementById('inbox-list');
-            inboxEl.innerHTML = localData.inbox.length === 0 ? '<p class="text-xs text-slate-400 italic">Inbox vide. Tout est trié !</p>' : '';
-            localData.inbox.forEach(item => {
+            let inboxItems = filterByAssignee(localData.inbox);
+            inboxEl.innerHTML = inboxItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Inbox vide. Tout est trié !</p>' : '';
+            inboxItems.forEach(item => {
                 if(query && !item.text.toLowerCase().includes(query)) return;
                 const safeText = item.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 inboxEl.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs gap-2" data-id="${item.id}">
-                        <span class="font-medium text-slate-700 flex-1">${item.text}</span>
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
+                        <span class="font-medium text-slate-700 dark:text-slate-200 flex-1">${item.text}</span>
                         <div class="flex items-center space-x-1 shrink-0">
-                            <select id="target-${item.id}" class="text-[11px] py-1 px-1.5 bg-white border border-slate-200 rounded-lg">
+                            <select id="target-${item.id}" class="text-[11px] py-1 px-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-200">
                                 <option value="todo" ${item.suggested==='todo'?'selected':''}>To-Do</option>
                                 <option value="contact" ${item.suggested==='contact'?'selected':''}>À contacter</option>
                                 <option value="recurring" ${item.suggested==='recurring'?'selected':''}>Récurrentes</option>
@@ -616,7 +731,7 @@
                                 <option value="project" ${item.suggested==='project'?'selected':''}>Projet</option>
                                 <option value="it" ${item.suggested==='it'?'selected':''}>Tableau IT</option>
                             </select>
-                            <button onclick="triageItem('${item.id}', '${safeText}', document.getElementById('target-${item.id}').value)" class="px-2.5 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg font-medium transition">Trier →</button>
+                            <button onclick="triageItem('${item.id}', '${safeText}', document.getElementById('target-${item.id}').value)" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 rounded-lg font-medium transition">Trier →</button>
                             <button onclick="deleteItem('inbox', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                         </div>
                     </div>
@@ -625,23 +740,24 @@
 
             // Formations
             const trainEl = document.getElementById('training-list');
-            trainEl.innerHTML = localData.training.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun travailleur à vérifier.</p>' : '';
-            localData.training.forEach(item => {
+            let trainItems = filterByAssignee(localData.training);
+            trainEl.innerHTML = trainItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun travailleur à vérifier.</p>' : '';
+            trainItems.forEach(item => {
                 if(query && !item.workerName.toLowerCase().includes(query)) return;
                 const safeWorker = item.workerName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 trainEl.innerHTML += `
-                    <div class="flex items-start justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs gap-2" data-id="${item.id}">
+                    <div class="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
                         <div class="flex items-start space-x-2 flex-1">
-                            <span class="drag-handle text-slate-300 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                            <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
                             <div class="w-2 h-2 rounded-full bg-purple-500 mt-1.5 shrink-0"></div>
                             <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                <span class="font-bold text-slate-800">${item.workerName}</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-200">${item.workerName}</span>
                                 ${getAssigneeBadge(item.assignee)}
                             </div>
                         </div>
                         <div class="flex items-center space-x-1 shrink-0">
                             <button onclick="openModal('training', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="completeItem('training', '${item.id}', '${safeWorker}')" class="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg font-medium text-[11px]">Validé ✓</button>
+                            <button onclick="completeItem('training', '${item.id}', '${safeWorker}')" class="px-2 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 rounded-lg font-medium text-[11px]">Validé ✓</button>
                         </div>
                     </div>
                 `;
@@ -649,28 +765,30 @@
 
             // Contact
             const contactEl = document.getElementById('contact-list');
-            contactEl.innerHTML = localData.contact.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun contact en attente.</p>' : '';
-            localData.contact.forEach(item => {
+            let contactItems = filterByAssignee(localData.contact);
+            contactEl.innerHTML = contactItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun contact en attente.</p>' : '';
+            contactItems.forEach(item => {
                 if(query && !item.title.toLowerCase().includes(query)) return;
                 const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 contactEl.innerHTML += `
-                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs space-y-1.5" data-id="${item.id}">
-                        <div class="flex items-start justify-between font-semibold text-slate-800 gap-2">
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs space-y-1.5" data-id="${item.id}">
+                        <div class="flex items-start justify-between font-semibold text-slate-800 dark:text-slate-200 gap-2">
                             <div class="flex items-start space-x-2 flex-1">
-                                <span class="drag-handle text-slate-300 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                                <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
                                 <div class="flex flex-wrap items-center gap-1.5 flex-1">
                                     <span>${item.title}</span>
                                     ${getAssigneeBadge(item.assignee)}
+                                    ${getDateBadge(item.dueDate)}
                                 </div>
                             </div>
                             <div class="flex items-center space-x-1 shrink-0">
-                                <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-[10px]">${item.channel}</span>
+                                <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-md text-[10px]">${item.channel}</span>
                                 <button onclick="openModal('contact', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
                             </div>
                         </div>
-                        ${item.message ? `<p class="text-slate-500 italic pl-5">"${item.message}"</p>` : ''}
+                        ${item.message ? `<p class="text-slate-500 dark:text-slate-400 italic pl-5">"${item.message}"</p>` : ''}
                         <div class="flex justify-end pt-1">
-                            <button onclick="completeItem('contact', '${item.id}', '${safeTitle}')" class="text-emerald-600 font-semibold hover:underline text-[11px]">Terminé ✓</button>
+                            <button onclick="completeItem('contact', '${item.id}', '${safeTitle}')" class="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline text-[11px]">Terminé ✓</button>
                         </div>
                     </div>
                 `;
@@ -678,55 +796,49 @@
 
             // Projets
             const projEl = document.getElementById('project-list');
-            projEl.innerHTML = localData.project.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet en cours.</p>' : '';
-            localData.project.forEach(item => {
+            let projectItems = filterByAssignee(localData.project);
+            projEl.innerHTML = projectItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet en cours.</p>' : '';
+            projectItems.forEach(item => {
                 if(query && !item.title.toLowerCase().includes(query)) return;
                 const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 const subtasks = item.subtasks || [];
                 
-                let deadlineBadge = '';
-                if(item.deadline) {
-                    const today = new Date().toISOString().slice(0,10);
-                    if(item.deadline < today) deadlineBadge = `<span class="px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded text-[10px] font-bold">En retard (${item.deadline})</span>`;
-                    else deadlineBadge = `<span class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px]">🗓️ ${item.deadline}</span>`;
-                }
-
                 projEl.innerHTML += `
-                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs space-y-2.5" data-id="${item.id}">
-                        <div class="flex items-start justify-between font-bold text-slate-800 gap-2">
+                    <div class="p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs space-y-2.5" data-id="${item.id}">
+                        <div class="flex items-start justify-between font-bold text-slate-800 dark:text-slate-200 gap-2">
                             <div class="flex items-start space-x-2 flex-1">
-                                <span class="drag-handle text-slate-300 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                                <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
                                 <div class="flex flex-wrap items-center gap-1.5 flex-1">
                                     <span class="text-sm">${item.title}</span>
                                     ${getAssigneeBadge(item.assignee)}
+                                    ${getDateBadge(item.deadline)}
                                 </div>
                             </div>
                             <div class="flex items-center space-x-1 shrink-0">
-                                ${deadlineBadge}
                                 <button onclick="openModal('project', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                                <button onclick="completeItem('project', '${item.id}', '${safeTitle}')" class="p-1 text-emerald-600 hover:text-emerald-700"><i data-lucide="check-circle" class="w-4 h-4"></i></button>
+                                <button onclick="completeItem('project', '${item.id}', '${safeTitle}')" class="p-1 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"><i data-lucide="check-circle" class="w-4 h-4"></i></button>
                             </div>
                         </div>
 
                         <div class="space-y-1">
-                            <div class="flex justify-between text-[10px] text-slate-500">
+                            <div class="flex justify-between text-[10px] text-slate-500 dark:text-slate-400">
                                 <span>Progression</span>
-                                <span class="font-bold text-cyan-600">${item.progress || 0}%</span>
+                                <span class="font-bold text-cyan-600 dark:text-cyan-400">${item.progress || 0}%</span>
                             </div>
-                            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
                                 <div class="bg-cyan-500 h-full rounded-full transition-all duration-300" style="width: ${item.progress || 0}%"></div>
                             </div>
                         </div>
 
-                        <div class="pt-1 space-y-1.5 border-t border-slate-200/60">
+                        <div class="pt-1 space-y-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
                             <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold text-slate-500 uppercase">Sous-tâches (${subtasks.filter(s=>s.done).length}/${subtasks.length})</span>
-                                <button onclick="addSubtask('${item.id}')" class="text-[11px] text-indigo-600 font-medium hover:underline">+ Sous-tâche</button>
+                                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Sous-tâches (${subtasks.filter(s=>s.done).length}/${subtasks.length})</span>
+                                <button onclick="addSubtask('${item.id}')" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium hover:underline">+ Sous-tâche</button>
                             </div>
                             ${subtasks.map(s => `
                                 <div class="flex items-center space-x-2 text-[11px]">
                                     <input type="checkbox" ${s.done ? 'checked' : ''} onclick="toggleSubtask('${item.id}', '${s.id}')" class="w-3.5 h-3.5 text-cyan-600 rounded">
-                                    <span class="${s.done ? 'line-through text-slate-400' : 'text-slate-700'}">${s.title}</span>
+                                    <span class="${s.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}">${s.title}</span>
                                 </div>
                             `).join('')}
                         </div>
@@ -734,24 +846,25 @@
                 `;
             });
 
-            // Tâches Récurrentes (Avec bouton de rafraîchissement manuel et design aligné)
+            // Tâches Récurrentes
             const recEl = document.getElementById('recurring-list');
-            recEl.innerHTML = localData.recurring.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche récurrente.</p>' : '';
-            localData.recurring.forEach(item => {
+            let recurringItems = filterByAssignee(localData.recurring);
+            recEl.innerHTML = recurringItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche récurrente.</p>' : '';
+            recurringItems.forEach(item => {
                 if(query && !item.title.toLowerCase().includes(query)) return;
                 const todayStr = new Date().toLocaleDateString('fr-FR');
                 const isDoneToday = item.lastDone === todayStr;
 
                 recEl.innerHTML += `
-                    <div class="flex items-start justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs gap-2" data-id="${item.id}">
+                    <div class="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
                         <div class="flex items-start space-x-2.5 flex-1">
-                            <span class="drag-handle text-slate-300 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
-                            <button onclick="completeRecurringItem('${item.id}')" class="w-4 h-4 mt-0.5 flex items-center justify-center rounded border shrink-0 ${isDoneToday ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 bg-white'}">
+                            <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                            <button onclick="completeRecurringItem('${item.id}')" class="w-4 h-4 mt-0.5 flex items-center justify-center rounded border shrink-0 ${isDoneToday ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}">
                                 ${isDoneToday ? '✓' : ''}
                             </button>
                             <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                <span class="font-medium ${isDoneToday ? 'line-through text-slate-400' : 'text-slate-700'}">${item.title}</span>
-                                <span class="px-1.5 py-0.5 text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded shrink-0">🔄 ${item.frequency || 'Quotidienne'}</span>
+                                <span class="font-medium ${isDoneToday ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'}">${item.title}</span>
+                                <span class="px-1.5 py-0.5 text-[9px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded shrink-0">🔄 ${item.frequency || 'Quotidienne'}</span>
                                 ${getAssigneeBadge(item.assignee)}
                             </div>
                         </div>
@@ -766,12 +879,36 @@
             });
 
             // To-Do
-            renderSimpleList('todo', 'todo-list', true, query);
+            const todoEl = document.getElementById('todo-list');
+            let todoItems = filterByAssignee(localData.todo);
+            todoEl.innerHTML = todoItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Rien pour le moment.</p>' : '';
+            todoItems.forEach(item => {
+                if(query && !item.title.toLowerCase().includes(query)) return;
+                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                todoEl.innerHTML += `
+                    <div class="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
+                        <div class="flex items-start space-x-2.5 flex-1">
+                            <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                            <input type="checkbox" onclick="completeItem('todo', '${item.id}', '${safeTitle}')" class="w-4 h-4 mt-0.5 text-indigo-600 rounded border-slate-300 shrink-0">
+                            <div class="flex flex-wrap items-center gap-1.5 flex-1">
+                                <span class="font-medium text-slate-700 dark:text-slate-200">${item.title}</span>
+                                ${getAssigneeBadge(item.assignee)}
+                                ${getDateBadge(item.dueDate)}
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button onclick="openModal('todo', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="deleteItem('todo', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
 
             // IT
             const itEl = document.getElementById('it-list');
-            itEl.innerHTML = localData.it.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune demande IT.</p>' : '';
-            localData.it.forEach(item => {
+            let itItems = filterByAssignee(localData.it);
+            itEl.innerHTML = itItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune demande IT.</p>' : '';
+            itItems.forEach(item => {
                 if(query && !item.title.toLowerCase().includes(query)) return;
                 const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 itEl.innerHTML += `
@@ -800,10 +937,10 @@
             histEl.innerHTML = localData.history.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun élément archivé.</p>' : '';
             localData.history.forEach(item => {
                 histEl.innerHTML += `
-                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg text-xs">
+                    <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/60 rounded-lg text-xs">
                         <div class="flex items-center space-x-2">
                             <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-500"></i>
-                            <span class="line-through text-slate-500">${item.title}</span>
+                            <span class="line-through text-slate-500 dark:text-slate-400">${item.title}</span>
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="text-[10px] text-slate-400">${item.completedAt}</span>
@@ -816,44 +953,19 @@
             lucide.createIcons();
         }
 
-        function renderSimpleList(col, elementId, hasCheckbox, query) {
-            const el = document.getElementById(elementId);
-            el.innerHTML = localData[col].length === 0 ? `<p class="text-xs text-slate-400 italic">Rien pour le moment.</p>` : '';
-            localData[col].forEach(item => {
-                if(query && !item.title.toLowerCase().includes(query)) return;
-                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                el.innerHTML += `
-                    <div class="flex items-start justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs gap-2" data-id="${item.id}">
-                        <div class="flex items-start space-x-2.5 flex-1">
-                            <span class="drag-handle text-slate-300 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
-                            <input type="checkbox" onclick="completeItem('${col}', '${item.id}', '${safeTitle}')" class="w-4 h-4 mt-0.5 text-indigo-600 rounded border-slate-300 shrink-0">
-                            <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                <span class="font-medium text-slate-700">${item.title}</span>
-                                ${getAssigneeBadge(item.assignee)}
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-1 shrink-0">
-                            <button onclick="openModal('${col}', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="deleteItem('${col}', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
         // EXPORTATION EXCEL (CSV)
         window.exportToExcel = function() {
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-            csvContent += "Module;Intitulé / Travailleur;Responsable;Détail / Deadline;Statut\n";
+            csvContent += "Module;Intitulé / Travailleur;Responsable;Date / Échéance;Détail;Statut\n";
 
-            localData.inbox.forEach(item => csvContent += `Inbox;"${item.text.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Suggéré: ${item.suggested}";En attente\n`);
-            localData.todo.forEach(item => csvContent += `To-Do;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";En cours\n`);
-            localData.contact.forEach(item => csvContent += `Contact;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Canal: ${item.channel} | ${item.message || ''}";À contacter\n`);
-            localData.recurring.forEach(item => csvContent += `Récurrentes;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Fréquence: ${item.frequency || 'Quotidienne'}";Actif\n`);
-            localData.training.forEach(item => csvContent += `Formations;"${item.workerName.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Groupe unique";À vérifier\n`);
-            localData.project.forEach(item => csvContent += `Projets;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Deadline: ${item.deadline || 'Aucune'}";"${item.progress}%"\n`);
-            localData.it.forEach(item => csvContent += `IT;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"Notes: ${item.notes || ''}";En cours\n`);
-            localData.history.forEach(item => csvContent += `Historique;"${item.title.replace(/"/g, '""')}";"-";"Fait le: ${item.completedAt}";Terminé\n`);
+            localData.inbox.forEach(item => csvContent += `Inbox;"${item.text.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Suggéré: ${item.suggested}";En attente\n`);
+            localData.todo.forEach(item => csvContent += `To-Do;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.dueDate || 'Aucune'}";"-";En cours\n`);
+            localData.contact.forEach(item => csvContent += `Contact;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.dueDate || 'Aucune'}";"Canal: ${item.channel} | ${item.message || ''}";À contacter\n`);
+            localData.recurring.forEach(item => csvContent += `Récurrentes;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Fréquence: ${item.frequency || 'Quotidienne'}";Actif\n`);
+            localData.training.forEach(item => csvContent += `Formations;"${item.workerName.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Groupe unique";À vérifier\n`);
+            localData.project.forEach(item => csvContent += `Projets;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.deadline || 'Aucune'}";"Progression: ${item.progress}%";En cours\n`);
+            localData.it.forEach(item => csvContent += `IT;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Notes: ${item.notes || ''}";En cours\n`);
+            localData.history.forEach(item => csvContent += `Historique;"${item.title.replace(/"/g, '""')}";"-";"Fait le: ${item.completedAt}";"-";Terminé\n`);
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
@@ -862,7 +974,7 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }
+        };
     </script>
 </body>
 </html>
