@@ -3,29 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DuoSync Workspace Pro</title>
+    <title>DuoSync Workspace Pro - Complet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .ghost-card { opacity: 0.4; background-color: #f1f5f9; border: 2px dashed #6366f1; }
-        .drag-handle { cursor: grab; }
-        .drag-handle:active { cursor: grabbing; }
-    </style>
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
 </head>
 <body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased flex overflow-hidden transition-colors duration-200">
 
-    <!-- BARRE DE NAVIGATION LATÉRALE (SIDEBAR A GAUCHE) -->
+    <!-- SIDEBAR À GAUCHE -->
     <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 z-30">
         <div>
-            <!-- LOGO & BRANDING -->
             <div class="h-16 px-6 flex items-center space-x-3 border-b border-slate-100 dark:border-slate-800">
                 <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-200 dark:shadow-none">
                     <i data-lucide="layers" class="w-5 h-5"></i>
@@ -36,38 +28,32 @@
                 </div>
             </div>
 
-            <!-- MENU DE NAVIGATION -->
             <nav class="p-4 space-y-1 text-xs font-semibold">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold transition">
                     <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                     <span>Tableau de bord</span>
                 </button>
-
                 <button onclick="switchTab('weekly')" id="nav-weekly" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                     <i data-lucide="calendar" class="w-4 h-4"></i>
                     <span>Planning Hebdo</span>
                 </button>
-
                 <button onclick="switchTab('templates')" id="nav-templates" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                     <i data-lucide="mail-plus" class="w-4 h-4"></i>
-                    <span>Templates & Mails</span>
+                    <span>Studio Mails & Templates</span>
                 </button>
             </nav>
         </div>
 
-        <!-- BAS DE NAVIGATION (STATUT, CONFIG & THÈME) -->
         <div class="p-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
             <div id="sync-status" class="flex items-center space-x-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-[11px] font-medium border border-amber-200 dark:border-amber-800">
                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                 <span id="sync-text">Config requise</span>
             </div>
-
-            <button onclick="openConfigModal()" class="w-full flex items-center space-x-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition">
+            <button onclick="openConfigModal()" class="w-full flex items-center space-x-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition">
                 <i data-lucide="settings" class="w-4 h-4"></i>
                 <span>Configuration Firebase</span>
             </button>
-
-            <button onclick="toggleDarkMode()" class="w-full flex items-center justify-between px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition">
+            <button onclick="toggleDarkMode()" class="w-full flex items-center justify-between px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition">
                 <span class="flex items-center space-x-2">
                     <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
                     <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
@@ -77,14 +63,12 @@
         </div>
     </aside>
 
-    <!-- ZONE DE CONTENU PRINCIPALE (À DROITE DU MENU) -->
+    <!-- ZONE DE CONTENU PRINCIPALE -->
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
 
         <!-- HEADER BANNER -->
         <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 h-16 px-6 flex items-center justify-between sticky top-0 z-20 shrink-0">
-            <div class="flex items-center space-x-4">
-                <h2 id="page-title" class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Tableau de bord</h2>
-            </div>
+            <h2 id="page-title" class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Tableau de bord</h2>
             <div class="flex items-center space-x-3">
                 <div id="urgent-badge" class="hidden items-center space-x-1 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800">
                     <i data-lucide="bell" class="w-3.5 h-3.5 animate-bounce"></i>
@@ -99,8 +83,7 @@
 
         <!-- VUE 1 : TABLEAU DE BORD PRINCIPAL -->
         <main id="tab-dashboard" class="p-6 space-y-6">
-
-            <!-- FILTRES ET RECHERCHE -->
+            <!-- FILTRES & RECHERCHE -->
             <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
                 <div class="flex items-center space-x-1.5 overflow-x-auto py-1">
                     <span class="text-xs font-semibold text-slate-400 mr-1">Filtrer par :</span>
@@ -109,7 +92,7 @@
                     <button onclick="setFilterAssignee('Koloina')" id="filter-Koloina" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">👤 Koloina</button>
                     <button onclick="setFilterAssignee('Les deux')" id="filter-Les-deux" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">👥 Les deux</button>
                 </div>
-                <input type="text" id="search-bar" oninput="renderAll()" placeholder="🔎 Rechercher une tâche, un nom..." class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="search-bar" oninput="renderAll()" placeholder="🔎 Rechercher..." class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </section>
 
             <!-- INBOX & CAPTURE RAPIDE -->
@@ -119,122 +102,98 @@
                     <h3 class="font-bold text-slate-900 dark:text-white text-base">Inbox & Capture Rapide</h3>
                 </div>
                 <form onsubmit="handleInboxSubmit(event)" class="flex gap-2">
-                    <input type="text" id="inbox-input" placeholder="Saisir une idée, action ou travailleur..." class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <input type="text" id="inbox-input" placeholder="Saisir une idée, action..." class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500">
                     <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl transition flex items-center space-x-1.5 shrink-0">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span>Capturer</span>
+                        <i data-lucide="plus" class="w-4 h-4"></i><span>Capturer</span>
                     </button>
                 </form>
-                <div id="inbox-list" class="space-y-2 max-h-56 overflow-y-auto pt-2"></div>
+                <div id="inbox-list" class="space-y-2 max-h-40 overflow-y-auto pt-2"></div>
             </section>
 
-            <!-- GRILLE DE MODULES -->
+            <!-- GRILLE DE MODULES AVANCÉS -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- GAUCHE -->
                 <div class="space-y-6">
-                    <!-- TO DO -->
+                    <!-- TO-DO -->
                     <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+                                <div class="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
                                 <h3 class="font-bold text-slate-900 dark:text-white text-base">Simple To-Do</h3>
                             </div>
                             <button onclick="openModal('todo')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                         </div>
-                        <div id="todo-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[40px]"></div>
+                        <div id="todo-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
                     </section>
 
-                    <!-- RECURRING -->
+                    <!-- TÂCHES RÉCURRENTES (AVEC RÉINITIALISATION AUTOMATIQUE & RESPONSABLE) -->
                     <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
-                                <h3 class="font-bold text-slate-900 dark:text-white text-base">Tâches Récurrentes</h3>
+                                <div class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 dark:text-white text-base">Tâches Récurrentes</h3>
+                                    <p class="text-[10px] text-slate-400">Auto-réinitialisation journalière / hebdo</p>
+                                </div>
                             </div>
                             <button onclick="openModal('recurring')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                         </div>
-                        <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[40px]"></div>
+                        <div id="recurring-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
                     </section>
 
-                    <!-- PROJECTS -->
+                    <!-- PROJETS AVANCÉS (AVEC SOUS-TACHES & DEADLINES) -->
                     <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-cyan-50 dark:bg-cyan-950/50 text-cyan-600 dark:text-cyan-400 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
-                                <h3 class="font-bold text-slate-900 dark:text-white text-base">Projets en cours</h3>
+                                <div class="p-2 bg-cyan-50 dark:bg-cyan-950/50 text-cyan-600 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 dark:text-white text-base">Suivi Projets & Sous-tâches</h3>
+                                    <p class="text-[10px] text-slate-400">Deadlines et alertes actives</p>
+                                </div>
                             </div>
-                            <button onclick="openModal('project')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Nouveau Projet</button>
+                            <button onclick="openProjectModal()" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Nouveau Projet</button>
                         </div>
-                        <div id="project-list" class="space-y-3.5 max-h-96 overflow-y-auto min-h-[40px]"></div>
+                        <div id="project-list" class="space-y-4 max-h-80 overflow-y-auto min-h-[40px]"></div>
                     </section>
                 </div>
 
-                <!-- DROITE -->
                 <div class="space-y-6">
-                    <!-- CONTACT -->
+                    <!-- À CONTACTER -->
                     <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
+                                <div class="p-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
                                 <h3 class="font-bold text-slate-900 dark:text-white text-base">À Contacter</h3>
                             </div>
                             <button onclick="openModal('contact')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                         </div>
-                        <div id="contact-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[40px]"></div>
+                        <div id="contact-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
                     </section>
 
-                    <!-- FOLLOWUP -->
+                    <!-- DOSSIERS ADMINISTRATIFS -->
                     <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-lg"><i data-lucide="file-text" class="w-5 h-5"></i></div>
+                                <div class="p-2 bg-rose-50 dark:bg-rose-950/50 text-rose-600 rounded-lg"><i data-lucide="file-text" class="w-5 h-5"></i></div>
                                 <h3 class="font-bold text-slate-900 dark:text-white text-base">Suivi & Dossiers administratifs</h3>
                             </div>
-                            <button onclick="openModal('followup')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Dossier</button>
+                            <button onclick="openModal('followup')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                         </div>
-                        <div id="followup-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[40px]"></div>
+                        <div id="followup-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
                     </section>
 
-                    <!-- TRAINING -->
+                    <!-- FORMATIONS -->
                     <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 rounded-lg"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
+                                <div class="p-2 bg-purple-50 dark:bg-purple-950/50 text-purple-600 rounded-lg"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
                                 <h3 class="font-bold text-slate-900 dark:text-white text-base">Formations Travailleurs</h3>
                             </div>
-                            <button onclick="openModal('training')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Travailleur</button>
+                            <button onclick="openModal('training')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                         </div>
-                        <div id="training-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[40px]"></div>
-                    </section>
-
-                    <!-- IT -->
-                    <section class="bg-slate-900 dark:bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xs text-white">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-slate-800 text-indigo-400 rounded-lg"><i data-lucide="terminal" class="w-5 h-5"></i></div>
-                                <h3 class="font-bold text-white text-base">Tableau IT & Pense-bête</h3>
-                            </div>
-                            <button onclick="openModal('it')" class="text-xs text-indigo-300 font-semibold hover:underline">+ Demande</button>
-                        </div>
-                        <div id="it-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[40px]"></div>
+                        <div id="training-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
                     </section>
                 </div>
             </div>
-
-            <!-- HISTORIQUE -->
-            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
-                <details class="group">
-                    <summary class="flex items-center justify-between cursor-pointer list-none">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg"><i data-lucide="archive" class="w-5 h-5"></i></div>
-                            <h3 class="font-bold text-slate-800 dark:text-slate-200 text-base">Historique & Tâches terminées</h3>
-                            <span id="history-count" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-full">0</span>
-                        </div>
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
-                    </summary>
-                    <div id="history-list" class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2 max-h-60 overflow-y-auto"></div>
-                </details>
-            </section>
         </main>
 
         <!-- VUE 2 : PLANNING HEBDOMADAIRE -->
@@ -243,219 +202,194 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="font-bold text-slate-900 dark:text-white text-base">Planning Hebdomadaire (Lundi à Vendredi)</h3>
-                        <p class="text-xs text-slate-400">Définissez vos priorités de chaque jour de la semaine</p>
+                        <p class="text-xs text-slate-400">Répartition stratégique</p>
                     </div>
-                    <button onclick="clearWeeklyPlan()" class="text-xs px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-semibold transition">🔄 Réinitialiser la semaine</button>
+                    <button onclick="clearWeeklyPlan()" class="text-xs px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-semibold transition">🔄 Réinitialiser</button>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
                     <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/60 p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2"><span class="text-xs font-bold text-slate-700 dark:text-slate-200">Lundi</span><button onclick="openDayModal('Lundi')" class="text-indigo-600 dark:text-indigo-400 font-bold text-xs">+</button></div>
+                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Lundi</span><button onclick="openDayModal('Lundi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Lundi" class="space-y-2 min-h-[120px]"></div>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/60 p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2"><span class="text-xs font-bold text-slate-700 dark:text-slate-200">Mardi</span><button onclick="openDayModal('Mardi')" class="text-indigo-600 dark:text-indigo-400 font-bold text-xs">+</button></div>
+                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Mardi</span><button onclick="openDayModal('Mardi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Mardi" class="space-y-2 min-h-[120px]"></div>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/60 p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2"><span class="text-xs font-bold text-slate-700 dark:text-slate-200">Mercredi</span><button onclick="openDayModal('Mercredi')" class="text-indigo-600 dark:text-indigo-400 font-bold text-xs">+</button></div>
+                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Mercredi</span><button onclick="openDayModal('Mercredi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Mercredi" class="space-y-2 min-h-[120px]"></div>
                     </div>
                     <div class="bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-800/50 p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b border-indigo-200 dark:border-indigo-800 pb-2"><span class="text-xs font-bold text-indigo-900 dark:text-indigo-300">Jeudi 💼</span><button onclick="openDayModal('Jeudi')" class="text-indigo-600 dark:text-indigo-400 font-bold text-xs">+</button></div>
+                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold text-indigo-900">Jeudi 💼</span><button onclick="openDayModal('Jeudi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Jeudi" class="space-y-2 min-h-[120px]"></div>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/60 p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2"><span class="text-xs font-bold text-slate-700 dark:text-slate-200">Vendredi</span><button onclick="openDayModal('Vendredi')" class="text-indigo-600 dark:text-indigo-400 font-bold text-xs">+</button></div>
+                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Vendredi</span><button onclick="openDayModal('Vendredi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Vendredi" class="space-y-2 min-h-[120px]"></div>
                     </div>
                 </div>
             </section>
         </main>
 
-        <!-- VUE 3 : GENERATEUR DE TEMPLATES & MAILS AVEC CASES A COCHER DYNAMIQUES -->
+        <!-- VUE 3 : STUDIO DE TEMPLATES DE MAILS & RELANCES -->
         <main id="tab-templates" class="p-6 space-y-6 hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                <!-- CONFIGURATEUR DU MESSAGE -->
-                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-xs">
-                    <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center space-x-2">
-                        <i data-lucide="sliders" class="w-5 h-5 text-indigo-600"></i>
-                        <span>Variables & Statut du destinataire</span>
-                    </h3>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Modèle de message</label>
-                        <select id="tmpl-select" onchange="loadTemplate()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium">
-                            <option value="conformite">Relance Dossier & Cartes de chantier (ASP/SIMDUT)</option>
-                            <option value="medical">Rappel Formulaire Médical & Intégration</option>
-                            <option value="notification">Notification d'information Direction / Manager</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Destinataire (Nom)</label>
-                            <input type="text" id="var-name" value="Jean Dupont" oninput="updateGeneratedEmail()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date d'échéance</label>
-                            <input type="date" id="var-date" oninput="updateGeneratedEmail()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs">
-                        </div>
-                    </div>
-
-                    <div class="pt-2 space-y-2 border-t border-slate-100 dark:border-slate-800">
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Éléments manquants à inclure dans la relance :</label>
-                        <div class="space-y-2 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-                            <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer">
-                                <input type="checkbox" id="chk-asp" checked onchange="updateGeneratedEmail()" class="w-4 h-4 text-indigo-600 rounded">
-                                <span>Attestation / Carte ASP Construction</span>
-                            </label>
-                            <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer">
-                                <input type="checkbox" id="chk-simdut" checked onchange="updateGeneratedEmail()" class="w-4 h-4 text-indigo-600 rounded">
-                                <span>Certificat de formation SIMDUT 2015</span>
-                            </label>
-                            <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer">
-                                <input type="checkbox" id="chk-medical" onchange="updateGeneratedEmail()" class="w-4 h-4 text-indigo-600 rounded">
-                                <span>Formulaire de déclaration médicale d'accès au site</span>
-                            </label>
-                            <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer">
-                                <input type="checkbox" id="chk-onboarding" onchange="updateGeneratedEmail()" class="w-4 h-4 text-indigo-600 rounded">
-                                <span>Module d'onboarding général complété</span>
-                            </label>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- APERÇU DU MESSAGE GENERÉ -->
-                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-xs flex flex-col justify-between">
-                    <div class="space-y-3">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-4">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border p-5 space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center space-x-2">
-                                <i data-lucide="file-text" class="w-5 h-5 text-emerald-600"></i>
-                                <span>Aperçu du message prêt à envoyer</span>
-                            </h3>
-                            <span class="text-[10px] px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold rounded-md">Format Teams / Mail</span>
+                            <h3 class="font-bold text-sm">Mes Modèles</h3>
+                            <button onclick="openNewTemplateModal()" class="text-xs bg-indigo-50 text-indigo-600 font-bold px-2.5 py-1 rounded-lg">+ Créer</button>
                         </div>
-                        <div id="email-preview" class="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs font-mono leading-relaxed whitespace-pre-wrap text-slate-700 dark:text-slate-200 min-h-[220px] border border-slate-200 dark:border-slate-700"></div>
+                        <div id="templates-list-container" class="space-y-2 max-h-[380px] overflow-y-auto"></div>
                     </div>
-                    
-                    <button onclick="copyGeneratedEmail()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center space-x-2">
-                        <i data-lucide="copy" class="w-4 h-4"></i>
-                        <span id="copy-btn-text">Copier le message dans le presse-papier</span>
-                    </button>
-                </section>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border p-5 space-y-4">
+                        <h3 class="font-bold text-sm">Variables & Pièces</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Destinataire</label>
+                                <input type="text" id="var-name" value="Mickaela" oninput="updateEmailPreview()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Échéance</label>
+                                <input type="date" id="var-date" oninput="updateEmailPreview()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
+                            </div>
+                        </div>
+                        <div class="pt-2 space-y-2 border-t">
+                            <label class="block text-[11px] font-semibold text-slate-500">Critères à inclure :</label>
+                            <div class="space-y-2 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
+                                <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer"><input type="checkbox" id="chk-asp" checked onchange="updateEmailPreview()" class="w-4 h-4 text-indigo-600 rounded"><span>Carte ASP Construction</span></label>
+                                <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer"><input type="checkbox" id="chk-simdut" checked onchange="updateEmailPreview()" class="w-4 h-4 text-indigo-600 rounded"><span>Certificat SIMDUT 2015</span></label>
+                                <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer"><input type="checkbox" id="chk-medical" onchange="updateEmailPreview()" class="w-4 h-4 text-indigo-600 rounded"><span>Formulaire Médical</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border p-5 space-y-4 flex flex-col justify-between h-full">
+                        <div class="space-y-3">
+                            <h3 class="font-bold text-sm">Aperçu en temps réel</h3>
+                            <div id="email-preview" class="p-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs font-mono leading-relaxed whitespace-pre-wrap min-h-[220px] border"></div>
+                        </div>
+                        <button onclick="copyGeneratedEmail()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center justify-center space-x-2">
+                            <i data-lucide="copy" class="w-4 h-4"></i><span id="copy-btn-text">Copier le message</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </main>
-
     </div>
 
-    <!-- MODALE DE CONFIGURATION FIREBASE (CLE MANUELLE) -->
+    <!-- MODALE CONFIG FIREBASE -->
     <div id="config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Configuration Firebase</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Collez l'objet JSON fourni par Firebase pour connecter votre application de manière sécurisée en local.</p>
-            <textarea id="config-json-input" rows="7" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-4 dark:text-white"></textarea>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border space-y-4">
+            <h3 class="text-lg font-bold">Configuration Firebase</h3>
+            <textarea id="config-json-input" rows="7" placeholder='{"apiKey": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl dark:text-white"></textarea>
             <div class="flex justify-end space-x-2">
-                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
-                <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer & Connecter</button>
+                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 text-xs font-semibold rounded-xl">Annuler</button>
+                <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl">Enregistrer & Connecter</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE UNIVERSELLE -->
+    <!-- MODALE PROJET AVANCÉ -->
+    <div id="project-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border space-y-4">
+            <h3 class="text-lg font-bold">Nouveau Projet Avancé</h3>
+            <form onsubmit="handleProjectSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Nom du projet</label>
+                    <input type="text" id="proj-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Date limite (Deadline)</label>
+                    <input type="date" id="proj-deadline" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Responsable</label>
+                    <select id="proj-assignee" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
+                        <option value="Mickaela">Mickaela</option>
+                        <option value="Koloina">Koloina</option>
+                        <option value="Les deux">Les deux</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeProjectModal()" class="px-4 py-2 bg-slate-100 text-xs rounded-xl">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-xs rounded-xl">Créer le projet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE UNIVERSELLE & PLANNER -->
     <div id="universal-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
-            <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white mb-4">Ajouter un élément</h3>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border space-y-4">
+            <h3 id="modal-title" class="text-lg font-bold">Ajouter un élément</h3>
             <form onsubmit="handleUniversalSubmit(event)" class="space-y-3">
                 <input type="hidden" id="modal-type">
                 <div>
-                    <label id="m-title-label" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Titre / Intitulé</label>
-                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label class="block text-xs font-semibold mb-1">Intitulé</label>
+                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
+                </div>
+                <div id="recurring-options" class="hidden">
+                    <label class="block text-[11px] font-semibold mb-1">Fréquence de réinitialisation</label>
+                    <select id="m-frequency" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
+                        <option value="daily">Quotidienne (Reset après 24h)</option>
+                        <option value="weekly">Hebdomadaire</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Responsable</label>
-                    <select id="m-assignee" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
-                        <option value="Non assigné">Non assigné</option>
+                    <label class="block text-xs font-semibold mb-1">Responsable</label>
+                    <select id="m-assignee" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
                         <option value="Mickaela">Mickaela</option>
                         <option value="Koloina">Koloina</option>
                         <option value="Les deux">Les deux</option>
                     </select>
                 </div>
                 <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
+                    <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 text-xs rounded-xl">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-xs rounded-xl">Enregistrer</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODALE PLANNER -->
-    <div id="day-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Ajouter au planning</h3>
-            <form onsubmit="handleDaySubmit(event)" class="space-y-3">
-                <input type="hidden" id="selected-day">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Tâche</label>
-                    <input type="text" id="day-item-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Responsable</label>
-                    <select id="day-item-assignee" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
-                        <option value="Mickaela">Mickaela</option>
-                        <option value="Koloina">Koloina</option>
-                        <option value="Les deux">Les deux</option>
-                    </select>
-                </div>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeDayModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- SCRIPT FIREBASE & LOGIQUE APP -->
+    <!-- SCRIPT COMPLET -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         let db = null;
-        let localData = { inbox: [], recurring: [], contact: [], followup: [], training: [], todo: [], project: [], it: [], history: [], weekly: [] };
+        let localData = { inbox: [], recurring: [], contact: [], followup: [], training: [], todo: [], project: [], weekly: [] };
         let activeAssigneeFilter = 'all';
+
+        let emailTemplates = [
+            { id: 't1', name: 'Relance conformité chantier', body: 'Bonjour {{nom}},\n\nNous attendons les documents suivants :\n{{items}}\n\nÉchéance : {{date}}.\n\nCordialement,' },
+            { id: 't2', name: 'Rappel Médical', body: 'Bonjour {{nom}},\n\nVeuillez compléter votre formulaire médical avant le {{date}}.' }
+        ];
+        let activeTemplateId = 't1';
 
         window.onload = function() {
             lucide.createIcons();
-            
             if (localStorage.getItem('theme') === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.getElementById('theme-text').innerText = "Mode Clair";
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.getElementById('theme-text').innerText = "Mode Sombre";
             }
-
-            const savedConfig = localStorage.getItem('duo_firebase_config');
-            if (savedConfig) {
-                try {
-                    initFirebase(JSON.parse(savedConfig));
-                } catch(e) { console.error(e); }
-            }
-
-            updateGeneratedEmail();
+            const savedCfg = localStorage.getItem('duo_firebase_config');
+            if(savedCfg) { try { initFirebase(JSON.parse(savedCfg)); } catch(e){} }
+            renderTemplatesList();
+            updateEmailPreview();
         };
 
         window.toggleDarkMode = function() {
             const root = document.documentElement;
             if (root.classList.contains('dark')) {
-                root.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
+                root.classList.remove('dark'); localStorage.setItem('theme', 'light');
                 document.getElementById('theme-text').innerText = "Mode Sombre";
             } else {
-                root.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
+                root.classList.add('dark'); localStorage.setItem('theme', 'dark');
                 document.getElementById('theme-text').innerText = "Mode Clair";
             }
         };
@@ -463,57 +397,39 @@
         window.switchTab = function(tabName) {
             ['dashboard', 'weekly', 'templates'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`nav-${t}`).className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition";
+                document.getElementById(`nav-${t}`).className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition font-semibold";
             });
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
             document.getElementById(`nav-${tabName}`).className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold transition";
-            document.getElementById('page-title').innerText = tabName === 'dashboard' ? 'Tableau de bord' : (tabName === 'weekly' ? 'Planning Hebdomadaire' : 'Templates & Relances Mails');
         };
 
-        window.openConfigModal = function() {
-            document.getElementById('config-modal').classList.remove('hidden');
-            const current = localStorage.getItem('duo_firebase_config');
-            if (current) document.getElementById('config-json-input').value = current;
-        };
-
-        window.closeConfigModal = function() {
-            document.getElementById('config-modal').classList.add('hidden');
-        };
-
+        window.openConfigModal = function() { document.getElementById('config-modal').classList.remove('hidden'); };
+        window.closeConfigModal = function() { document.getElementById('config-modal').classList.add('hidden'); };
         window.saveConfig = function() {
             const val = document.getElementById('config-json-input').value.trim();
             try {
-                const configObj = JSON.parse(val);
-                localStorage.setItem('duo_firebase_config', JSON.stringify(configObj));
-                closeConfigModal();
-                initFirebase(configObj);
-            } catch(e) {
-                alert("Format JSON invalide.");
-            }
+                const cfg = JSON.parse(val);
+                localStorage.setItem('duo_firebase_config', JSON.stringify(cfg));
+                closeConfigModal(); initFirebase(cfg);
+            } catch(e) { alert("JSON invalide"); }
         };
 
-        function initFirebase(config) {
+        function initFirebase(cfg) {
             try {
-                const app = initializeApp(config);
+                const app = initializeApp(cfg);
                 db = getFirestore(app);
-                const auth = getAuth(app);
-                signInAnonymously(auth).then(() => {
-                    document.getElementById('sync-status').className = "flex items-center space-x-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold border border-emerald-200 dark:border-emerald-800";
+                signInAnonymously(getAuth(app)).then(() => {
+                    document.getElementById('sync-status').className = "flex items-center space-x-2 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200";
                     document.getElementById('sync-text').innerText = "Connecté & Synchro";
                     setupListeners();
-                }).catch(err => {
-                    document.getElementById('sync-text').innerText = "Erreur Auth";
                 });
-            } catch (e) {
-                console.error(e);
-            }
+            } catch(e){}
         }
 
         function setupListeners() {
-            ['inbox', 'recurring', 'contact', 'followup', 'training', 'todo', 'project', 'it', 'history', 'weekly'].forEach(colName => {
+            ['inbox', 'recurring', 'contact', 'followup', 'training', 'todo', 'project', 'weekly'].forEach(colName => {
                 onSnapshot(collection(db, colName), (snapshot) => {
-                    let items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    localData[colName] = items;
+                    localData[colName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderAll();
                 });
             });
@@ -521,202 +437,98 @@
 
         window.setFilterAssignee = function(assignee) {
             activeAssigneeFilter = assignee;
-            ['all', 'Mickaela', 'Koloina', 'Les-deux'].forEach(name => {
-                const btn = document.getElementById(`filter-${name}`);
-                if (btn) {
-                    btn.className = (name === 'Les-deux' && assignee === 'Les deux') || name === assignee 
-                        ? "px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition"
-                        : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition";
-                }
-            });
             renderAll();
         };
 
-        // GENERATEUR DE TEMPLATES
-        window.loadTemplate = function() { updateGeneratedEmail(); };
-
-        window.updateGeneratedEmail = function() {
-            const tmpl = document.getElementById('tmpl-select').value;
-            const name = document.getElementById('var-name').value.trim() || 'Bonjour';
-            const date = document.getElementById('var-date').value || 'dans les plus brefs délais';
-
-            let itemsMissing = [];
-            if(document.getElementById('chk-asp').checked) itemsMissing.push("• Attestation / Carte ASP Construction à jour");
-            if(document.getElementById('chk-simdut').checked) itemsMissing.push("• Certificat de formation SIMDUT 2015");
-            if(document.getElementById('chk-medical').checked) itemsMissing.push("• Formulaire de déclaration médicale d'accès au site");
-            if(document.getElementById('chk-onboarding').checked) itemsMissing.push("• Validation du module d'onboarding général");
-
-            let text = "";
-            if (tmpl === 'conformite') {
-                text = `Bonjour ${name},\n\nSauf erreur de ma part, nous sommes toujours en attente des documents de conformité suivants pour valider votre accès au site :\n\n${itemsMissing.join('\n')}\n\nMerci de bien vouloir nous transmettre ces éléments avant le ${date}.\n\nCordialement,\nL'équipe de coordination`;
-            } else if (tmpl === 'medical') {
-                text = `Bonjour ${name},\n\nAfin d'officialiser votre déploiement sur le terrain, merci de compléter la vérification suivante avant le ${date} :\n\n${itemsMissing.join('\n')}\n\nRestant à disposition pour toute question.\n\nBonne journée,`;
-            } else {
-                text = `Bonjour,\n\nNote d'information concernant le suivi du dossier de ${name} :\n\nStatut des éléments requis :\n${itemsMissing.join('\n')}\n\nÉchéance cible fixée au : ${date}.\n\nMerci pour le suivi.`;
-            }
-
-            document.getElementById('email-preview').innerText = text;
-        };
-
-        window.copyGeneratedEmail = function() {
-            const text = document.getElementById('email-preview').innerText;
-            navigator.clipboard.writeText(text);
-            const btnText = document.getElementById('copy-btn-text');
-            btnText.innerText = "Copié dans le presse-papier ! ✓";
-            setTimeout(() => { btnText.innerText = "Copier le message dans le presse-papier"; }, 2000);
-        };
-
-        // RENDER GENERAL
         function getAssigneeBadge(assignee) {
             if (!assignee || assignee === 'Non assigné') return '';
-            let color = 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200';
-            if (assignee === 'Mickaela') color = 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
-            else if (assignee === 'Koloina') color = 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
-            else if (assignee === 'Les deux') color = 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
-
+            let color = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+            if (assignee === 'Koloina') color = 'bg-purple-50 text-purple-700 border-purple-200';
+            else if (assignee === 'Les deux') color = 'bg-amber-50 text-amber-700 border-amber-200';
             return `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md border ${color} shrink-0">👤 ${assignee}</span>`;
         }
 
-        function filterByAssignee(items) {
-            if (activeAssigneeFilter === 'all') return items;
-            return items.filter(x => (x.assignee || 'Non assigné') === activeAssigneeFilter);
-        }
-
         function renderAll() {
-            // Planning Hebdo
-            ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'].forEach(day => {
-                const dayEl = document.getElementById(`day-${day}`);
-                if (!dayEl) return;
-                let dayItems = filterByAssignee(localData.weekly.filter(w => w.day === day));
-                dayEl.innerHTML = dayItems.length === 0 ? '<p class="text-[11px] text-slate-400 italic">Rien de prévu</p>' : '';
-                dayItems.forEach(item => {
-                    dayEl.innerHTML += `
-                        <div class="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs space-y-1">
-                            <div class="flex items-start justify-between gap-1">
-                                <span class="${item.completed ? 'line-through text-slate-400' : 'font-medium text-slate-800 dark:text-slate-200'}">${item.title}</span>
-                                <button onclick="deleteWeeklyItem('${item.id}')" class="text-slate-300 hover:text-rose-500 text-[10px]">✕</button>
-                            </div>
-                            <div class="flex items-center justify-between pt-1">
-                                ${getAssigneeBadge(item.assignee)}
-                                <button onclick="toggleWeeklyItem('${item.id}')" class="text-[10px] ${item.completed ? 'text-emerald-600 font-bold' : 'text-slate-400 hover:text-indigo-600'}">${item.completed ? 'Fait ✓' : 'Cocher'}</button>
+            // Calcul des urgences / alertes dead-line projets
+            let urgentCount = 0;
+            const now = new Date();
+
+            // Rendu Projets Avancés
+            const projEl = document.getElementById('project-list');
+            projEl.innerHTML = localData.project.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet.</p>' : '';
+            localData.project.forEach(p => {
+                const deadlineDate = new Date(p.deadline);
+                const diffDays = Math.ceil((deadlineDate - now) / (1000 * 60 * 60 * 24));
+                let badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                if (diffDays <= 2 && diffDays >= 0) { urgentCount++; badgeColor = 'bg-amber-50 text-amber-700 border-amber-200'; }
+                else if (diffDays < 0) { urgentCount++; badgeColor = 'bg-rose-50 text-rose-700 border-rose-200'; }
+
+                projEl.innerHTML += `
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800/60 border rounded-xl space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-slate-800 dark:text-slate-100">${p.title}</span>
+                            <div class="flex items-center space-x-1">
+                                <span class="px-2 py-0.5 text-[10px] font-semibold rounded-md border ${badgeColor}">Échéance : ${p.deadline}</span>
+                                <button onclick="deleteItem('project', '${p.id}')" class="text-slate-400 hover:text-rose-600">✕</button>
                             </div>
                         </div>
-                    `;
-                });
-            });
-
-            // Inbox
-            const inboxEl = document.getElementById('inbox-list');
-            let inboxItems = filterByAssignee(localData.inbox);
-            inboxEl.innerHTML = inboxItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Inbox vide. Tout est trié !</p>' : '';
-            inboxItems.forEach(item => {
-                inboxEl.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2">
-                        <span class="font-medium text-slate-700 dark:text-slate-200 flex-1">${item.text}</span>
-                        <button onclick="triageItem('${item.id}', '${item.text.replace(/'/g, "\\'")}', 'todo')" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium">Trier →</button>
-                        <button onclick="deleteItem('inbox', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
+                            ${getAssigneeBadge(p.assignee)}
+                            <button onclick="openSubTaskModal('${p.id}')" class="text-indigo-600 font-semibold">+ Sous-tâche</button>
+                        </div>
                     </div>
                 `;
             });
 
-            // Lists
-            const collections = [
-                { key: 'todo', el: 'todo-list', titleKey: 'title' },
-                { key: 'contact', el: 'contact-list', titleKey: 'title' },
-                { key: 'followup', el: 'followup-list', titleKey: 'title' },
-                { key: 'training', el: 'training-list', titleKey: 'workerName' },
-                { key: 'it', el: 'it-list', titleKey: 'title' }
-            ];
+            // Affichage badge urgence haut de page
+            const urgentBadge = document.getElementById('urgent-badge');
+            if (urgentCount > 0) {
+                urgentBadge.classList.remove('hidden'); urgentBadge.classList.add('flex');
+                document.getElementById('urgent-text').innerText = `${urgentCount} alerte(s) deadline`;
+            } else { urgentBadge.classList.add('hidden'); }
 
-            collections.forEach(col => {
-                const container = document.getElementById(col.el);
-                if (!container) return;
-                let items = filterByAssignee(localData[col.key]);
-                container.innerHTML = items.length === 0 ? '<p class="text-xs text-slate-400 italic">Rien pour le moment.</p>' : '';
-                items.forEach(item => {
-                    const titleVal = item[col.titleKey] || item.title || '';
-                    container.innerHTML += `
-                        <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2">
-                            <div class="flex items-center space-x-2 flex-1">
-                                <input type="checkbox" onclick="completeItem('${col.key}', '${item.id}', '${titleVal.replace(/'/g, "\\'")}')" class="w-4 h-4 text-indigo-600 rounded">
-                                <span class="font-medium text-slate-700 dark:text-slate-200">${titleVal}</span>
-                                ${getAssigneeBadge(item.assignee)}
-                            </div>
-                            <button onclick="deleteItem('${col.key}', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            // Rendu Récurrentes
+            const recEl = document.getElementById('recurring-list');
+            recEl.innerHTML = localData.recurring.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche récurrente.</p>' : '';
+            localData.recurring.forEach(r => {
+                recEl.innerHTML += `
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border rounded-xl text-xs">
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" onclick="deleteItem('recurring', '${r.id}')" class="w-4 h-4 text-indigo-600 rounded">
+                            <span class="font-medium">${r.title}</span>
+                            ${getAssigneeBadge(r.assignee)}
+                        </div>
+                        <span class="text-[10px] text-indigo-500 font-semibold bg-indigo-50 px-2 py-0.5 rounded">🔄 ${r.frequency || 'quotidienne'}</span>
+                    </div>
+                `;
+            });
+
+            // Rendu To-Do, Contact, etc.
+            ['todo', 'contact', 'followup', 'training'].forEach(col => {
+                const el = document.getElementById(`${col}-list`);
+                if(!el) return;
+                el.innerHTML = localData[col].length === 0 ? '<p class="text-xs text-slate-400 italic">Vide.</p>' : '';
+                localData[col].forEach(item => {
+                    el.innerHTML += `
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border rounded-xl text-xs">
+                            <span class="font-medium">${item.title || item.workerName || ''}</span>
+                            <div class="flex items-center space-x-2">${getAssigneeBadge(item.assignee)}<button onclick="deleteItem('${col}', '${item.id}')" class="text-slate-400 hover:text-rose-600">✕</button></div>
                         </div>
                     `;
                 });
             });
 
-            document.getElementById('history-count').innerText = localData.history.length;
             lucide.createIcons();
         }
-
-        // HANDLERS
-        window.handleInboxSubmit = async function(e) {
-            e.preventDefault();
-            const input = document.getElementById('inbox-input');
-            const val = input.value.trim();
-            if(!val) return;
-            if(db) await addDoc(collection(db, 'inbox'), { text: val, timestamp: Date.now(), assignee: 'Non assigné' });
-            input.value = '';
-        };
-
-        window.triageItem = async function(id, text, target) {
-            if(db) {
-                await addDoc(collection(db, target), { title: text, assignee: 'Non assigné' });
-                await deleteDoc(doc(db, 'inbox', id));
-            }
-        };
-
-        window.completeItem = async function(col, id, title) {
-            if(db) {
-                await addDoc(collection(db, 'history'), { title, completedAt: new Date().toLocaleDateString('fr-FR') });
-                await deleteDoc(doc(db, col, id));
-            }
-        };
-
-        window.deleteItem = async function(col, id) {
-            if(db) await deleteDoc(doc(db, col, id));
-        };
-
-        window.openDayModal = function(day) {
-            document.getElementById('day-modal').classList.remove('hidden');
-            document.getElementById('selected-day').value = day;
-            document.getElementById('day-item-title').value = '';
-        };
-
-        window.closeDayModal = function() { document.getElementById('day-modal').classList.add('hidden'); };
-
-        window.handleDaySubmit = async function(e) {
-            e.preventDefault();
-            const day = document.getElementById('selected-day').value;
-            const title = document.getElementById('day-item-title').value.trim();
-            const assignee = document.getElementById('day-item-assignee').value;
-            if(db) await addDoc(collection(db, 'weekly'), { day, title, assignee, completed: false });
-            closeDayModal();
-        };
-
-        window.toggleWeeklyItem = async function(id) {
-            const item = localData.weekly.find(w => w.id === id);
-            if(item && db) await updateDoc(doc(db, 'weekly', id), { completed: !item.completed });
-        };
-
-        window.deleteWeeklyItem = async function(id) {
-            if(db) await deleteDoc(doc(db, 'weekly', id));
-        };
-
-        window.clearWeeklyPlan = async function() {
-            if(!confirm("Réinitialiser le planning de la semaine ?")) return;
-            if(db) localData.weekly.forEach(async item => await deleteDoc(doc(db, 'weekly', item.id)));
-        };
 
         window.openModal = function(type) {
             document.getElementById('universal-modal').classList.remove('hidden');
             document.getElementById('modal-type').value = type;
             document.getElementById('m-title').value = '';
+            const freqCont = document.getElementById('recurring-options');
+            if(type === 'recurring') freqCont.classList.remove('hidden');
+            else freqCont.classList.add('hidden');
         };
-
         window.closeModalWindow = function() { document.getElementById('universal-modal').classList.add('hidden'); };
 
         window.handleUniversalSubmit = async function(e) {
@@ -724,27 +536,51 @@
             const type = document.getElementById('modal-type').value;
             const title = document.getElementById('m-title').value;
             const assignee = document.getElementById('m-assignee').value;
-            let payload = { assignee };
-            if(type === 'training') payload.workerName = title;
-            else payload.title = title;
-            if(db) await addDoc(collection(db, type), payload);
+            const frequency = document.getElementById('m-frequency').value;
+            if(db) await addDoc(collection(db, type), { title, assignee, frequency });
             closeModalWindow();
         };
 
-        window.exportToExcel = function() {
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFFModule;Intitulé;Responsable;Statut\n";
-            Object.keys(localData).forEach(col => {
-                localData[col].forEach(item => {
-                    csvContent += `${col};"${(item.title || item.workerName || item.text || '').replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";Actif\n`;
-                });
+        window.openProjectModal = function() { document.getElementById('project-modal').classList.remove('hidden'); };
+        window.closeProjectModal = function() { document.getElementById('project-modal').classList.add('hidden'); };
+        window.handleProjectSubmit = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('proj-title').value;
+            const deadline = document.getElementById('proj-deadline').value;
+            const assignee = document.getElementById('proj-assignee').value;
+            if(db) await addDoc(collection(db, 'project'), { title, deadline, assignee, subtasks: [] });
+            closeProjectModal();
+        };
+
+        window.deleteItem = async function(col, id) { if(db) await deleteDoc(doc(db, col, id)); };
+
+        // Studio Mail Scripts
+        window.renderTemplatesList = function() {
+            const container = document.getElementById('templates-list-container');
+            container.innerHTML = '';
+            emailTemplates.forEach(t => {
+                container.innerHTML += `
+                    <div onclick="selectTemplate('${t.id}')" class="p-3 rounded-xl border text-xs cursor-pointer ${t.id === activeTemplateId ? 'bg-indigo-50 border-indigo-300 font-bold text-indigo-600' : 'bg-slate-50'}">
+                        ${t.name}
+                    </div>
+                `;
             });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `DuoSync_Export_${new Date().toISOString().slice(0, 10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        };
+        window.selectTemplate = function(id) { activeTemplateId = id; renderTemplatesList(); updateEmailPreview(); };
+        window.updateEmailPreview = function() {
+            const tmpl = emailTemplates.find(t => t.id === activeTemplateId);
+            if(!tmpl) return;
+            const name = document.getElementById('var-name').value || 'Mickaela';
+            const date = document.getElementById('var-date').value || 'bientôt';
+            let items = [];
+            if(document.getElementById('chk-asp')?.checked) items.push("• Carte ASP");
+            if(document.getElementById('chk-simdut')?.checked) items.push("• Certificat SIMDUT");
+            if(document.getElementById('chk-medical')?.checked) items.push("• Formulaire Médical");
+            document.getElementById('email-preview').innerText = tmpl.body.replace(/{{nom}}/g, name).replace(/{{date}}/g, date).replace(/{{items}}/g, items.join('\n'));
+        };
+        window.copyGeneratedEmail = function() {
+            navigator.clipboard.writeText(document.getElementById('email-preview').innerText);
+            alert("Copié dans le presse-papier ! ✓");
         };
     </script>
 </body>
