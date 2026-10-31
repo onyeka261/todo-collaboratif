@@ -1,575 +1,1002 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="fr" class="h-full bg-slate-50 transition-colors duration-200" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DuoSync Workspace Pro - Complet</title>
+    <title>DuoSync - Tableau de Bord Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { darkMode: 'class' }
+        tailwind.config = {
+            darkMode: 'class',
+        }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ghost-card { opacity: 0.4; background-color: #f1f5f9; border: 2px dashed #6366f1; }
+        .drag-handle { cursor: grab; }
+        .drag-handle:active { cursor: grabbing; }
+    </style>
 </head>
-<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased flex overflow-hidden transition-colors duration-200">
+<body class="h-full flex flex-col text-slate-800 dark:text-slate-100 dark:bg-slate-950 antialiased overflow-x-hidden">
 
-    <!-- SIDEBAR À GAUCHE -->
-    <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 z-30">
-        <div>
-            <div class="h-16 px-6 flex items-center space-x-3 border-b border-slate-100 dark:border-slate-800">
-                <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-200 dark:shadow-none">
+    <!-- HEADER / NAVIGATION -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-100 dark:shadow-none">
                     <i data-lucide="layers" class="w-5 h-5"></i>
                 </div>
                 <div>
-                    <h1 class="text-sm font-bold text-slate-900 dark:text-white leading-tight">DuoSync</h1>
-                    <p class="text-[10px] text-slate-400 font-medium">Workspace Pro</p>
+                    <h1 class="text-base font-bold text-slate-900 dark:text-white leading-tight">DuoSync Workspace</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Gestion collaborative & Suivi de projets</p>
                 </div>
             </div>
-
-            <nav class="p-4 space-y-1 text-xs font-semibold">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold transition">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                    <span>Tableau de bord</span>
-                </button>
-                <button onclick="switchTab('weekly')" id="nav-weekly" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                    <i data-lucide="calendar" class="w-4 h-4"></i>
-                    <span>Planning Hebdo</span>
-                </button>
-                <button onclick="switchTab('templates')" id="nav-templates" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                    <i data-lucide="mail-plus" class="w-4 h-4"></i>
-                    <span>Studio Mails & Templates</span>
-                </button>
-            </nav>
-        </div>
-
-        <div class="p-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-            <div id="sync-status" class="flex items-center space-x-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-[11px] font-medium border border-amber-200 dark:border-amber-800">
-                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                <span id="sync-text">Config requise</span>
-            </div>
-            <button onclick="openConfigModal()" class="w-full flex items-center space-x-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition">
-                <i data-lucide="settings" class="w-4 h-4"></i>
-                <span>Configuration Firebase</span>
-            </button>
-            <button onclick="toggleDarkMode()" class="w-full flex items-center justify-between px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition">
-                <span class="flex items-center space-x-2">
-                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
-                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
-                    <span id="theme-text">Mode Sombre</span>
-                </span>
-            </button>
-        </div>
-    </aside>
-
-    <!-- ZONE DE CONTENU PRINCIPALE -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-
-        <!-- HEADER BANNER -->
-        <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 h-16 px-6 flex items-center justify-between sticky top-0 z-20 shrink-0">
-            <h2 id="page-title" class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Tableau de bord</h2>
-            <div class="flex items-center space-x-3">
-                <div id="urgent-badge" class="hidden items-center space-x-1 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800">
+            
+            <div class="flex items-center space-x-2">
+                <!-- BADGE URGENCES / COMPTEUR D'ÉCHÉANCES -->
+                <div id="urgent-badge" class="hidden items-center space-x-1 px-2.5 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800">
                     <i data-lucide="bell" class="w-3.5 h-3.5 animate-bounce"></i>
                     <span id="urgent-text">0 urgence</span>
                 </div>
-                <button onclick="exportToExcel()" class="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-semibold transition">
-                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                    <span>Exporter Excel</span>
+
+                <button onclick="exportToExcel()" class="flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-semibold transition">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Exporter (Excel)</span>
+                </button>
+
+                <div id="sync-status" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-800">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span id="sync-text">Config requise</span>
+                </div>
+
+                <!-- BASCULE MODE SOMBRE -->
+                <button onclick="toggleDarkMode()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition" title="Changer de thème">
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                </button>
+
+                <button onclick="openConfigModal()" class="flex items-center space-x-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
                 </button>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <!-- VUE 1 : TABLEAU DE BORD PRINCIPAL -->
-        <main id="tab-dashboard" class="p-6 space-y-6">
-            <!-- FILTRES & RECHERCHE -->
-            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+    <!-- MAIN DASHBOARD CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- FILTRES DE RESPONSABLES ET BARRE DE RECHERCHE -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center space-x-1.5 overflow-x-auto py-1">
-                    <span class="text-xs font-semibold text-slate-400 mr-1">Filtrer par :</span>
+                    <span class="text-xs font-semibold text-slate-400 mr-1 hidden sm:inline">Filtrer par :</span>
                     <button onclick="setFilterAssignee('all')" id="filter-all" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition">Tous</button>
-                    <button onclick="setFilterAssignee('Mickaela')" id="filter-Mickaela" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">👤 Mickaela</button>
-                    <button onclick="setFilterAssignee('Koloina')" id="filter-Koloina" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">👤 Koloina</button>
-                    <button onclick="setFilterAssignee('Les deux')" id="filter-Les-deux" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">👥 Les deux</button>
+                    <button onclick="setFilterAssignee('Mickaela')" id="filter-Mickaela" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👤 Mickaela</button>
+                    <button onclick="setFilterAssignee('Koloina')" id="filter-Koloina" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👤 Koloina</button>
+                    <button onclick="setFilterAssignee('Les deux')" id="filter-Les-deux" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👥 Les deux</button>
                 </div>
-                <input type="text" id="search-bar" oninput="renderAll()" placeholder="🔎 Rechercher..." class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            </section>
+                <input type="text" id="search-bar" oninput="renderAll()" placeholder="🔎 Rechercher une tâche, un nom..." class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+        </section>
 
-            <!-- INBOX & CAPTURE RAPIDE -->
-            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-xs">
-                <div class="flex items-center space-x-2">
-                    <div class="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg"><i data-lucide="inbox" class="w-5 h-5"></i></div>
-                    <h3 class="font-bold text-slate-900 dark:text-white text-base">Inbox & Capture Rapide</h3>
+        <!-- INBOX & CAPTURE RAPIDE -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-4">
+            <div class="flex items-center space-x-2">
+                <div class="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                    <i data-lucide="inbox" class="w-5 h-5"></i>
                 </div>
-                <form onsubmit="handleInboxSubmit(event)" class="flex gap-2">
-                    <input type="text" id="inbox-input" placeholder="Saisir une idée, action..." class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500">
-                    <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl transition flex items-center space-x-1.5 shrink-0">
-                        <i data-lucide="plus" class="w-4 h-4"></i><span>Capturer</span>
-                    </button>
-                </form>
-                <div id="inbox-list" class="space-y-2 max-h-40 overflow-y-auto pt-2"></div>
-            </section>
+                <h2 class="font-bold text-slate-900 dark:text-white text-base">Inbox & Capture Rapide</h2>
+            </div>
+            <form id="inbox-form" onsubmit="handleInboxSubmit(event)" class="flex gap-2">
+                <input type="text" id="inbox-input" placeholder="Saisir une idée, action ou travailleur..." 
+                    class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-sm transition flex items-center space-x-1.5 shrink-0">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Capturer</span>
+                </button>
+            </form>
+            <div id="inbox-list" class="space-y-2 max-h-56 overflow-y-auto pt-2"></div>
+        </section>
 
-            <!-- GRILLE DE MODULES AVANCÉS -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="space-y-6">
-                    <!-- TO-DO -->
-                    <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
-                                <h3 class="font-bold text-slate-900 dark:text-white text-base">Simple To-Do</h3>
-                            </div>
-                            <button onclick="openModal('todo')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
-                        </div>
-                        <div id="todo-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
-                    </section>
+        <!-- GRILLE PRINCIPALE -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                    <!-- TÂCHES RÉCURRENTES (AUTO-RESET JOURNALIER) -->
-                    <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
-                                <div>
-                                    <h3 class="font-bold text-slate-900 dark:text-white text-base">Tâches Récurrentes</h3>
-                                    <p class="text-[10px] text-slate-400">Se décochent automatiquement chaque jour</p>
-                                </div>
-                            </div>
-                            <button onclick="openModal('recurring')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
-                        </div>
-                        <div id="recurring-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
-                    </section>
+            <!-- COLONNE GAUCHE -->
+            <div class="space-y-6">
 
-                    <!-- PROJETS AVANCÉS -->
-                    <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-cyan-50 dark:bg-cyan-950/50 text-cyan-600 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
-                                <div>
-                                    <h3 class="font-bold text-slate-900 dark:text-white text-base">Suivi Projets & Sous-tâches</h3>
-                                    <p class="text-[10px] text-slate-400">Deadlines et alertes actives</p>
-                                </div>
+                <!-- 1. SIMPLE TO-DO -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Simple To-Do</h2>
+                                <p class="text-[10px] text-slate-400">Avec échéance et priorité par glisser-déposer</p>
                             </div>
-                            <button onclick="openProjectModal()" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Nouveau Projet</button>
                         </div>
-                        <div id="project-list" class="space-y-4 max-h-80 overflow-y-auto min-h-[40px]"></div>
-                    </section>
-                </div>
+                        <button onclick="openModal('todo')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="todo-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
+                </section>
 
-                <div class="space-y-6">
-                    <!-- À CONTACTER -->
-                    <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
-                                <h3 class="font-bold text-slate-900 dark:text-white text-base">À Contacter</h3>
+                <!-- 2. TACHES RECURRENTES -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Tâches Récurrentes</h2>
+                                <p class="text-[10px] text-slate-400">Réinitialisables à volonté</p>
                             </div>
-                            <button onclick="openModal('contact')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                         </div>
-                        <div id="contact-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
-                    </section>
+                        <button onclick="openModal('recurring')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                </section>
 
-                    <!-- DOSSIERS ADMINISTRATIFS -->
-                    <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-rose-50 dark:bg-rose-950/50 text-rose-600 rounded-lg"><i data-lucide="file-text" class="w-5 h-5"></i></div>
-                                <h3 class="font-bold text-slate-900 dark:text-white text-base">Suivi & Dossiers administratifs</h3>
-                            </div>
-                            <button onclick="openModal('followup')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                <!-- 3. PROJETS EN COURS -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-cyan-50 dark:bg-cyan-950/50 text-cyan-600 dark:text-cyan-400 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 dark:text-white text-base">Projets en cours</h2>
                         </div>
-                        <div id="followup-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
-                    </section>
+                        <button onclick="openModal('project')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Nouveau Projet</button>
+                    </div>
+                    <div id="project-list" class="space-y-3.5 max-h-96 overflow-y-auto min-h-[50px]"></div>
+                </section>
 
-                    <!-- TABLEAU IT (PERMANENT, NON SUPPRIMÉ) -->
-                    <section class="bg-slate-900 dark:bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xs text-white">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-slate-800 text-indigo-400 rounded-lg"><i data-lucide="terminal" class="w-5 h-5"></i></div>
-                                <div>
-                                    <h3 class="font-bold text-white text-base">Tableau IT & Suivi</h3>
-                                    <p class="text-xs text-slate-400">Demandes techniques permanentes</p>
-                                </div>
-                            </div>
-                            <button onclick="openModal('it')" class="text-xs text-indigo-300 font-semibold hover:underline">+ Demande</button>
-                        </div>
-                        <div id="it-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
-                    </section>
-                </div>
             </div>
 
-            <!-- HISTORIQUE VISIBLE DES TÂCHES TERMINÉES -->
-            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
-                <div class="flex items-center justify-between mb-3">
+            <!-- COLONNE DROITE -->
+            <div class="space-y-6">
+
+                <!-- 4. A CONTACTER -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">À Contacter</h2>
+                                <p class="text-[10px] text-slate-400">Avec date de suivi/rappel</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('contact')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="contact-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+                <!-- 5. NOUVEAU MODULE : SUIVI & RELANCES ADMINISTRATIVES -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-lg"><i data-lucide="bell-ring" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Suivi & Relances</h2>
+                                <p class="text-[10px] text-slate-400">Dossiers, conformité & personnes à informer</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('followup')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Suivi</button>
+                    </div>
+                    <div id="followup-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+                <!-- 6. FORMATIONS DES TRAVAILLEURS -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 rounded-lg"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Formations - Suivi des travailleurs</h2>
+                                <p class="text-[11px] text-slate-400">Vérification de la validation de la formation du groupe</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('training')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Travailleur</button>
+                    </div>
+                    <div id="training-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+                <!-- 7. TABLEAU IT (PRIVÉ) -->
+                <section class="bg-slate-900 dark:bg-slate-900 rounded-2xl border border-slate-800 shadow-xs p-5 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-slate-800 text-indigo-400 rounded-lg"><i data-lucide="terminal" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-white text-base">Tableau IT & Suivi</h2>
+                                <p class="text-xs text-slate-400">Pense-bête personnel demandes techniques</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('it')" class="text-xs text-indigo-300 font-semibold hover:underline">+ Demande</button>
+                    </div>
+                    <div id="it-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+            </div>
+
+        </div>
+
+        <!-- SECTION HISTORIQUE ET TACHES TERMINÉES -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+            <details class="group">
+                <summary class="flex items-center justify-between cursor-pointer list-none">
                     <div class="flex items-center space-x-2">
-                        <div class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg"><i data-lucide="archive" class="w-5 h-5"></i></div>
-                        <h3 class="font-bold text-slate-800 dark:text-slate-200 text-base">Historique & Tâches terminées</h3>
+                        <div class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
+                            <i data-lucide="archive" class="w-5 h-5"></i>
+                        </div>
+                        <h2 class="font-bold text-slate-800 dark:text-slate-200 text-base">Historique & Tâches terminées</h2>
                         <span id="history-count" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-full">0</span>
                     </div>
-                </div>
-                <div id="history-list" class="space-y-2 max-h-48 overflow-y-auto pt-2 border-t border-slate-100 dark:border-slate-800"></div>
-            </section>
-        </main>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div id="history-list" class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2 max-h-60 overflow-y-auto"></div>
+            </details>
+        </section>
 
-        <!-- VUE 2 : PLANNING HEBDOMADAIRE -->
-        <main id="tab-weekly" class="p-6 space-y-6 hidden">
-            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-xs">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-slate-900 dark:text-white text-base">Planning Hebdomadaire (Lundi à Vendredi)</h3>
-                        <p class="text-xs text-slate-400">Répartition stratégique</p>
-                    </div>
-                    <button onclick="clearWeeklyPlan()" class="text-xs px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-semibold transition">🔄 Réinitialiser</button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
-                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Lundi</span><button onclick="openDayModal('Lundi')" class="text-indigo-600 font-bold text-xs">+</button></div>
-                        <div id="day-Lundi" class="space-y-2 min-h-[120px]"></div>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Mardi</span><button onclick="openDayModal('Mardi')" class="text-indigo-600 font-bold text-xs">+</button></div>
-                        <div id="day-Mardi" class="space-y-2 min-h-[120px]"></div>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Mercredi</span><button onclick="openDayModal('Mercredi')" class="text-indigo-600 font-bold text-xs">+</button></div>
-                        <div id="day-Mercredi" class="space-y-2 min-h-[120px]"></div>
-                    </div>
-                    <div class="bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold text-indigo-900">Jeudi 💼</span><button onclick="openDayModal('Jeudi')" class="text-indigo-600 font-bold text-xs">+</button></div>
-                        <div id="day-Jeudi" class="space-y-2 min-h-[120px]"></div>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border p-3 space-y-2">
-                        <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Vendredi</span><button onclick="openDayModal('Vendredi')" class="text-indigo-600 font-bold text-xs">+</button></div>
-                        <div id="day-Vendredi" class="space-y-2 min-h-[120px]"></div>
-                    </div>
-                </div>
-            </section>
-        </main>
+    </main>
 
-        <!-- VUE 3 : STUDIO DE TEMPLATES DE MAILS & RELANCES -->
-        <main id="tab-templates" class="p-6 space-y-6 hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="space-y-4">
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl border p-5 space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-sm">Mes Modèles</h3>
-                            <button onclick="openNewTemplateModal()" class="text-xs bg-indigo-50 text-indigo-600 font-bold px-2.5 py-1 rounded-lg">+ Créer</button>
-                        </div>
-                        <div id="templates-list-container" class="space-y-2 max-h-[380px] overflow-y-auto"></div>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl border p-5 space-y-4">
-                        <h3 class="font-bold text-sm">Variables & Pièces</h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Destinataire</label>
-                                <input type="text" id="var-name" value="Mickaela" oninput="updateEmailPreview()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Échéance</label>
-                                <input type="date" id="var-date" oninput="updateEmailPreview()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
-                            </div>
-                        </div>
-                        <div class="pt-2 space-y-2 border-t">
-                            <label class="block text-[11px] font-semibold text-slate-500">Critères à inclure :</label>
-                            <div class="space-y-2 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-                                <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer"><input type="checkbox" id="chk-asp" checked onchange="updateEmailPreview()" class="w-4 h-4 text-indigo-600 rounded"><span>Carte ASP Construction</span></label>
-                                <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer"><input type="checkbox" id="chk-simdut" checked onchange="updateEmailPreview()" class="w-4 h-4 text-indigo-600 rounded"><span>Certificat SIMDUT 2015</span></label>
-                                <label class="flex items-center space-x-2 text-xs font-medium cursor-pointer"><input type="checkbox" id="chk-medical" onchange="updateEmailPreview()" class="w-4 h-4 text-indigo-600 rounded"><span>Formulaire Médical</span></label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl border p-5 space-y-4 flex flex-col justify-between h-full">
-                        <div class="space-y-3">
-                            <h3 class="font-bold text-sm">Aperçu en temps réel</h3>
-                            <div id="email-preview" class="p-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs font-mono leading-relaxed whitespace-pre-wrap min-h-[220px] border"></div>
-                        </div>
-                        <button onclick="copyGeneratedEmail()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center justify-center space-x-2">
-                            <i data-lucide="copy" class="w-4 h-4"></i><span id="copy-btn-text">Copier le message</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- MODALE CONFIG FIREBASE -->
-    <div id="config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border space-y-4">
-            <h3 class="text-lg font-bold">Configuration Firebase</h3>
-            <textarea id="config-json-input" rows="7" placeholder='{"apiKey": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl dark:text-white"></textarea>
+    <!-- MODALE DE CONFIGURATION FIREBASE -->
+    <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Configuration Firebase</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Collez l'objet JSON fourni par Firebase pour synchroniser l'appareil.</p>
+            <textarea id="config-json-input" rows="7" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-4"></textarea>
             <div class="flex justify-end space-x-2">
-                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 text-xs font-semibold rounded-xl">Annuler</button>
-                <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl">Enregistrer & Connecter</button>
+                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
+                <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer & Connecter</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE PROJET AVANCÉ -->
-    <div id="project-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border space-y-4">
-            <h3 class="text-lg font-bold">Nouveau Projet Avancé</h3>
-            <form onsubmit="handleProjectSubmit(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold mb-1">Nom du projet</label>
-                    <input type="text" id="proj-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold mb-1">Date limite (Deadline)</label>
-                    <input type="date" id="proj-deadline" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold mb-1">Responsable</label>
-                    <select id="proj-assignee" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
-                        <option value="Mickaela">Mickaela</option>
-                        <option value="Koloina">Koloina</option>
-                        <option value="Les deux">Les deux</option>
-                    </select>
-                </div>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeProjectModal()" class="px-4 py-2 bg-slate-100 text-xs rounded-xl">Annuler</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-xs rounded-xl">Créer le projet</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODALE UNIVERSELLE -->
-    <div id="universal-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border space-y-4">
-            <h3 id="modal-title" class="text-lg font-bold">Ajouter un élément</h3>
-            <form onsubmit="handleUniversalSubmit(event)" class="space-y-3">
+    <!-- MODALE UNIVERSELLE (CREATION & MODIFICATION) -->
+    <div id="universal-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white mb-4">Ajouter un élément</h3>
+            <form id="universal-form" onsubmit="handleUniversalSubmit(event)" class="space-y-3">
                 <input type="hidden" id="modal-type">
+                <input type="hidden" id="modal-edit-id">
                 <div>
-                    <label class="block text-xs font-semibold mb-1">Intitulé</label>
-                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
+                    <label id="m-title-label" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Intitulé / Titre</label>
+                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold mb-1">Responsable</label>
-                    <select id="m-assignee" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Responsable</label>
+                    <select id="m-assignee" onchange="checkAssigneeCustom(this.value)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="Non assigné">Non assigné</option>
                         <option value="Mickaela">Mickaela</option>
                         <option value="Koloina">Koloina</option>
                         <option value="Les deux">Les deux</option>
+                        <option value="custom">Autre (Saisir un nom...)</option>
                     </select>
                 </div>
+                <div id="custom-assignee-container" class="hidden">
+                    <input type="text" id="m-custom-assignee" placeholder="Nom du nouveau responsable..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div id="extra-field-container"></div>
                 <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 text-xs rounded-xl">Annuler</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-xs rounded-xl">Enregistrer</button>
+                    <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- SCRIPT LOGIQUE -->
+    <!-- SCRIPTS FIREBASE & LOGIQUE APP -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         let db = null;
-        let localData = { inbox: [], recurring: [], contact: [], followup: [], training: [], todo: [], project: [], it: [], history: [], weekly: [] };
+        let localData = { inbox: [], recurring: [], contact: [], followup: [], training: [], todo: [], project: [], it: [], history: [] };
+        let sortableInstances = {};
         let activeAssigneeFilter = 'all';
-
-        let emailTemplates = [
-            { id: 't1', name: 'Relance conformité chantier', body: 'Bonjour {{nom}},\n\nNous attendons les documents suivants :\n{{items}}\n\nÉchéance : {{date}}.\n\nCordialement,' },
-            { id: 't2', name: 'Rappel Médical', body: 'Bonjour {{nom}},\n\nVeuillez compléter votre formulaire médical avant le {{date}}.' }
-        ];
-        let activeTemplateId = 't1';
 
         window.onload = function() {
             lucide.createIcons();
             if (localStorage.getItem('theme') === 'dark') {
                 document.documentElement.classList.add('dark');
-                document.getElementById('theme-text').innerText = "Mode Clair";
             }
-            const savedCfg = localStorage.getItem('duo_firebase_config');
-            if(savedCfg) { try { initFirebase(JSON.parse(savedCfg)); } catch(e){} }
-            renderTemplatesList();
-            updateEmailPreview();
-            checkDailyReset();
+            const savedConfig = localStorage.getItem('duo_firebase_config');
+            if (savedConfig) {
+                try {
+                    initFirebase(JSON.parse(savedConfig));
+                } catch (e) {
+                    console.error("Config invalide");
+                }
+            }
+            initSortable();
         };
 
         window.toggleDarkMode = function() {
             const root = document.documentElement;
             if (root.classList.contains('dark')) {
-                root.classList.remove('dark'); localStorage.setItem('theme', 'light');
-                document.getElementById('theme-text').innerText = "Mode Sombre";
+                root.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
             } else {
-                root.classList.add('dark'); localStorage.setItem('theme', 'dark');
-                document.getElementById('theme-text').innerText = "Mode Clair";
+                root.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
             }
         };
-
-        window.switchTab = function(tabName) {
-            ['dashboard', 'weekly', 'templates'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`nav-${t}`).className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition font-semibold";
-            });
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.getElementById(`nav-${tabName}`).className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold transition";
-        };
-
-        window.openConfigModal = function() { document.getElementById('config-modal').classList.remove('hidden'); };
-        window.closeConfigModal = function() { document.getElementById('config-modal').classList.add('hidden'); };
-        window.saveConfig = function() {
-            const val = document.getElementById('config-json-input').value.trim();
-            try {
-                const cfg = JSON.parse(val);
-                localStorage.setItem('duo_firebase_config', JSON.stringify(cfg));
-                closeConfigModal(); initFirebase(cfg);
-            } catch(e) { alert("JSON invalide"); }
-        };
-
-        function initFirebase(cfg) {
-            try {
-                const app = initializeApp(cfg);
-                db = getFirestore(app);
-                signInAnonymously(getAuth(app)).then(() => {
-                    document.getElementById('sync-status').className = "flex items-center space-x-2 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200";
-                    document.getElementById('sync-text').innerText = "Connecté & Synchro";
-                    setupListeners();
-                });
-            } catch(e){}
-        }
-
-        function setupListeners() {
-            ['inbox', 'recurring', 'contact', 'followup', 'training', 'todo', 'project', 'it', 'history', 'weekly'].forEach(colName => {
-                onSnapshot(collection(db, colName), (snapshot) => {
-                    localData[colName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderAll();
-                });
-            });
-        }
-
-        // Vérification automatique du reset journalier des récurrentes (après minuit)
-        function checkDailyReset() {
-            const today = new Date().toDateString();
-            const lastReset = localStorage.getItem('duo_last_recurring_reset');
-            if (lastReset !== today) {
-                // Nouveau jour : on décoche toutes les récurrentes locales ou via firebase si connecté
-                localData.recurring.forEach(async (r) => {
-                    if (r.completed && db) {
-                        await updateDoc(doc(db, 'recurring', r.id), { completed: false });
-                    }
-                });
-                localStorage.setItem('duo_last_recurring_reset', today);
-            }
-        }
 
         window.setFilterAssignee = function(assignee) {
             activeAssigneeFilter = assignee;
+            ['all', 'Mickaela', 'Koloina', 'Les-deux'].forEach(name => {
+                const btn = document.getElementById(`filter-${name}`);
+                if (btn) {
+                    if ((name === 'Les-deux' && assignee === 'Les deux') || name === assignee) {
+                        btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition";
+                    } else {
+                        btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition";
+                    }
+                }
+            });
             renderAll();
+        };
+
+        window.openConfigModal = function() {
+            document.getElementById('config-modal').classList.remove('hidden');
+            const current = localStorage.getItem('duo_firebase_config');
+            if (current) document.getElementById('config-json-input').value = current;
+        };
+
+        window.closeConfigModal = function() {
+            document.getElementById('config-modal').classList.add('hidden');
+        };
+
+        window.saveConfig = function() {
+            const val = document.getElementById('config-json-input').value.trim();
+            try {
+                const configObj = JSON.parse(val);
+                localStorage.setItem('duo_firebase_config', JSON.stringify(configObj));
+                closeConfigModal();
+                initFirebase(configObj);
+            } catch(e) {
+                alert("Format JSON invalide.");
+            }
+        };
+
+        function initFirebase(config) {
+            try {
+                const app = initializeApp(config);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+                signInAnonymously(auth).then(() => {
+                    document.getElementById('sync-status').className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-800";
+                    document.getElementById('sync-text').innerText = "Connecté & Synchronisé";
+                    setupListeners();
+                }).catch(err => alert("Erreur d'authentification : " + err.message));
+            } catch (e) {
+                alert("Erreur d'initialisation : " + e.message);
+            }
+        }
+
+        function setupListeners() {
+            ['inbox', 'recurring', 'contact', 'followup', 'training', 'todo', 'project', 'it', 'history'].forEach(colName => {
+                onSnapshot(collection(db, colName), (snapshot) => {
+                    let items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    items.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+                    localData[colName] = items;
+                    renderAll();
+                }, (error) => console.error("Erreur sync " + colName, error));
+            });
+        }
+
+        function initSortable() {
+            const collections = ['todo', 'recurring', 'project', 'contact', 'followup', 'training', 'it'];
+            collections.forEach(col => {
+                const el = document.getElementById(`${col}-list`);
+                if (!el) return;
+                sortableInstances[col] = new Sortable(el, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'ghost-card',
+                    onEnd: async function () {
+                        const newOrderIds = Array.from(el.children).map(child => child.getAttribute('data-id')).filter(Boolean);
+                        newOrderIds.forEach((id, index) => {
+                            let item = localData[col].find(x => x.id === id);
+                            if (item) item.order = index;
+                            if (db) {
+                                updateDoc(doc(db, col, id), { order: index });
+                            }
+                        });
+                        localData[col].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+                    }
+                });
+            });
+        }
+
+        window.handleInboxSubmit = async function(e) {
+            e.preventDefault();
+            const input = document.getElementById('inbox-input');
+            const val = input.value.trim();
+            if(!val) return;
+
+            let target = 'todo';
+            const lower = val.toLowerCase();
+            if(lower.includes('form') || lower.includes('travailleur') || lower.includes('vérif')) target = 'training';
+            else if(lower.includes('relance') || lower.includes('suivi') || lower.includes('dossier')) target = 'followup';
+            else if(lower.includes('contact') || lower.includes('appel') || lower.includes('email') || lower.includes('teams')) target = 'contact';
+            else if(lower.includes('it') || lower.includes('bug') || lower.includes('ordi')) target = 'it';
+            else if(lower.includes('projet')) target = 'project';
+            else if(lower.includes('tous les') || lower.includes('chaque')) target = 'recurring';
+
+            if(db) {
+                await addDoc(collection(db, 'inbox'), { text: val, suggested: target, timestamp: Date.now(), assignee: 'Non assigné' });
+            } else {
+                localData.inbox.push({ id: 'local_' + Math.random(), text: val, suggested: target, assignee: 'Non assigné' });
+                renderAll();
+            }
+            input.value = '';
+        };
+
+        window.triageItem = async function(id, text, selectedTarget) {
+            let maxOrder = localData[selectedTarget].length;
+            let payload = { title: text, completed: false, order: maxOrder, assignee: 'Non assigné' };
+            
+            if(selectedTarget === 'contact') payload = { title: text, channel: 'Teams', message: '', dueDate: '', status: 'À contacter', order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'followup') payload = { title: text, notifyTo: '', dueDate: '', status: 'À relancer', order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'training') payload = { workerName: text, completed: false, order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'it') payload = { title: text, status: 'À transmettre', notes: '', order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'project') payload = { title: text, progress: 0, deadline: '', subtasks: [], order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'recurring') payload = { title: text, frequency: 'Quotidienne', lastDone: '', order: maxOrder, assignee: 'Non assigné' };
+            else if(selectedTarget === 'todo') payload = { title: text, dueDate: '', order: maxOrder, assignee: 'Non assigné' };
+
+            if(db) {
+                await addDoc(collection(db, selectedTarget), payload);
+                await deleteDoc(doc(db, 'inbox', id));
+            } else {
+                localData.inbox = localData.inbox.filter(x => x.id !== id);
+                localData[selectedTarget].push({ id: 'local_' + Math.random(), ...payload });
+                renderAll();
+            }
+        };
+
+        window.completeRecurringItem = async function(id) {
+            const todayStr = new Date().toLocaleDateString('fr-FR');
+            if(db) {
+                await updateDoc(doc(db, 'recurring', id), { lastDone: todayStr });
+            } else {
+                let item = localData.recurring.find(x => x.id === id);
+                if(item) item.lastDone = todayStr;
+                renderAll();
+            }
+        };
+
+        window.resetRecurringItem = async function(id) {
+            if(db) {
+                await updateDoc(doc(db, 'recurring', id), { lastDone: '' });
+            } else {
+                let item = localData.recurring.find(x => x.id === id);
+                if(item) item.lastDone = '';
+                renderAll();
+            }
+        };
+
+        window.completeItem = async function(col, id, titleOrWorker) {
+            if(db) {
+                await addDoc(collection(db, 'history'), {
+                    title: titleOrWorker,
+                    originalCol: col,
+                    completedAt: new Date().toLocaleDateString('fr-FR')
+                });
+                await deleteDoc(doc(db, col, id));
+            } else {
+                localData[col] = localData[col].filter(x => x.id !== id);
+                localData.history.push({
+                    id: 'local_' + Math.random(),
+                    title: titleOrWorker,
+                    originalCol: col,
+                    completedAt: new Date().toLocaleDateString('fr-FR')
+                });
+                renderAll();
+            }
+        };
+
+        window.deleteItem = async function(col, id) {
+            if(db) await deleteDoc(doc(db, col, id));
+            else {
+                localData[col] = localData[col].filter(x => x.id !== id);
+                renderAll();
+            }
+        };
+
+        window.addSubtask = async function(projId) {
+            const text = prompt("Titre de la nouvelle sous-tâche :");
+            if(!text) return;
+            const proj = localData.project.find(p => p.id === projId);
+            if(!proj) return;
+
+            const subtasks = proj.subtasks || [];
+            subtasks.push({ id: 'sub_' + Date.now(), title: text, done: false });
+            
+            const doneCount = subtasks.filter(s => s.done).length;
+            const progress = Math.round((doneCount / subtasks.length) * 100);
+
+            if(db) {
+                await updateDoc(doc(db, 'project', projId), { subtasks, progress });
+            } else {
+                proj.subtasks = subtasks;
+                proj.progress = progress;
+                renderAll();
+            }
+        };
+
+        window.toggleSubtask = async function(projId, subId) {
+            const proj = localData.project.find(p => p.id === projId);
+            if(!proj || !proj.subtasks) return;
+
+            const subtasks = proj.subtasks.map(s => s.id === subId ? { ...s, done: !s.done } : s);
+            const doneCount = subtasks.filter(s => s.done).length;
+            const progress = Math.round((doneCount / subtasks.length) * 100);
+
+            if(db) {
+                await updateDoc(doc(db, 'project', projId), { subtasks, progress });
+            } else {
+                proj.subtasks = subtasks;
+                proj.progress = progress;
+                renderAll();
+            }
+        };
+
+        window.checkAssigneeCustom = function(val) {
+            const customContainer = document.getElementById('custom-assignee-container');
+            if (val === 'custom') {
+                customContainer.classList.remove('hidden');
+                document.getElementById('m-custom-assignee').focus();
+            } else {
+                customContainer.classList.add('hidden');
+            }
+        };
+
+        window.openModal = function(type, editId = null) {
+            document.getElementById('universal-modal').classList.remove('hidden');
+            document.getElementById('modal-type').value = type;
+            document.getElementById('modal-edit-id').value = editId || '';
+            const container = document.getElementById('extra-field-container');
+            container.innerHTML = '';
+
+            let existing = editId ? localData[type].find(x => x.id === editId) : null;
+            document.getElementById('m-title-label').innerText = type === 'training' ? "Nom du travailleur" : "Intitulé / Titre";
+            document.getElementById('m-title').value = existing ? (existing.title || existing.workerName || '') : '';
+            
+            const assigneeSelect = document.getElementById('m-assignee');
+            const customContainer = document.getElementById('custom-assignee-container');
+            const customInput = document.getElementById('m-custom-assignee');
+
+            const currentAssignee = existing?.assignee || 'Non assigné';
+            if (['Non assigné', 'Mickaela', 'Koloina', 'Les deux'].includes(currentAssignee)) {
+                assigneeSelect.value = currentAssignee;
+                customContainer.classList.add('hidden');
+                customInput.value = '';
+            } else {
+                assigneeSelect.value = 'custom';
+                customContainer.classList.remove('hidden');
+                customInput.value = currentAssignee;
+            }
+
+            if(type === 'contact') {
+                document.getElementById('modal-title').innerText = editId ? "Modifier le contact" : "Ajouter un contact";
+                container.innerHTML = `
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Canal</label>
+                    <select id="m-channel" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"><option ${existing?.channel==='Teams'?'selected':''}>Teams</option><option ${existing?.channel==='Téléphone'?'selected':''}>Téléphone</option><option ${existing?.channel==='Courriel'?'selected':''}>Courriel</option></select></div>
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date de rappel / suivi</label><input type="date" id="m-duedate" value="${existing?.dueDate || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Message / Notes</label><input type="text" id="m-message" value="${existing?.message || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
+                `;
+            } else if(type === 'followup') {
+                document.getElementById('modal-title').innerText = editId ? "Modifier le suivi" : "Nouveau suivi & relance";
+                container.innerHTML = `
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Personnes à informer / notifier</label><input type="text" id="m-notifyto" value="${existing?.notifyTo || ''}" placeholder="Ex: Marc, Gillian..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date limite de relance</label><input type="date" id="m-duedate" value="${existing?.dueDate || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
+                `;
+            } else if(type === 'todo') {
+                document.getElementById('modal-title').innerText = editId ? "Modifier la To-Do" : "Ajouter une To-Do";
+                container.innerHTML = `
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date d'échéance</label><input type="date" id="m-duedate" value="${existing?.dueDate || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
+                `;
+            } else if(type === 'recurring') {
+                document.getElementById('modal-title').innerText = editId ? "Modifier la tâche récurrente" : "Nouvelle tâche récurrente";
+                container.innerHTML = `
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Fréquence</label>
+                    <select id="m-frequency" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                        <option ${existing?.frequency==='Quotidienne'?'selected':''}>Quotidienne</option>
+                        <option ${existing?.frequency==='Hebdomadaire'?'selected':''}>Hebdomadaire</option>
+                        <option ${existing?.frequency==='Mensuelle'?'selected':''}>Mensuelle</option>
+                    </select></div>
+                `;
+            } else if(type === 'training') {
+                document.getElementById('modal-title').innerText = editId ? "Modifier le travailleur" : "Ajouter un travailleur";
+            } else if(type === 'it') {
+                document.getElementById('modal-title').innerText = editId ? "Modifier la demande IT" : "Nouvelle demande IT";
+                container.innerHTML = `<div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Notes de suivi</label><input type="text" id="m-notes" value="${existing?.notes || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>`;
+            } else if(type === 'project') {
+                document.getElementById('modal-title').innerText = editId ? "Modifier le projet" : "Nouveau Projet";
+                container.innerHTML = `
+                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date Limite (Deadline)</label><input type="date" id="m-deadline" value="${existing?.deadline || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
+                `;
+            } else {
+                document.getElementById('modal-title').innerText = editId ? "Modifier l'élément" : "Ajouter un élément";
+            }
+        };
+
+        window.closeModalWindow = function() {
+            document.getElementById('universal-modal').classList.add('hidden');
+            document.getElementById('m-title').value = '';
+            document.getElementById('modal-edit-id').value = '';
+        };
+
+        window.handleUniversalSubmit = async function(e) {
+            e.preventDefault();
+            const type = document.getElementById('modal-type').value;
+            const editId = document.getElementById('modal-edit-id').value;
+            const titleVal = document.getElementById('m-title').value;
+            
+            let assigneeVal = document.getElementById('m-assignee').value;
+            if (assigneeVal === 'custom') {
+                assigneeVal = document.getElementById('m-custom-assignee').value.trim() || 'Non assigné';
+            }
+
+            let payload = { assignee: assigneeVal };
+            if(type === 'training') payload.workerName = titleVal;
+            else payload.title = titleVal;
+
+            if(type === 'contact') {
+                payload.channel = document.getElementById('m-channel').value;
+                payload.dueDate = document.getElementById('m-duedate')?.value || '';
+                payload.message = document.getElementById('m-message').value;
+            } else if(type === 'followup') {
+                payload.notifyTo = document.getElementById('m-notifyto')?.value || '';
+                payload.dueDate = document.getElementById('m-duedate')?.value || '';
+            } else if(type === 'todo') {
+                payload.dueDate = document.getElementById('m-duedate')?.value || '';
+            } else if(type === 'recurring') {
+                payload.frequency = document.getElementById('m-frequency').value;
+                if(!editId) payload.lastDone = '';
+            } else if(type === 'it') {
+                payload.notes = document.getElementById('m-notes').value || '';
+            } else if(type === 'project') {
+                payload.deadline = document.getElementById('m-deadline').value || '';
+            }
+
+            if(db) {
+                if(editId) {
+                    await updateDoc(doc(db, type, editId), payload);
+                } else {
+                    payload.order = localData[type].length;
+                    if(type === 'project') { payload.progress = 0; payload.subtasks = []; }
+                    await addDoc(collection(db, type), payload);
+                }
+            } else {
+                if(editId) {
+                    let idx = localData[type].findIndex(x => x.id === editId);
+                    if(idx !== -1) localData[type][idx] = { ...localData[type][idx], ...payload };
+                } else {
+                    payload.order = localData[type].length;
+                    localData[type].push({ id: 'local_' + Math.random(), ...payload });
+                }
+                renderAll();
+            }
+            closeModalWindow();
         };
 
         function getAssigneeBadge(assignee) {
             if (!assignee || assignee === 'Non assigné') return '';
-            let color = 'bg-indigo-50 text-indigo-700 border-indigo-200';
-            if (assignee === 'Koloina') color = 'bg-purple-50 text-purple-700 border-purple-200';
-            else if (assignee === 'Les deux') color = 'bg-amber-50 text-amber-700 border-amber-200';
+            let color = 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+            if (assignee === 'Mickaela') color = 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
+            else if (assignee === 'Koloina') color = 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
+            else if (assignee === 'Les deux') color = 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
+
             return `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md border ${color} shrink-0">👤 ${assignee}</span>`;
         }
 
-        function filterItems(items) {
+        function getDateBadge(dateStr) {
+            if (!dateStr) return '';
+            const today = new Date().toISOString().slice(0,10);
+            if (dateStr < today) {
+                return `<span class="px-1.5 py-0.5 bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 rounded text-[10px] font-bold shrink-0">⚠️ ${dateStr}</span>`;
+            }
+            return `<span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded text-[10px] shrink-0">🗓️ ${dateStr}</span>`;
+        }
+
+        function filterByAssignee(items) {
             if (activeAssigneeFilter === 'all') return items;
             return items.filter(x => (x.assignee || 'Non assigné') === activeAssigneeFilter);
         }
 
-        function renderAll() {
+        function updateUrgentCount() {
+            const today = new Date().toISOString().slice(0,10);
             let urgentCount = 0;
-            const now = new Date();
+            const checkDate = (d) => { if(d && d <= today) urgentCount++; };
 
-            // Rendu Projets
-            const projEl = document.getElementById('project-list');
-            let filteredProjects = filterItems(localData.project);
-            projEl.innerHTML = filteredProjects.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet.</p>' : '';
-            filteredProjects.forEach(p => {
-                const deadlineDate = new Date(p.deadline);
-                const diffDays = Math.ceil((deadlineDate - now) / (1000 * 60 * 60 * 24));
-                let badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                if (diffDays <= 2 && diffDays >= 0) { urgentCount++; badgeColor = 'bg-amber-50 text-amber-700 border-amber-200'; }
-                else if (diffDays < 0) { urgentCount++; badgeColor = 'bg-rose-50 text-rose-700 border-rose-200'; }
+            localData.todo.forEach(x => checkDate(x.dueDate));
+            localData.contact.forEach(x => checkDate(x.dueDate));
+            localData.followup.forEach(x => checkDate(x.dueDate));
+            localData.project.forEach(x => checkDate(x.deadline));
 
-                projEl.innerHTML += `
-                    <div class="p-3 bg-slate-50 dark:bg-slate-800/60 border rounded-xl space-y-2 text-xs">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-slate-800 dark:text-slate-100">${p.title}</span>
-                            <div class="flex items-center space-x-1">
-                                <span class="px-2 py-0.5 text-[10px] font-semibold rounded-md border ${badgeColor}">Échéance : ${p.deadline}</span>
-                                <button onclick="deleteItem('project', '${p.id}')" class="text-slate-400 hover:text-rose-600">✕</button>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
-                            ${getAssigneeBadge(p.assignee)}
-                        </div>
-                    </div>
-                `;
-            });
+            const badge = document.getElementById('urgent-badge');
+            const text = document.getElementById('urgent-text');
 
-            // Badge urgence haut de page
-            const urgentBadge = document.getElementById('urgent-badge');
             if (urgentCount > 0) {
-                urgentBadge.classList.remove('hidden'); urgentBadge.classList.add('flex');
-                document.getElementById('urgent-text').innerText = `${urgentCount} alerte(s) deadline`;
-            } else { urgentBadge.classList.add('hidden'); }
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+                text.innerText = `${urgentCount} urgence${urgentCount > 1 ? 's' : ''}`;
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+        }
 
-            // Rendu Tâches Récurrentes (restent affichées, cochables, reset auto journalier)
-            const recEl = document.getElementById('recurring-list');
-            let filteredRec = filterItems(localData.recurring);
-            recEl.innerHTML = filteredRec.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche récurrente.</p>' : '';
-            filteredRec.forEach(r => {
-                recEl.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border rounded-xl text-xs">
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" ${r.completed ? 'checked' : ''} onchange="toggleRecurring('${r.id}', ${!r.completed})" class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
-                            <span class="font-medium ${r.completed ? 'line-through text-slate-400' : ''}">${r.title}</span>
-                            ${getAssigneeBadge(r.assignee)}
+        function renderAll() {
+            const query = (document.getElementById('search-bar')?.value || '').toLowerCase();
+            updateUrgentCount();
+
+            // Inbox
+            const inboxEl = document.getElementById('inbox-list');
+            let inboxItems = filterByAssignee(localData.inbox);
+            inboxEl.innerHTML = inboxItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Inbox vide. Tout est trié !</p>' : '';
+            inboxItems.forEach(item => {
+                if(query && !item.text.toLowerCase().includes(query)) return;
+                const safeText = item.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                inboxEl.innerHTML += `
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
+                        <span class="font-medium text-slate-700 dark:text-slate-200 flex-1">${item.text}</span>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <select id="target-${item.id}" class="text-[11px] py-1 px-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-200">
+                                <option value="todo" ${item.suggested==='todo'?'selected':''}>To-Do</option>
+                                <option value="contact" ${item.suggested==='contact'?'selected':''}>À contacter</option>
+                                <option value="followup" ${item.suggested==='followup'?'selected':''}>Suivi & Relances</option>
+                                <option value="recurring" ${item.suggested==='recurring'?'selected':''}>Récurrentes</option>
+                                <option value="training" ${item.suggested==='training'?'selected':''}>Formations</option>
+                                <option value="project" ${item.suggested==='project'?'selected':''}>Projet</option>
+                                <option value="it" ${item.suggested==='it'?'selected':''}>Tableau IT</option>
+                            </select>
+                            <button onclick="triageItem('${item.id}', '${safeText}', document.getElementById('target-${item.id}').value)" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 rounded-lg font-medium transition">Trier →</button>
+                            <button onclick="deleteItem('inbox', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                         </div>
-                        <button onclick="deleteItem('recurring', '${r.id}')" class="text-slate-300 hover:text-rose-600 text-xs">✕</button>
                     </div>
                 `;
             });
 
-            // Rendu To-Do, Contact, Suivi, Formations, IT (IT conservé et non supprimé)
-            const sections = [
-                { key: 'todo', el: 'todo-list' },
-                { key: 'contact', el: 'contact-list' },
-                { key: 'followup', el: 'followup-list' },
-                { key: 'training', el: 'training-list' },
-                { key: 'it', el: 'it-list' }
-            ];
-
-            sections.forEach(sec => {
-                const container = document.getElementById(`${sec.key}-list`);
-                if(!container) return;
-                let items = filterItems(localData[sec.key]);
-                container.innerHTML = items.length === 0 ? '<p class="text-xs text-slate-400 italic">Rien pour le moment.</p>' : '';
-                items.forEach(item => {
-                    const titleVal = item.title || item.workerName || '';
-                    container.innerHTML += `
-                        <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border rounded-xl text-xs">
-                            <div class="flex items-center space-x-2">
-                                <input type="checkbox" onclick="completeItem('${sec.key}', '${item.id}', '${titleVal.replace(/'/g, "\\'")}')" class="w-4 h-4 text-indigo-600 rounded">
-                                <span class="font-medium">${titleVal}</span>
+            // Formations
+            const trainEl = document.getElementById('training-list');
+            let trainItems = filterByAssignee(localData.training);
+            trainEl.innerHTML = trainItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun travailleur à vérifier.</p>' : '';
+            trainItems.forEach(item => {
+                if(query && !item.workerName.toLowerCase().includes(query)) return;
+                const safeWorker = item.workerName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                trainEl.innerHTML += `
+                    <div class="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
+                        <div class="flex items-start space-x-2 flex-1">
+                            <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                            <div class="w-2 h-2 rounded-full bg-purple-500 mt-1.5 shrink-0"></div>
+                            <div class="flex flex-wrap items-center gap-1.5 flex-1">
+                                <span class="font-bold text-slate-800 dark:text-slate-200">${item.workerName}</span>
                                 ${getAssigneeBadge(item.assignee)}
                             </div>
-                            <button onclick="deleteItem('${sec.key}', '${item.id}')" class="text-slate-400 hover:text-rose-600">✕</button>
                         </div>
-                    `;
-                });
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button onclick="openModal('training', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="completeItem('training', '${item.id}', '${safeWorker}')" class="px-2 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 rounded-lg font-medium text-[11px]">Validé ✓</button>
+                        </div>
+                    </div>
+                `;
             });
 
-            // Historique visible des tâches terminées
+            // Contact
+            const contactEl = document.getElementById('contact-list');
+            let contactItems = filterByAssignee(localData.contact);
+            contactEl.innerHTML = contactItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun contact en attente.</p>' : '';
+            contactItems.forEach(item => {
+                if(query && !item.title.toLowerCase().includes(query)) return;
+                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                contactEl.innerHTML += `
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs space-y-1.5" data-id="${item.id}">
+                        <div class="flex items-start justify-between font-semibold text-slate-800 dark:text-slate-200 gap-2">
+                            <div class="flex items-start space-x-2 flex-1">
+                                <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                                <div class="flex flex-wrap items-center gap-1.5 flex-1">
+                                    <span>${item.title}</span>
+                                    ${getAssigneeBadge(item.assignee)}
+                                    ${getDateBadge(item.dueDate)}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-md text-[10px]">${item.channel}</span>
+                                <button onclick="openModal('contact', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </div>
+                        ${item.message ? `<p class="text-slate-500 dark:text-slate-400 italic pl-5">"${item.message}"</p>` : ''}
+                        <div class="flex justify-end pt-1">
+                            <button onclick="completeItem('contact', '${item.id}', '${safeTitle}')" class="text-emerald-600 font-semibold hover:underline text-[11px]">Terminé ✓</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Suivi & Relances (Nouveau module)
+            const followupEl = document.getElementById('followup-list');
+            let followupItems = filterByAssignee(localData.followup);
+            followupEl.innerHTML = followupItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun suivi en cours.</p>' : '';
+            followupItems.forEach(item => {
+                if(query && !item.title.toLowerCase().includes(query)) return;
+                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                followupEl.innerHTML += `
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs space-y-1.5" data-id="${item.id}">
+                        <div class="flex items-start justify-between font-semibold text-slate-800 dark:text-slate-200 gap-2">
+                            <div class="flex items-start space-x-2 flex-1">
+                                <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                                <div class="flex flex-wrap items-center gap-1.5 flex-1">
+                                    <span>${item.title}</span>
+                                    ${getAssigneeBadge(item.assignee)}
+                                    ${getDateBadge(item.dueDate)}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="openModal('followup', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </div>
+                        ${item.notifyTo ? `<p class="text-rose-600 dark:text-rose-400 text-[11px] pl-5">📢 À informer : ${item.notifyTo}</p>` : ''}
+                        <div class="flex justify-end pt-1">
+                            <button onclick="completeItem('followup', '${item.id}', '${safeTitle}')" class="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline text-[11px]">Résolu / Terminé ✓</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Projets
+            const projEl = document.getElementById('project-list');
+            let projectItems = filterByAssignee(localData.project);
+            projEl.innerHTML = projectItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet en cours.</p>' : '';
+            projectItems.forEach(item => {
+                if(query && !item.title.toLowerCase().includes(query)) return;
+                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const subtasks = item.subtasks || [];
+                
+                projEl.innerHTML += `
+                    <div class="p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs space-y-2.5" data-id="${item.id}">
+                        <div class="flex items-start justify-between font-bold text-slate-800 dark:text-slate-200 gap-2">
+                            <div class="flex items-start space-x-2 flex-1">
+                                <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                                <div class="flex flex-wrap items-center gap-1.5 flex-1">
+                                    <span class="text-sm">${item.title}</span>
+                                    ${getAssigneeBadge(item.assignee)}
+                                    ${getDateBadge(item.deadline)}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="openModal('project', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="completeItem('project', '${item.id}', '${safeTitle}')" class="p-1 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"><i data-lucide="check-circle" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                                <span>Progression</span>
+                                <span class="font-bold text-cyan-600 dark:text-cyan-400">${item.progress || 0}%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                                <div class="bg-cyan-500 h-full rounded-full transition-all duration-300" style="width: ${item.progress || 0}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="pt-1 space-y-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Sous-tâches (${subtasks.filter(s=>s.done).length}/${subtasks.length})</span>
+                                <button onclick="addSubtask('${item.id}')" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium hover:underline">+ Sous-tâche</button>
+                            </div>
+                            ${subtasks.map(s => `
+                                <div class="flex items-center space-x-2 text-[11px]">
+                                    <input type="checkbox" ${s.done ? 'checked' : ''} onclick="toggleSubtask('${item.id}', '${s.id}')" class="w-3.5 h-3.5 text-cyan-600 rounded">
+                                    <span class="${s.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}">${s.title}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Tâches Récurrentes
+            const recEl = document.getElementById('recurring-list');
+            let recurringItems = filterByAssignee(localData.recurring);
+            recEl.innerHTML = recurringItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche récurrente.</p>' : '';
+            recurringItems.forEach(item => {
+                if(query && !item.title.toLowerCase().includes(query)) return;
+                const todayStr = new Date().toLocaleDateString('fr-FR');
+                const isDoneToday = item.lastDone === todayStr;
+
+                recEl.innerHTML += `
+                    <div class="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
+                        <div class="flex items-start space-x-2.5 flex-1">
+                            <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                            <button onclick="completeRecurringItem('${item.id}')" class="w-4 h-4 mt-0.5 flex items-center justify-center rounded border shrink-0 ${isDoneToday ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}">
+                                ${isDoneToday ? '✓' : ''}
+                            </button>
+                            <div class="flex flex-wrap items-center gap-1.5 flex-1">
+                                <span class="font-medium ${isDoneToday ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'}">${item.title}</span>
+                                <span class="px-1.5 py-0.5 text-[9px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded shrink-0">🔄 ${item.frequency || 'Quotidienne'}</span>
+                                ${getAssigneeBadge(item.assignee)}
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            ${item.lastDone ? `<span class="text-[10px] text-slate-400 mr-1 hidden sm:inline">Fait le ${item.lastDone}</span>` : ''}
+                            <button onclick="resetRecurringItem('${item.id}')" title="Rafraîchir / Relancer la tâche" class="p-1 text-slate-400 hover:text-emerald-600"><i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="openModal('recurring', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="deleteItem('recurring', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // To-Do
+            const todoEl = document.getElementById('todo-list');
+            let todoItems = filterByAssignee(localData.todo);
+            todoEl.innerHTML = todoItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Rien pour le moment.</p>' : '';
+            todoItems.forEach(item => {
+                if(query && !item.title.toLowerCase().includes(query)) return;
+                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                todoEl.innerHTML += `
+                    <div class="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
+                        <div class="flex items-start space-x-2.5 flex-1">
+                            <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                            <input type="checkbox" onclick="completeItem('todo', '${item.id}', '${safeTitle}')" class="w-4 h-4 mt-0.5 text-indigo-600 rounded border-slate-300 shrink-0">
+                            <div class="flex flex-wrap items-center gap-1.5 flex-1">
+                                <span class="font-medium text-slate-700 dark:text-slate-200">${item.title}</span>
+                                ${getAssigneeBadge(item.assignee)}
+                                ${getDateBadge(item.dueDate)}
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button onclick="openModal('todo', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="deleteItem('todo', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // IT
+            const itEl = document.getElementById('it-list');
+            let itItems = filterByAssignee(localData.it);
+            itEl.innerHTML = itItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune demande IT.</p>' : '';
+            itItems.forEach(item => {
+                if(query && !item.title.toLowerCase().includes(query)) return;
+                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                itEl.innerHTML += `
+                    <div class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs space-y-1.5" data-id="${item.id}">
+                        <div class="flex items-start justify-between font-medium text-slate-200 gap-2">
+                            <div class="flex items-start space-x-2 flex-1">
+                                <span class="drag-handle text-slate-600 hover:text-slate-400 font-bold px-0.5 mt-0.5">⋮⋮</span>
+                                <div class="flex flex-wrap items-center gap-1.5 flex-1">
+                                    <span>${item.title}</span>
+                                    ${getAssigneeBadge(item.assignee)}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="openModal('it', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-300"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="completeItem('it', '${item.id}', '${safeTitle}')" class="p-1 text-emerald-400 hover:text-emerald-300"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </div>
+                        ${item.notes ? `<p class="text-slate-400 text-[11px] pl-5">Suivi : ${item.notes}</p>` : ''}
+                    </div>
+                `;
+            });
+
+            // Historique
             const histEl = document.getElementById('history-list');
             document.getElementById('history-count').innerText = localData.history.length;
-            histEl.innerHTML = localData.history.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche terminée pour l\'instant.</p>' : '';
-            localData.history.forEach(h => {
+            histEl.innerHTML = localData.history.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun élément archivé.</p>' : '';
+            localData.history.forEach(item => {
                 histEl.innerHTML += `
-                    <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg text-xs">
-                        <span class="line-through text-slate-400">${h.title}</span>
-                        <span class="text-[10px] text-slate-400">${h.completedAt || ''}</span>
+                    <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/60 rounded-lg text-xs">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-500"></i>
+                            <span class="line-through text-slate-500 dark:text-slate-400">${item.title}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[10px] text-slate-400">${item.completedAt}</span>
+                            <button onclick="deleteItem('history', '${item.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                        </div>
                     </div>
                 `;
             });
@@ -577,73 +1004,28 @@
             lucide.createIcons();
         }
 
-        window.toggleRecurring = async function(id, status) {
-            if(db) await updateDoc(doc(db, 'recurring', id), { completed: status });
-        };
+        // EXPORTATION EXCEL (CSV)
+        window.exportToExcel = function() {
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "Module;Intitulé / Travailleur;Responsable;Date / Échéance;Détail / Personnes à informer;Statut\n";
 
-        window.completeItem = async function(col, id, title) {
-            if(db) {
-                await addDoc(collection(db, 'history'), { title, completedAt: new Date().toLocaleDateString('fr-FR') });
-                await deleteDoc(doc(db, col, id));
-            }
-        };
+            localData.inbox.forEach(item => csvContent += `Inbox;"${item.text.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Suggéré: ${item.suggested}";En attente\n`);
+            localData.todo.forEach(item => csvContent += `To-Do;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.dueDate || 'Aucune'}";"-";En cours\n`);
+            localData.contact.forEach(item => csvContent += `Contact;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.dueDate || 'Aucune'}";"Canal: ${item.channel} | ${item.message || ''}";À contacter\n`);
+            localData.followup.forEach(item => csvContent += `Suivi & Relances;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.dueDate || 'Aucune'}";"À informer: ${item.notifyTo || 'Aucune'}";En cours\n`);
+            localData.recurring.forEach(item => csvContent += `Récurrentes;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Fréquence: ${item.frequency || 'Quotidienne'}";Actif\n`);
+            localData.training.forEach(item => csvContent += `Formations;"${item.workerName.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Groupe unique";À vérifier\n`);
+            localData.project.forEach(item => csvContent += `Projets;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.deadline || 'Aucune'}";"Progression: ${item.progress}%";En cours\n`);
+            localData.it.forEach(item => csvContent += `IT;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Notes: ${item.notes || ''}";En cours\n`);
+            localData.history.forEach(item => csvContent += `Historique;"${item.title.replace(/"/g, '""')}";"-";"Fait le: ${item.completedAt}";"-";Terminé\n`);
 
-        window.deleteItem = async function(col, id) { if(db) await deleteDoc(doc(db, col, id)); };
-
-        window.openModal = function(type) {
-            document.getElementById('universal-modal').classList.remove('hidden');
-            document.getElementById('modal-type').value = type;
-            document.getElementById('m-title').value = '';
-        };
-        window.closeModalWindow = function() { document.getElementById('universal-modal').classList.add('hidden'); };
-
-        window.handleUniversalSubmit = async function(e) {
-            e.preventDefault();
-            const type = document.getElementById('modal-type').value;
-            const title = document.getElementById('m-title').value;
-            const assignee = document.getElementById('m-assignee').value;
-            if(db) await addDoc(collection(db, type), { title, assignee, completed: false });
-            closeModalWindow();
-        };
-
-        window.openProjectModal = function() { document.getElementById('project-modal').classList.remove('hidden'); };
-        window.closeProjectModal = function() { document.getElementById('project-modal').classList.add('hidden'); };
-        window.handleProjectSubmit = async function(e) {
-            e.preventDefault();
-            const title = document.getElementById('proj-title').value;
-            const deadline = document.getElementById('proj-deadline').value;
-            const assignee = document.getElementById('proj-assignee').value;
-            if(db) await addDoc(collection(db, 'project'), { title, deadline, assignee });
-            closeProjectModal();
-        };
-
-        // Studio Mail Scripts
-        window.renderTemplatesList = function() {
-            const container = document.getElementById('templates-list-container');
-            container.innerHTML = '';
-            emailTemplates.forEach(t => {
-                container.innerHTML += `
-                    <div onclick="selectTemplate('${t.id}')" class="p-3 rounded-xl border text-xs cursor-pointer ${t.id === activeTemplateId ? 'bg-indigo-50 border-indigo-300 font-bold text-indigo-600' : 'bg-slate-50'}">
-                        ${t.name}
-                    </div>
-                `;
-            });
-        };
-        window.selectTemplate = function(id) { activeTemplateId = id; renderTemplatesList(); updateEmailPreview(); };
-        window.updateEmailPreview = function() {
-            const tmpl = emailTemplates.find(t => t.id === activeTemplateId);
-            if(!tmpl) return;
-            const name = document.getElementById('var-name').value || 'Mickaela';
-            const date = document.getElementById('var-date').value || 'bientôt';
-            let items = [];
-            if(document.getElementById('chk-asp')?.checked) items.push("• Carte ASP");
-            if(document.getElementById('chk-simdut')?.checked) items.push("• Certificat SIMDUT");
-            if(document.getElementById('chk-medical')?.checked) items.push("• Formulaire Médical");
-            document.getElementById('email-preview').innerText = tmpl.body.replace(/{{nom}}/g, name).replace(/{{date}}/g, date).replace(/{{items}}/g, items.join('\n'));
-        };
-        window.copyGeneratedEmail = function() {
-            navigator.clipboard.writeText(document.getElementById('email-preview').innerText);
-            alert("Copié dans le presse-papier ! ✓");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `DuoSync_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         };
     </script>
 </body>
