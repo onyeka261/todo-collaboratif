@@ -125,14 +125,14 @@
                         <div id="todo-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
                     </section>
 
-                    <!-- TÂCHES RÉCURRENTES (AVEC RÉINITIALISATION AUTOMATIQUE & RESPONSABLE) -->
+                    <!-- TÂCHES RÉCURRENTES (AUTO-RESET JOURNALIER) -->
                     <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
                                 <div class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
                                 <div>
                                     <h3 class="font-bold text-slate-900 dark:text-white text-base">Tâches Récurrentes</h3>
-                                    <p class="text-[10px] text-slate-400">Auto-réinitialisation journalière / hebdo</p>
+                                    <p class="text-[10px] text-slate-400">Se décochent automatiquement chaque jour</p>
                                 </div>
                             </div>
                             <button onclick="openModal('recurring')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
@@ -140,7 +140,7 @@
                         <div id="recurring-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
                     </section>
 
-                    <!-- PROJETS AVANCÉS (AVEC SOUS-TACHES & DEADLINES) -->
+                    <!-- PROJETS AVANCÉS -->
                     <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
@@ -181,19 +181,34 @@
                         <div id="followup-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
                     </section>
 
-                    <!-- FORMATIONS -->
-                    <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
+                    <!-- TABLEAU IT (PERMANENT, NON SUPPRIMÉ) -->
+                    <section class="bg-slate-900 dark:bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xs text-white">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
-                                <div class="p-2 bg-purple-50 dark:bg-purple-950/50 text-purple-600 rounded-lg"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
-                                <h3 class="font-bold text-slate-900 dark:text-white text-base">Formations Travailleurs</h3>
+                                <div class="p-2 bg-slate-800 text-indigo-400 rounded-lg"><i data-lucide="terminal" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h3 class="font-bold text-white text-base">Tableau IT & Suivi</h3>
+                                    <p class="text-xs text-slate-400">Demandes techniques permanentes</p>
+                                </div>
                             </div>
-                            <button onclick="openModal('training')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                            <button onclick="openModal('it')" class="text-xs text-indigo-300 font-semibold hover:underline">+ Demande</button>
                         </div>
-                        <div id="training-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
+                        <div id="it-list" class="space-y-2.5 max-h-60 overflow-y-auto min-h-[30px]"></div>
                     </section>
                 </div>
             </div>
+
+            <!-- HISTORIQUE VISIBLE DES TÂCHES TERMINÉES -->
+            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg"><i data-lucide="archive" class="w-5 h-5"></i></div>
+                        <h3 class="font-bold text-slate-800 dark:text-slate-200 text-base">Historique & Tâches terminées</h3>
+                        <span id="history-count" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-full">0</span>
+                    </div>
+                </div>
+                <div id="history-list" class="space-y-2 max-h-48 overflow-y-auto pt-2 border-t border-slate-100 dark:border-slate-800"></div>
+            </section>
         </main>
 
         <!-- VUE 2 : PLANNING HEBDOMADAIRE -->
@@ -207,23 +222,23 @@
                     <button onclick="clearWeeklyPlan()" class="text-xs px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-semibold transition">🔄 Réinitialiser</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
-                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/60 p-3 space-y-2">
+                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border p-3 space-y-2">
                         <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Lundi</span><button onclick="openDayModal('Lundi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Lundi" class="space-y-2 min-h-[120px]"></div>
                     </div>
-                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/60 p-3 space-y-2">
+                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border p-3 space-y-2">
                         <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Mardi</span><button onclick="openDayModal('Mardi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Mardi" class="space-y-2 min-h-[120px]"></div>
                     </div>
-                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/60 p-3 space-y-2">
+                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border p-3 space-y-2">
                         <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Mercredi</span><button onclick="openDayModal('Mercredi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Mercredi" class="space-y-2 min-h-[120px]"></div>
                     </div>
-                    <div class="bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-800/50 p-3 space-y-2">
+                    <div class="bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border p-3 space-y-2">
                         <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold text-indigo-900">Jeudi 💼</span><button onclick="openDayModal('Jeudi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Jeudi" class="space-y-2 min-h-[120px]"></div>
                     </div>
-                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/60 p-3 space-y-2">
+                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border p-3 space-y-2">
                         <div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">Vendredi</span><button onclick="openDayModal('Vendredi')" class="text-indigo-600 font-bold text-xs">+</button></div>
                         <div id="day-Vendredi" class="space-y-2 min-h-[120px]"></div>
                     </div>
@@ -322,7 +337,7 @@
         </div>
     </div>
 
-    <!-- MODALE UNIVERSELLE & PLANNER -->
+    <!-- MODALE UNIVERSELLE -->
     <div id="universal-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border space-y-4">
             <h3 id="modal-title" class="text-lg font-bold">Ajouter un élément</h3>
@@ -331,13 +346,6 @@
                 <div>
                     <label class="block text-xs font-semibold mb-1">Intitulé</label>
                     <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
-                </div>
-                <div id="recurring-options" class="hidden">
-                    <label class="block text-[11px] font-semibold mb-1">Fréquence de réinitialisation</label>
-                    <select id="m-frequency" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs">
-                        <option value="daily">Quotidienne (Reset après 24h)</option>
-                        <option value="weekly">Hebdomadaire</option>
-                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold mb-1">Responsable</label>
@@ -355,14 +363,14 @@
         </div>
     </div>
 
-    <!-- SCRIPT COMPLET -->
+    <!-- SCRIPT LOGIQUE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         let db = null;
-        let localData = { inbox: [], recurring: [], contact: [], followup: [], training: [], todo: [], project: [], weekly: [] };
+        let localData = { inbox: [], recurring: [], contact: [], followup: [], training: [], todo: [], project: [], it: [], history: [], weekly: [] };
         let activeAssigneeFilter = 'all';
 
         let emailTemplates = [
@@ -381,6 +389,7 @@
             if(savedCfg) { try { initFirebase(JSON.parse(savedCfg)); } catch(e){} }
             renderTemplatesList();
             updateEmailPreview();
+            checkDailyReset();
         };
 
         window.toggleDarkMode = function() {
@@ -427,12 +436,27 @@
         }
 
         function setupListeners() {
-            ['inbox', 'recurring', 'contact', 'followup', 'training', 'todo', 'project', 'weekly'].forEach(colName => {
+            ['inbox', 'recurring', 'contact', 'followup', 'training', 'todo', 'project', 'it', 'history', 'weekly'].forEach(colName => {
                 onSnapshot(collection(db, colName), (snapshot) => {
                     localData[colName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderAll();
                 });
             });
+        }
+
+        // Vérification automatique du reset journalier des récurrentes (après minuit)
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            const lastReset = localStorage.getItem('duo_last_recurring_reset');
+            if (lastReset !== today) {
+                // Nouveau jour : on décoche toutes les récurrentes locales ou via firebase si connecté
+                localData.recurring.forEach(async (r) => {
+                    if (r.completed && db) {
+                        await updateDoc(doc(db, 'recurring', r.id), { completed: false });
+                    }
+                });
+                localStorage.setItem('duo_last_recurring_reset', today);
+            }
         }
 
         window.setFilterAssignee = function(assignee) {
@@ -448,15 +472,20 @@
             return `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md border ${color} shrink-0">👤 ${assignee}</span>`;
         }
 
+        function filterItems(items) {
+            if (activeAssigneeFilter === 'all') return items;
+            return items.filter(x => (x.assignee || 'Non assigné') === activeAssigneeFilter);
+        }
+
         function renderAll() {
-            // Calcul des urgences / alertes dead-line projets
             let urgentCount = 0;
             const now = new Date();
 
-            // Rendu Projets Avancés
+            // Rendu Projets
             const projEl = document.getElementById('project-list');
-            projEl.innerHTML = localData.project.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet.</p>' : '';
-            localData.project.forEach(p => {
+            let filteredProjects = filterItems(localData.project);
+            projEl.innerHTML = filteredProjects.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet.</p>' : '';
+            filteredProjects.forEach(p => {
                 const deadlineDate = new Date(p.deadline);
                 const diffDays = Math.ceil((deadlineDate - now) / (1000 * 60 * 60 * 24));
                 let badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -474,60 +503,97 @@
                         </div>
                         <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
                             ${getAssigneeBadge(p.assignee)}
-                            <button onclick="openSubTaskModal('${p.id}')" class="text-indigo-600 font-semibold">+ Sous-tâche</button>
                         </div>
                     </div>
                 `;
             });
 
-            // Affichage badge urgence haut de page
+            // Badge urgence haut de page
             const urgentBadge = document.getElementById('urgent-badge');
             if (urgentCount > 0) {
                 urgentBadge.classList.remove('hidden'); urgentBadge.classList.add('flex');
                 document.getElementById('urgent-text').innerText = `${urgentCount} alerte(s) deadline`;
             } else { urgentBadge.classList.add('hidden'); }
 
-            // Rendu Récurrentes
+            // Rendu Tâches Récurrentes (restent affichées, cochables, reset auto journalier)
             const recEl = document.getElementById('recurring-list');
-            recEl.innerHTML = localData.recurring.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche récurrente.</p>' : '';
-            localData.recurring.forEach(r => {
+            let filteredRec = filterItems(localData.recurring);
+            recEl.innerHTML = filteredRec.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche récurrente.</p>' : '';
+            filteredRec.forEach(r => {
                 recEl.innerHTML += `
                     <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border rounded-xl text-xs">
                         <div class="flex items-center space-x-2">
-                            <input type="checkbox" onclick="deleteItem('recurring', '${r.id}')" class="w-4 h-4 text-indigo-600 rounded">
-                            <span class="font-medium">${r.title}</span>
+                            <input type="checkbox" ${r.completed ? 'checked' : ''} onchange="toggleRecurring('${r.id}', ${!r.completed})" class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
+                            <span class="font-medium ${r.completed ? 'line-through text-slate-400' : ''}">${r.title}</span>
                             ${getAssigneeBadge(r.assignee)}
                         </div>
-                        <span class="text-[10px] text-indigo-500 font-semibold bg-indigo-50 px-2 py-0.5 rounded">🔄 ${r.frequency || 'quotidienne'}</span>
+                        <button onclick="deleteItem('recurring', '${r.id}')" class="text-slate-300 hover:text-rose-600 text-xs">✕</button>
                     </div>
                 `;
             });
 
-            // Rendu To-Do, Contact, etc.
-            ['todo', 'contact', 'followup', 'training'].forEach(col => {
-                const el = document.getElementById(`${col}-list`);
-                if(!el) return;
-                el.innerHTML = localData[col].length === 0 ? '<p class="text-xs text-slate-400 italic">Vide.</p>' : '';
-                localData[col].forEach(item => {
-                    el.innerHTML += `
+            // Rendu To-Do, Contact, Suivi, Formations, IT (IT conservé et non supprimé)
+            const sections = [
+                { key: 'todo', el: 'todo-list' },
+                { key: 'contact', el: 'contact-list' },
+                { key: 'followup', el: 'followup-list' },
+                { key: 'training', el: 'training-list' },
+                { key: 'it', el: 'it-list' }
+            ];
+
+            sections.forEach(sec => {
+                const container = document.getElementById(`${sec.key}-list`);
+                if(!container) return;
+                let items = filterItems(localData[sec.key]);
+                container.innerHTML = items.length === 0 ? '<p class="text-xs text-slate-400 italic">Rien pour le moment.</p>' : '';
+                items.forEach(item => {
+                    const titleVal = item.title || item.workerName || '';
+                    container.innerHTML += `
                         <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border rounded-xl text-xs">
-                            <span class="font-medium">${item.title || item.workerName || ''}</span>
-                            <div class="flex items-center space-x-2">${getAssigneeBadge(item.assignee)}<button onclick="deleteItem('${col}', '${item.id}')" class="text-slate-400 hover:text-rose-600">✕</button></div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" onclick="completeItem('${sec.key}', '${item.id}', '${titleVal.replace(/'/g, "\\'")}')" class="w-4 h-4 text-indigo-600 rounded">
+                                <span class="font-medium">${titleVal}</span>
+                                ${getAssigneeBadge(item.assignee)}
+                            </div>
+                            <button onclick="deleteItem('${sec.key}', '${item.id}')" class="text-slate-400 hover:text-rose-600">✕</button>
                         </div>
                     `;
                 });
             });
 
+            // Historique visible des tâches terminées
+            const histEl = document.getElementById('history-list');
+            document.getElementById('history-count').innerText = localData.history.length;
+            histEl.innerHTML = localData.history.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche terminée pour l\'instant.</p>' : '';
+            localData.history.forEach(h => {
+                histEl.innerHTML += `
+                    <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg text-xs">
+                        <span class="line-through text-slate-400">${h.title}</span>
+                        <span class="text-[10px] text-slate-400">${h.completedAt || ''}</span>
+                    </div>
+                `;
+            });
+
             lucide.createIcons();
         }
+
+        window.toggleRecurring = async function(id, status) {
+            if(db) await updateDoc(doc(db, 'recurring', id), { completed: status });
+        };
+
+        window.completeItem = async function(col, id, title) {
+            if(db) {
+                await addDoc(collection(db, 'history'), { title, completedAt: new Date().toLocaleDateString('fr-FR') });
+                await deleteDoc(doc(db, col, id));
+            }
+        };
+
+        window.deleteItem = async function(col, id) { if(db) await deleteDoc(doc(db, col, id)); };
 
         window.openModal = function(type) {
             document.getElementById('universal-modal').classList.remove('hidden');
             document.getElementById('modal-type').value = type;
             document.getElementById('m-title').value = '';
-            const freqCont = document.getElementById('recurring-options');
-            if(type === 'recurring') freqCont.classList.remove('hidden');
-            else freqCont.classList.add('hidden');
         };
         window.closeModalWindow = function() { document.getElementById('universal-modal').classList.add('hidden'); };
 
@@ -536,8 +602,7 @@
             const type = document.getElementById('modal-type').value;
             const title = document.getElementById('m-title').value;
             const assignee = document.getElementById('m-assignee').value;
-            const frequency = document.getElementById('m-frequency').value;
-            if(db) await addDoc(collection(db, type), { title, assignee, frequency });
+            if(db) await addDoc(collection(db, type), { title, assignee, completed: false });
             closeModalWindow();
         };
 
@@ -548,11 +613,9 @@
             const title = document.getElementById('proj-title').value;
             const deadline = document.getElementById('proj-deadline').value;
             const assignee = document.getElementById('proj-assignee').value;
-            if(db) await addDoc(collection(db, 'project'), { title, deadline, assignee, subtasks: [] });
+            if(db) await addDoc(collection(db, 'project'), { title, deadline, assignee });
             closeProjectModal();
         };
-
-        window.deleteItem = async function(col, id) { if(db) await deleteDoc(doc(db, col, id)); };
 
         // Studio Mail Scripts
         window.renderTemplatesList = function() {
