@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50 transition-colors duration-200" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DuoSync - Tableau de Bord Pro & Planning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ghost-card { opacity: 0.4; background-color: #f1f5f9; border: 2px dashed #6366f1; }
+        .drag-handle { cursor: grab; }
+        .drag-handle:active { cursor: grabbing; }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 dark:text-slate-100 dark:bg-slate-950 antialiased overflow-x-hidden">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-100 dark:shadow-none">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-slate-900 dark:text-white leading-tight">DuoSync Workspace</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Gestion collaborative & Planning hebdomadaire</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <div id="urgent-badge" class="hidden items-center space-x-1 px-2.5 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800">
+                    <i data-lucide="bell" class="w-3.5 h-3.5 animate-bounce"></i>
+                    <span id="urgent-text">0 urgence</span>
+                </div>
+
+                <button onclick="exportToExcel()" class="flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-semibold transition">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Exporter (Excel)</span>
+                </button>
+
+                <div id="sync-status" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-800">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span id="sync-text">Config requise</span>
+                </div>
+
+                <button onclick="toggleDarkMode()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition" title="Changer de thème">
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                </button>
+
+                <button onclick="openConfigModal()" class="flex items-center space-x-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN DASHBOARD CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- FILTRES DE RESPONSABLES ET BARRE DE RECHERCHE -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-1.5 overflow-x-auto py-1">
+                    <span class="text-xs font-semibold text-slate-400 mr-1 hidden sm:inline">Filtrer par :</span>
+                    <button onclick="setFilterAssignee('all')" id="filter-all" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition">Tous</button>
+                    <button onclick="setFilterAssignee('Mickaela')" id="filter-Mickaela" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👤 Mickaela</button>
+                    <button onclick="setFilterAssignee('Koloina')" id="filter-Koloina" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👤 Koloina</button>
+                    <button onclick="setFilterAssignee('Les deux')" id="filter-Les-deux" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👥 Les deux</button>
+                </div>
+                <input type="text" id="search-bar" oninput="renderAll()" placeholder="🔎 Rechercher une tâche, un nom..." class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+        </section>
+
+        <!-- NOVIUM : SECTION PLANNING HEBDOMADAIRE INTEGRÉE -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                        <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 dark:text-white text-base">Planning Hebdomadaire</h2>
+                        <p class="text-xs text-slate-400">Répartition stratégique des tâches de la semaine</p>
+                    </div>
+                </div>
+                <button onclick="clearWeeklyPlan()" class="text-xs px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-lg font-medium transition">
+                    🔄 Vider le planning
+                </button>
+            </div>
+
+            <!-- GRILLE DES 5 JOURS -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 pt-2">
+                
+                <!-- LUNDI -->
+                <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-700/60 p-3 flex flex-col space-y-2">
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200">Lundi</span>
+                        <button onclick="openDayModal('Lundi')" class="text-indigo-600 dark:text-indigo-400 text-xs font-bold">+</button>
+                    </div>
+                    <div id="day-Lundi" class="space-y-2 min-h-[100px] flex-1"></div>
+                </div>
+
+                <!-- MARDI -->
+                <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-700/60 p-3 flex flex-col space-y-2">
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200">Mardi</span>
+                        <button onclick="openDayModal('Mardi')" class="text-indigo-600 dark:text-indigo-400 text-xs font-bold">+</button>
+                    </div>
+                    <div id="day-Mardi" class="space-y-2 min-h-[100px] flex-1"></div>
+                </div>
+
+                <!-- MERCREDI -->
+                <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-700/60 p-3 flex flex-col space-y-2">
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200">Mercredi</span>
+                        <button onclick="openDayModal('Mercredi')" class="text-indigo-600 dark:text-indigo-400 text-xs font-bold">+</button>
+                    </div>
+                    <div id="day-Mercredi" class="space-y-2 min-h-[100px] flex-1"></div>
+                </div>
+
+                <!-- JEUDI (FOCUS FACTURATION) -->
+                <div class="bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-800/50 p-3 flex flex-col space-y-2">
+                    <div class="flex items-center justify-between border-b border-indigo-200 dark:border-indigo-800 pb-2">
+                        <span class="text-xs font-bold text-indigo-900 dark:text-indigo-300">Jeudi 💼</span>
+                        <button onclick="openDayModal('Jeudi')" class="text-indigo-600 dark:text-indigo-400 text-xs font-bold">+</button>
+                    </div>
+                    <div id="day-Jeudi" class="space-y-2 min-h-[100px] flex-1"></div>
+                </div>
+
+                <!-- VENDREDI -->
+                <div class="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-700/60 p-3 flex flex-col space-y-2">
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200">Vendredi</span>
+                        <button onclick="openDayModal('Vendredi')" class="text-indigo-600 dark:text-indigo-400 text-xs font-bold">+</button>
+                    </div>
+                    <div id="day-Vendredi" class="space-y-2 min-h-[100px] flex-1"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- INBOX & CAPTURE RAPIDE -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-4">
+            <div class="flex items-center space-x-2">
+                <div class="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                    <i data-lucide="inbox" class="w-5 h-5"></i>
+                </div>
+                <h2 class="font-bold text-slate-900 dark:text-white text-base">Inbox & Capture Rapide</h2>
+            </div>
+            <form id="inbox-form" onsubmit="handleInboxSubmit(event)" class="flex gap-2">
+                <input type="text" id="inbox-input" placeholder="Saisir une idée, action ou travailleur..." 
+                    class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-sm transition flex items-center space-x-1.5 shrink-0">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Capturer</span>
+                </button>
+            </form>
+            <div id="inbox-list" class="space-y-2 max-h-56 overflow-y-auto pt-2"></div>
+        </section>
+
+        <!-- GRILLE PRINCIPALE -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- COLONNE GAUCHE -->
+            <div class="space-y-6">
+
+                <!-- 1. SIMPLE TO-DO -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Simple To-Do</h2>
+                                <p class="text-[10px] text-slate-400">Avec échéance et priorité par glisser-déposer</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('todo')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="todo-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+                <!-- 2. TACHES RECURRENTES -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Tâches Récurrentes</h2>
+                                <p class="text-[10px] text-slate-400">Réinitialisables à volonté</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('recurring')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+                <!-- 3. PROJETS EN COURS -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-cyan-50 dark:bg-cyan-950/50 text-cyan-600 dark:text-cyan-400 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
+                            <h2 class="font-bold text-slate-900 dark:text-white text-base">Projets en cours</h2>
+                        </div>
+                        <button onclick="openModal('project')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Nouveau Projet</button>
+                    </div>
+                    <div id="project-list" class="space-y-3.5 max-h-96 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+            </div>
+
+            <!-- COLONNE DROITE -->
+            <div class="space-y-6">
+
+                <!-- 4. A CONTACTER -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">À Contacter</h2>
+                                <p class="text-[10px] text-slate-400">Appels & messages directs</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('contact')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                    </div>
+                    <div id="contact-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+                <!-- 5. SUIVI & DOSSIERS ADMINISTRATIFS -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-lg"><i data-lucide="file-text" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Suivi & Dossiers administratifs</h2>
+                                <p class="text-[10px] text-slate-400">Conformité & personnes à notifier</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('followup')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Dossier</button>
+                    </div>
+                    <div id="followup-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+                <!-- 6. FORMATIONS DES TRAVAILLEURS -->
+                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 rounded-lg"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Formations - Suivi des travailleurs</h2>
+                                <p class="text-[11px] text-slate-400">Vérification de la validation de la formation</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('training')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Travailleur</button>
+                    </div>
+                    <div id="training-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+                <!-- 7. TABLEAU IT (PRIVÉ) -->
+                <section class="bg-slate-900 dark:bg-slate-900 rounded-2xl border border-slate-800 shadow-xs p-5 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-slate-800 text-indigo-400 rounded-lg"><i data-lucide="terminal" class="w-5 h-5"></i></div>
+                            <div>
+                                <h2 class="font-bold text-white text-base">Tableau IT & Suivi</h2>
+                                <p class="text-xs text-slate-400">Pense-bête personnel demandes techniques</p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('it')" class="text-xs text-indigo-300 font-semibold hover:underline">+ Demande</button>
+                    </div>
+                    <div id="it-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                </section>
+
+            </div>
+
+        </div>
+
+        <!-- HISTORIQUE ET TACHES TERMINÉES -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
+            <details class="group">
+                <summary class="flex items-center justify-between cursor-pointer list-none">
+                    <div class="flex items-center space-x-2">
+                        <div class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
+                            <i data-lucide="archive" class="w-5 h-5"></i>
+                        </div>
+                        <h2 class="font-bold text-slate-800 dark:text-slate-200 text-base">Historique & Tâches terminées</h2>
+                        <span id="history-count" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-full">0</span>
+                    </div>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div id="history-list" class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2 max-h-60 overflow-y-auto"></div>
+            </details>
+        </section>
+
+    </main>
+
+    <!-- MODALE PLANNING (JOUR SPÉCIFIQUE) -->
+    <div id="day-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 id="day-modal-title" class="text-lg font-bold text-slate-900 dark:text-white mb-4">Ajouter une tâche au planning</h3>
+            <form id="day-form" onsubmit="handleDaySubmit(event)" class="space-y-3">
+                <input type="hidden" id="selected-day">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Intitulé de la tâche</label>
+                    <input type="text" id="day-item-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Responsable</label>
+                    <select id="day-item-assignee" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                        <option value="Mickaela">Mickaela</option>
+                        <option value="Koloina">Koloina</option>
+                        <option value="Les deux">Les deux</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeDayModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE DE CONFIGURATION FIREBASE & MODALE UNIVERSELLE IDEM -->
+    <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Configuration Firebase</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Collez l'objet JSON fourni par Firebase pour synchroniser l'appareil.</p>
+            <textarea id="config-json-input" rows="7" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-4"></textarea>
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
+                <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer & Connecter</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="universal-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white mb-4">Ajouter un élément</h3>
+            <form id="universal-form" onsubmit="handleUniversalSubmit(event)" class="space-y-3">
+                <input type="hidden" id="modal-type">
+                <input type="hidden" id="modal-edit-id">
+                <div>
+                    <label id="m-title-label" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Intitulé / Titre</label>
+                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Responsable</label>
+                    <select id="m-assignee" onchange="checkAssigneeCustom(this.value)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="Non assigné">Non assigné</option>
+                        <option value="Mickaela">Mickaela</option>
+                        <option value="Koloina">Koloina</option>
+                        <option value="Les deux">Les deux</option>
+                        <option value="custom">Autre (Saisir un nom...)</option>
+                    </select>
+                </div>
+                <div id="custom-assignee-container" class="hidden">
+                    <input type="text" id="m-custom-assignee" placeholder="Nom du nouveau responsable..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div id="extra-field-container"></div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPTS LOGIQUE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        let db = null;
+        let localData = { inbox: [], recurring: [], contact: [], followup: [], training: [], todo: [], project: [], it: [], history: [], weekly: [] };
+        let sortableInstances = {};
+        let activeAssigneeFilter = 'all';
+
+        window.onload = function() {
+            lucide.createIcons();
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+            const savedConfig = localStorage.getItem('duo_firebase_config');
+            if (savedConfig) {
+                try { initFirebase(JSON.parse(savedConfig)); } catch (e) { console.error(e); }
+            }
+            initSortable();
+        };
+
+        window.toggleDarkMode = function() {
+            const root = document.documentElement;
+            if (root.classList.contains('dark')) {
+                root.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                root.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        };
+
+        window.setFilterAssignee = function(assignee) {
+            activeAssigneeFilter = assignee;
+            ['all', 'Mickaela', 'Koloina', 'Les-deux'].forEach(name => {
+                const btn = document.getElementById(`filter-${name}`);
+                if (btn) {
+                    btn.className = (name === 'Les-deux' && assignee === 'Les deux') || name === assignee 
+                        ? "px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition"
+                        : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition";
+                }
+            });
+            renderAll();
+        };
+
+        window.openDayModal = function(day) {
+            document.getElementById('day-modal').classList.remove('hidden');
+            document.getElementById('selected-day').value = day;
+            document.getElementById('day-modal-title').innerText = `Ajouter une tâche au ${day}`;
+            document.getElementById('day-item-title').value = '';
+        };
+
+        window.closeDayModal = function() {
+            document.getElementById('day-modal').classList.add('hidden');
+        };
+
+        window.handleDaySubmit = async function(e) {
+            e.preventDefault();
+            const day = document.getElementById('selected-day').value;
+            const title = document.getElementById('day-item-title').value.trim();
+            const assignee = document.getElementById('day-item-assignee').value;
+            if(!title) return;
+
+            const payload = { day, title, assignee, completed: false };
+
+            if(db) {
+                await addDoc(collection(db, 'weekly'), payload);
+            } else {
+                localData.weekly.push({ id: 'local_' + Math.random(), ...payload });
+                renderAll();
+            }
+            closeDayModal();
+        };
+
+        window.toggleWeeklyItem = async function(id) {
+            const item = localData.weekly.find(w => w.id === id);
+            if(!item) return;
+            const updated = !item.completed;
+
+            if(db) {
+                await updateDoc(doc(db, 'weekly', id), { completed: updated });
+            } else {
+                item.completed = updated;
+                renderAll();
+            }
+        };
+
+        window.deleteWeeklyItem = async function(id) {
+            if(db) await deleteDoc(doc(db, 'weekly', id));
+            else {
+                localData.weekly = localData.weekly.filter(w => w.id !== id);
+                renderAll();
+            }
+        };
+
+        window.clearWeeklyPlan = async function() {
+            if(!confirm("Réinitialiser le planning de la semaine ?")) return;
+            if(db) {
+                localData.weekly.forEach(async (item) => {
+                    await deleteDoc(doc(db, 'weekly', item.id));
+                });
+            } else {
+                localData.weekly = [];
+                renderAll();
+            }
+        };
+
+        function initFirebase(config) {
+            try {
+                const app = initializeApp(config);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+                signInAnonymously(auth).then(() => {
+                    document.getElementById('sync-status').className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-800";
+                    document.getElementById('sync-text').innerText = "Connecté & Synchronisé";
+                    setupListeners();
+                });
+            } catch (e) { alert(e.message); }
+        }
+
+        function setupListeners() {
+            ['inbox', 'recurring', 'contact', 'followup', 'training', 'todo', 'project', 'it', 'history', 'weekly'].forEach(colName => {
+                onSnapshot(collection(db, colName), (snapshot) => {
+                    let items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    localData[colName] = items;
+                    renderAll();
+                });
+            });
+        }
+
+        function initSortable() {
+            ['todo', 'recurring', 'project', 'contact', 'followup', 'training', 'it'].forEach(col => {
+                const el = document.getElementById(`${col}-list`);
+                if (!el) return;
+                sortableInstances[col] = new Sortable(el, { handle: '.drag-handle', animation: 150 });
+            });
+        }
+
+        function getAssigneeBadge(assignee) {
+            if (!assignee || assignee === 'Non assigné') return '';
+            let color = 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200';
+            if (assignee === 'Mickaela') color = 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
+            else if (assignee === 'Koloina') color = 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
+            else if (assignee === 'Les deux') color = 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
+
+            return `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md border ${color} shrink-0">👤 ${assignee}</span>`;
+        }
+
+        function filterByAssignee(items) {
+            if (activeAssigneeFilter === 'all') return items;
+            return items.filter(x => (x.assignee || 'Non assigné') === activeAssigneeFilter);
+        }
+
+        function renderAll() {
+            // Planning Hebdomadaire
+            ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'].forEach(day => {
+                const dayContainer = document.getElementById(`day-${day}`);
+                if (!dayContainer) return;
+                let dayItems = filterByAssignee(localData.weekly.filter(w => w.day === day));
+                dayContainer.innerHTML = dayItems.length === 0 ? '<p class="text-[11px] text-slate-400 italic">Rien de prévu</p>' : '';
+                dayItems.forEach(item => {
+                    dayContainer.innerHTML += `
+                        <div class="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs space-y-1">
+                            <div class="flex items-start justify-between gap-1">
+                                <span class="${item.completed ? 'line-through text-slate-400' : 'font-medium text-slate-800 dark:text-slate-200'}">${item.title}</span>
+                                <button onclick="deleteWeeklyItem('${item.id}')" class="text-slate-300 hover:text-rose-500 text-[10px]">✕</button>
+                            </div>
+                            <div class="flex items-center justify-between pt-1">
+                                ${getAssigneeBadge(item.assignee)}
+                                <button onclick="toggleWeeklyItem('${item.id}')" class="text-[10px] ${item.completed ? 'text-emerald-600 font-bold' : 'text-slate-400 hover:text-indigo-600'}">
+                                    ${item.completed ? 'Fait ✓' : 'Cocher'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            // (Le reste du rendu identique pour Inbox, To-Do, Contact, Suivi, etc.)
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
