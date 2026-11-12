@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DuoSync - Tableau de Bord Pro</title>
+    <title>DuoSync Workspace Pro — Cockpit</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -18,272 +16,287 @@
         .ghost-card { opacity: 0.4; background-color: #f1f5f9; border: 2px dashed #6366f1; }
         .drag-handle { cursor: grab; }
         .drag-handle:active { cursor: grabbing; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
     </style>
 </head>
-<body class="h-full flex flex-col text-slate-800 dark:text-slate-100 dark:bg-slate-950 antialiased overflow-x-hidden">
+<body class="h-screen flex flex-col text-slate-800 dark:text-slate-100 dark:bg-slate-950 antialiased overflow-hidden">
 
-    <!-- HEADER / NAVIGATION -->
-    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-100 dark:shadow-none">
-                    <i data-lucide="layers" class="w-5 h-5"></i>
-                </div>
-                <div>
-                    <h1 class="text-base font-bold text-slate-900 dark:text-white leading-tight">DuoSync Workspace</h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Gestion collaborative & Suivi de projets</p>
-                </div>
+    <!-- HEADER UNIQUE -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 h-14 px-5 flex items-center justify-between shrink-0 z-20 gap-4">
+        <div class="flex items-center space-x-2.5 shrink-0">
+            <div class="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
+                <i data-lucide="layers" class="w-4 h-4"></i>
             </div>
-            
-            <div class="flex items-center space-x-2">
-                <!-- BADGE URGENCES / COMPTEUR D'ÉCHÉANCES -->
-                <div id="urgent-badge" class="hidden items-center space-x-1 px-2.5 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800">
-                    <i data-lucide="bell" class="w-3.5 h-3.5 animate-bounce"></i>
-                    <span id="urgent-text">0 urgence</span>
-                </div>
-
-                <button onclick="exportToExcel()" class="flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-semibold transition">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">Exporter (Excel)</span>
-                </button>
-
-                <div id="sync-status" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-xs font-medium border border-amber-200 dark:border-amber-800">
-                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                    <span id="sync-text">Config requise</span>
-                </div>
-
-                <!-- BASCULE MODE SOMBRE -->
-                <button onclick="toggleDarkMode()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition" title="Changer de thème">
-                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
-                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
-                </button>
-
-                <button onclick="openConfigModal()" class="flex items-center space-x-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition">
-                    <i data-lucide="settings" class="w-4 h-4"></i>
-                </button>
+            <div>
+                <h1 class="text-sm font-bold text-slate-900 dark:text-white leading-none">DuoSync Workspace</h1>
+                <p class="text-[10px] text-slate-400 mt-0.5">Cockpit collaboratif</p>
             </div>
+        </div>
+
+        <div class="flex items-center space-x-2 overflow-x-auto">
+            <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                <button onclick="setFilterAssignee('all')" id="filter-all" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-600 text-white transition">Tous</button>
+                <button onclick="setFilterAssignee('Mickaela')" id="filter-Mickaela" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700 transition">👤 Mickaela</button>
+                <button onclick="setFilterAssignee('Koloina')" id="filter-Koloina" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700 transition">👤 Koloina</button>
+                <button onclick="setFilterAssignee('Les deux')" id="filter-Les-deux" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700 transition">👥 Les deux</button>
+            </div>
+            <input type="text" id="search-bar" oninput="renderAll()" placeholder="🔎 Filtrer..." class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl w-44 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="flex items-center space-x-2 shrink-0">
+            <div id="sync-status" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-[10px] font-semibold border border-amber-200 dark:border-amber-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                <span id="sync-text">Local</span>
+            </div>
+
+            <button onclick="openHistoryModal()" class="flex items-center space-x-1 px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition" title="Historique">
+                <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+                <span id="history-count">0</span>
+            </button>
+
+            <button onclick="exportToExcel()" class="flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-semibold transition" title="Exporter en CSV/Excel">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span class="hidden xl:inline">Excel</span>
+            </button>
+
+            <button onclick="openConfigModal()" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition" title="Configuration Firebase">
+                <i data-lucide="settings" class="w-4 h-4"></i>
+            </button>
+
+            <button onclick="toggleDarkMode()" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition" title="Mode Sombre / Clair">
+                <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+            </button>
         </div>
     </header>
 
-    <!-- MAIN DASHBOARD CONTAINER -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+    <!-- ZONE PRINCIPALE SANS SCROLL GLOBAL -->
+    <main class="flex-1 p-3.5 overflow-hidden flex flex-col gap-3 min-h-0">
 
-        <!-- FILTRES DE RESPONSABLES ET BARRE DE RECHERCHE -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-4 space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center space-x-1.5 overflow-x-auto py-1">
-                    <span class="text-xs font-semibold text-slate-400 mr-1 hidden sm:inline">Filtrer par :</span>
-                    <button onclick="setFilterAssignee('all')" id="filter-all" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition">Tous</button>
-                    <button onclick="setFilterAssignee('Mickaela')" id="filter-Mickaela" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👤 Mickaela</button>
-                    <button onclick="setFilterAssignee('Koloina')" id="filter-Koloina" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👤 Koloina</button>
-                    <button onclick="setFilterAssignee('Les deux')" id="filter-Les-deux" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">👥 Les deux</button>
+        <!-- CAPTURE D'IDÉES AGRANDIE ET CONFORTABLE -->
+        <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 shadow-2xs shrink-0 flex flex-col gap-2.5">
+            <form id="inbox-form" onsubmit="handleInboxSubmit(event)" class="flex items-center gap-2.5">
+                <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 shrink-0 pl-1">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    <span class="text-xs font-bold hidden sm:inline">Capture rapide :</span>
                 </div>
-                <input type="text" id="search-bar" oninput="renderAll()" placeholder="🔎 Rechercher une tâche, un nom..." class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            </div>
-        </section>
+                <input type="text" id="inbox-input" placeholder="Noter une idée, une relance, un travailleur à former, un suivi IT..." class="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                
+                <button type="button" onclick="openBulkInboxModal()" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-xs rounded-xl transition flex items-center space-x-1.5 shrink-0" title="Ouvrir une grande zone pour coller plusieurs idées d'un coup">
+                    <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                    <span class="hidden md:inline">Multi-lignes</span>
+                </button>
 
-        <!-- INBOX & CAPTURE RAPIDE -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-4">
-            <div class="flex items-center space-x-2">
-                <div class="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                    <i data-lucide="inbox" class="w-5 h-5"></i>
-                </div>
-                <h2 class="font-bold text-slate-900 dark:text-white text-base">Inbox & Capture Rapide</h2>
-            </div>
-            <form id="inbox-form" onsubmit="handleInboxSubmit(event)" class="flex gap-2">
-                <input type="text" id="inbox-input" placeholder="Saisir une idée, action ou travailleur..." 
-                    class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
-                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-sm transition flex items-center space-x-1.5 shrink-0">
+                <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5 shrink-0">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     <span>Capturer</span>
                 </button>
             </form>
-            <div id="inbox-list" class="space-y-2 max-h-56 overflow-y-auto pt-2"></div>
+
+            <!-- File d'attente Inbox spacieuse (avec retour à la ligne automatique) -->
+            <div id="inbox-list" class="flex flex-wrap items-center gap-2 max-h-20 overflow-y-auto pt-1 border-t border-slate-100 dark:border-slate-800/80"></div>
         </section>
 
-        <!-- GRILLE PRINCIPALE -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- GRILLE 3 COLONNES (TOUTES LES 7 SECTIONS VISIBLES SANS SCROLL DE PAGE) -->
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-3.5 min-h-0 overflow-hidden">
 
-            <!-- COLONNE GAUCHE -->
-            <div class="space-y-6">
-
+            <!-- COLONNE 1 : SIMPLE TO-DO & TÂCHES RÉCURRENTES -->
+            <div class="flex flex-col gap-3.5 h-full min-h-0 overflow-hidden">
+                
                 <!-- 1. SIMPLE TO-DO -->
-                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></div>
-                            <div>
-                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Simple To-Do</h2>
-                                <p class="text-[10px] text-slate-400">Avec échéance et priorité par glisser-déposer</p>
-                            </div>
+                <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 flex flex-col flex-1 min-h-0 overflow-hidden shadow-2xs">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="check-square" class="w-4 h-4 text-amber-500"></i>
+                            <h2 class="font-bold text-xs text-slate-900 dark:text-white">Simple To-Do</h2>
                         </div>
-                        <button onclick="openModal('todo')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                        <button onclick="openModal('todo')" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                     </div>
-                    <div id="todo-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
+                    <div id="todo-list" class="space-y-2 flex-1 overflow-y-auto pr-1"></div>
                 </section>
 
-                <!-- 2. TACHES RECURRENTES -->
-                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-lg"><i data-lucide="repeat" class="w-5 h-5"></i></div>
-                            <div>
-                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Tâches Récurrentes</h2>
-                                <p class="text-[10px] text-slate-400">Réinitialisables à volonté</p>
-                            </div>
+                <!-- 2. TÂCHES RÉCURRENTES -->
+                <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 flex flex-col flex-1 min-h-0 overflow-hidden shadow-2xs">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="repeat" class="w-4 h-4 text-emerald-500"></i>
+                            <h2 class="font-bold text-xs text-slate-900 dark:text-white">Tâches Récurrentes</h2>
+                            <span class="text-[9px] px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded font-medium">Auto-Reset</span>
                         </div>
-                        <button onclick="openModal('recurring')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                        <button onclick="openModal('recurring')" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                     </div>
-                    <div id="recurring-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
-                </section>
-
-                <!-- 3. PROJETS EN COURS -->
-                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-cyan-50 dark:bg-cyan-950/50 text-cyan-600 dark:text-cyan-400 rounded-lg"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
-                            <h2 class="font-bold text-slate-900 dark:text-white text-base">Projets en cours</h2>
-                        </div>
-                        <button onclick="openModal('project')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Nouveau Projet</button>
-                    </div>
-                    <div id="project-list" class="space-y-3.5 max-h-96 overflow-y-auto min-h-[50px]"></div>
+                    <div id="recurring-list" class="space-y-2 flex-1 overflow-y-auto pr-1"></div>
                 </section>
 
             </div>
 
-            <!-- COLONNE DROITE -->
-            <div class="space-y-6">
-
-                <!-- 4. A CONTACTER -->
-                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-lg"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
-                            <div>
-                                <h2 class="font-bold text-slate-900 dark:text-white text-base">À Contacter</h2>
-                                <p class="text-[10px] text-slate-400">Avec date de suivi/rappel</p>
-                            </div>
+            <!-- COLONNE 2 : PROJETS & SOUS-PROJETS + TABLEAU IT -->
+            <div class="flex flex-col gap-3.5 h-full min-h-0 overflow-hidden">
+                
+                <!-- 3. PROJETS & SOUS-PROJETS -->
+                <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 flex flex-col flex-[2] min-h-0 overflow-hidden shadow-2xs">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="folder-kanban" class="w-4 h-4 text-cyan-500"></i>
+                            <h2 class="font-bold text-xs text-slate-900 dark:text-white">Projets & Sous-Projets</h2>
                         </div>
-                        <button onclick="openModal('contact')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
+                        <button onclick="openModal('project')" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Nouveau Projet</button>
                     </div>
-                    <div id="contact-list" class="space-y-2.5 max-h-80 overflow-y-auto min-h-[50px]"></div>
+                    <div id="project-list" class="space-y-2.5 flex-1 overflow-y-auto pr-1"></div>
                 </section>
 
-                <!-- 5. NOUVEAU MODULE : SUIVI & RELANCES ADMINISTRATIVES -->
-                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-lg"><i data-lucide="bell-ring" class="w-5 h-5"></i></div>
-                            <div>
-                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Suivi & Relances</h2>
-                                <p class="text-[10px] text-slate-400">Dossiers, conformité & personnes à informer</p>
-                            </div>
+                <!-- 4. TABLEAU IT & SUIVI -->
+                <section class="bg-slate-900 rounded-xl border border-slate-800 p-3 flex flex-col flex-1 min-h-0 overflow-hidden shadow-2xs text-white">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 shrink-0">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="terminal" class="w-4 h-4 text-indigo-400"></i>
+                            <h2 class="font-bold text-xs text-white">Tableau IT & Suivi</h2>
                         </div>
-                        <button onclick="openModal('followup')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Suivi</button>
+                        <button onclick="openModal('it')" class="text-[11px] text-indigo-300 font-semibold hover:underline">+ Demande</button>
                     </div>
-                    <div id="followup-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                    <div id="it-list" class="space-y-2 flex-1 overflow-y-auto pr-1"></div>
                 </section>
 
-                <!-- 6. FORMATIONS DES TRAVAILLEURS -->
-                <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 rounded-lg"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
-                            <div>
-                                <h2 class="font-bold text-slate-900 dark:text-white text-base">Formations - Suivi des travailleurs</h2>
-                                <p class="text-[11px] text-slate-400">Vérification de la validation de la formation du groupe</p>
-                            </div>
+            </div>
+
+            <!-- COLONNE 3 : À CONTACTER, SUIVI & RELANCES, FORMATIONS -->
+            <div class="flex flex-col gap-3.5 h-full min-h-0 overflow-hidden">
+                
+                <!-- 5. À CONTACTER -->
+                <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 flex flex-col flex-1 min-h-0 overflow-hidden shadow-2xs">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="phone-call" class="w-4 h-4 text-blue-500"></i>
+                            <h2 class="font-bold text-xs text-slate-900 dark:text-white">À Contacter</h2>
                         </div>
-                        <button onclick="openModal('training')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Travailleur</button>
+                        <button onclick="openModal('contact')" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter</button>
                     </div>
-                    <div id="training-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                    <div id="contact-list" class="space-y-2 flex-1 overflow-y-auto pr-1"></div>
                 </section>
 
-                <!-- 7. TABLEAU IT (PRIVÉ) -->
-                <section class="bg-slate-900 dark:bg-slate-900 rounded-2xl border border-slate-800 shadow-xs p-5 text-white">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 bg-slate-800 text-indigo-400 rounded-lg"><i data-lucide="terminal" class="w-5 h-5"></i></div>
-                            <div>
-                                <h2 class="font-bold text-white text-base">Tableau IT & Suivi</h2>
-                                <p class="text-xs text-slate-400">Pense-bête personnel demandes techniques</p>
-                            </div>
+                <!-- 6. SUIVI & RELANCES -->
+                <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 flex flex-col flex-1 min-h-0 overflow-hidden shadow-2xs">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="bell-ring" class="w-4 h-4 text-rose-500"></i>
+                            <h2 class="font-bold text-xs text-slate-900 dark:text-white">Suivi & Relances</h2>
                         </div>
-                        <button onclick="openModal('it')" class="text-xs text-indigo-300 font-semibold hover:underline">+ Demande</button>
+                        <button onclick="openModal('followup')" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Ajouter Suivi</button>
                     </div>
-                    <div id="it-list" class="space-y-2.5 max-h-64 overflow-y-auto min-h-[50px]"></div>
+                    <div id="followup-list" class="space-y-2 flex-1 overflow-y-auto pr-1"></div>
+                </section>
+
+                <!-- 7. FORMATIONS TRAVAILLEURS -->
+                <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 flex flex-col flex-1 min-h-0 overflow-hidden shadow-2xs">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="graduation-cap" class="w-4 h-4 text-purple-500"></i>
+                            <h2 class="font-bold text-xs text-slate-900 dark:text-white">Formations Travailleurs</h2>
+                        </div>
+                        <button onclick="openModal('training')" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Travailleur</button>
+                    </div>
+                    <div id="training-list" class="space-y-2 flex-1 overflow-y-auto pr-1"></div>
                 </section>
 
             </div>
 
         </div>
-
-        <!-- SECTION HISTORIQUE ET TACHES TERMINÉES -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5">
-            <details class="group">
-                <summary class="flex items-center justify-between cursor-pointer list-none">
-                    <div class="flex items-center space-x-2">
-                        <div class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
-                            <i data-lucide="archive" class="w-5 h-5"></i>
-                        </div>
-                        <h2 class="font-bold text-slate-800 dark:text-slate-200 text-base">Historique & Tâches terminées</h2>
-                        <span id="history-count" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-full">0</span>
-                    </div>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
-                </summary>
-                <div id="history-list" class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2 max-h-60 overflow-y-auto"></div>
-            </details>
-        </section>
-
     </main>
 
-    <!-- MODALE DE CONFIGURATION FIREBASE -->
-    <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Configuration Firebase</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Collez l'objet JSON fourni par Firebase pour synchroniser l'appareil.</p>
-            <textarea id="config-json-input" rows="7" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-4"></textarea>
-            <div class="flex justify-end space-x-2">
-                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
-                <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer & Connecter</button>
+    <!-- MODALE CAPTURE MULTI-LIGNES (GRANDE ZONE DE TEXTE) -->
+    <div id="bulk-inbox-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+                    <span>Capture d'idées en rafale</span>
+                </h3>
+                <button onclick="closeBulkInboxModal()" class="text-slate-400 hover:text-slate-600 text-sm">✕</button>
             </div>
-        </div>
-    </div>
-
-    <!-- MODALE UNIVERSELLE (CREATION & MODIFICATION) -->
-    <div id="universal-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
-            <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white mb-4">Ajouter un élément</h3>
-            <form id="universal-form" onsubmit="handleUniversalSubmit(event)" class="space-y-3">
-                <input type="hidden" id="modal-type">
-                <input type="hidden" id="modal-edit-id">
-                <div>
-                    <label id="m-title-label" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Intitulé / Titre</label>
-                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Responsable</label>
-                    <select id="m-assignee" onchange="checkAssigneeCustom(this.value)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        <option value="Non assigné">Non assigné</option>
-                        <option value="Mickaela">Mickaela</option>
-                        <option value="Koloina">Koloina</option>
-                        <option value="Les deux">Les deux</option>
-                        <option value="custom">Autre (Saisir un nom...)</option>
-                    </select>
-                </div>
-                <div id="custom-assignee-container" class="hidden">
-                    <input type="text" id="m-custom-assignee" placeholder="Nom du nouveau responsable..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                </div>
-                <div id="extra-field-container"></div>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" onclick="closeModalWindow()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Écris ou colle tes notes librement (<strong>1 ligne = 1 idée capturée</strong> avec tri intelligent automatique).</p>
+            <form onsubmit="handleBulkInboxSubmit(event)" class="space-y-3">
+                <textarea id="bulk-inbox-textarea" rows="7" required placeholder="Ex:&#10;Relancer contracteur pour carte ASP&#10;Formation SIMDUT Jean Tremblay&#10;Vérifier accès Cognibox avec IT&#10;Préparer module sécurité Casa Berardi" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeBulkInboxModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Tout capturer dans l'Inbox</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- SCRIPTS FIREBASE & LOGIQUE APP -->
+    <!-- MODALE UNIVERSELLE DYNAMIQUE -->
+    <div id="universal-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 id="modal-title" class="text-base font-bold text-slate-900 dark:text-white mb-3">Ajouter un élément</h3>
+            <form id="universal-form" onsubmit="handleUniversalSubmit(event)" class="space-y-3">
+                <input type="hidden" id="modal-type">
+                <div>
+                    <label id="m-title-label" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Intitulé / Titre</label>
+                    <input type="text" id="m-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Responsable</label>
+                    <select id="m-assignee" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="Non assigné">Non assigné</option>
+                        <option value="Mickaela">Mickaela</option>
+                        <option value="Koloina">Koloina</option>
+                        <option value="Les deux">Les deux</option>
+                    </select>
+                </div>
+                <div id="extra-field-container" class="space-y-3"></div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModalWindow()" class="px-4 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
+                    <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE SOUS-PROJET -->
+    <div id="subproject-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 class="text-sm font-bold mb-3">Ajouter un sous-projet</h3>
+            <form onsubmit="handleSubprojectSubmit(event)" class="space-y-3">
+                <input type="hidden" id="parent-project-id">
+                <input type="text" id="subproject-title" required placeholder="Nom du sous-projet / étape..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs">
+                <div class="flex justify-end space-x-2 pt-1">
+                    <button type="button" onclick="closeSubprojectModal()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-xs rounded-xl">Annuler</button>
+                    <button type="submit" class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-xl">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE HISTORIQUE -->
+    <div id="history-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col max-h-[80vh]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="text-sm font-bold flex items-center space-x-2">
+                    <i data-lucide="archive" class="w-4 h-4 text-slate-500"></i>
+                    <span>Historique & Tâches terminées</span>
+                </h3>
+                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+            </div>
+            <div id="history-list" class="py-3 space-y-2 overflow-y-auto flex-1"></div>
+        </div>
+    </div>
+
+    <!-- MODALE CONFIG FIREBASE -->
+    <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800">
+            <h3 class="text-sm font-bold mb-2">Configuration Firebase</h3>
+            <textarea id="config-json-input" rows="6" placeholder='{"apiKey": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl mb-3"></textarea>
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeConfigModal()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-xs font-semibold rounded-xl">Annuler</button>
+                <button onclick="saveConfig()" class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIQUE JAVASCRIPT COMPLÈTE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -291,34 +304,37 @@
 
         let db = null;
         let localData = { inbox: [], recurring: [], contact: [], followup: [], training: [], todo: [], project: [], it: [], history: [] };
-        let sortableInstances = {};
         let activeAssigneeFilter = 'all';
 
         window.onload = function() {
             lucide.createIcons();
-            if (localStorage.getItem('theme') === 'dark') {
-                document.documentElement.classList.add('dark');
-            }
+            if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+            
             const savedConfig = localStorage.getItem('duo_firebase_config');
             if (savedConfig) {
-                try {
-                    initFirebase(JSON.parse(savedConfig));
-                } catch (e) {
-                    console.error("Config invalide");
+                try { initFirebase(JSON.parse(savedConfig)); } catch (e) {}
+            } else {
+                const savedLocal = localStorage.getItem('duo_local_data_v10');
+                if (savedLocal) {
+                    try { localData = { ...localData, ...JSON.parse(savedLocal) }; } catch (e) {}
                 }
             }
+
+            checkAndAutoResetRecurring();
             initSortable();
+            renderAll();
         };
+
+        function saveLocalFallback() {
+            if (!db) {
+                localStorage.setItem('duo_local_data_v10', JSON.stringify(localData));
+            }
+        }
 
         window.toggleDarkMode = function() {
             const root = document.documentElement;
-            if (root.classList.contains('dark')) {
-                root.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                root.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
+            if (root.classList.contains('dark')) { root.classList.remove('dark'); localStorage.setItem('theme', 'light'); }
+            else { root.classList.add('dark'); localStorage.setItem('theme', 'dark'); }
         };
 
         window.setFilterAssignee = function(assignee) {
@@ -326,51 +342,36 @@
             ['all', 'Mickaela', 'Koloina', 'Les-deux'].forEach(name => {
                 const btn = document.getElementById(`filter-${name}`);
                 if (btn) {
-                    if ((name === 'Les-deux' && assignee === 'Les deux') || name === assignee) {
-                        btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition";
-                    } else {
-                        btn.className = "px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition";
-                    }
+                    btn.className = ((name === 'Les-deux' && assignee === 'Les deux') || name === assignee) ? 
+                        "px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-600 text-white transition" : 
+                        "px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700 transition";
                 }
             });
             renderAll();
         };
 
-        window.openConfigModal = function() {
-            document.getElementById('config-modal').classList.remove('hidden');
-            const current = localStorage.getItem('duo_firebase_config');
-            if (current) document.getElementById('config-json-input').value = current;
-        };
-
-        window.closeConfigModal = function() {
-            document.getElementById('config-modal').classList.add('hidden');
-        };
-
+        // --- FIREBASE ---
+        window.openConfigModal = function() { document.getElementById('config-modal').classList.remove('hidden'); };
+        window.closeConfigModal = function() { document.getElementById('config-modal').classList.add('hidden'); };
         window.saveConfig = function() {
             const val = document.getElementById('config-json-input').value.trim();
             try {
-                const configObj = JSON.parse(val);
-                localStorage.setItem('duo_firebase_config', JSON.stringify(configObj));
-                closeConfigModal();
-                initFirebase(configObj);
-            } catch(e) {
-                alert("Format JSON invalide.");
-            }
+                const cfg = JSON.parse(val);
+                localStorage.setItem('duo_firebase_config', JSON.stringify(cfg));
+                closeConfigModal(); initFirebase(cfg);
+            } catch(e) { alert("Format JSON invalide."); }
         };
 
         function initFirebase(config) {
             try {
                 const app = initializeApp(config);
                 db = getFirestore(app);
-                const auth = getAuth(app);
-                signInAnonymously(auth).then(() => {
-                    document.getElementById('sync-status').className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium border border-emerald-200 dark:border-emerald-800";
-                    document.getElementById('sync-text').innerText = "Connecté & Synchronisé";
+                signInAnonymously(getAuth(app)).then(() => {
+                    document.getElementById('sync-status').className = "flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold border border-emerald-200 dark:border-emerald-800";
+                    document.getElementById('sync-text').innerText = "Sync Cloud";
                     setupListeners();
-                }).catch(err => alert("Erreur d'authentification : " + err.message));
-            } catch (e) {
-                alert("Erreur d'initialisation : " + e.message);
-            }
+                });
+            } catch (e) { alert("Erreur Firebase : " + e.message); }
         }
 
         function setupListeners() {
@@ -379,17 +380,17 @@
                     let items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     items.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
                     localData[colName] = items;
+                    checkAndAutoResetRecurring();
                     renderAll();
-                }, (error) => console.error("Erreur sync " + colName, error));
+                });
             });
         }
 
         function initSortable() {
-            const collections = ['todo', 'recurring', 'project', 'contact', 'followup', 'training', 'it'];
-            collections.forEach(col => {
+            ['todo', 'recurring', 'project', 'contact', 'followup', 'training', 'it'].forEach(col => {
                 const el = document.getElementById(`${col}-list`);
                 if (!el) return;
-                sortableInstances[col] = new Sortable(el, {
+                new Sortable(el, {
                     handle: '.drag-handle',
                     animation: 150,
                     ghostClass: 'ghost-card',
@@ -398,14 +399,60 @@
                         newOrderIds.forEach((id, index) => {
                             let item = localData[col].find(x => x.id === id);
                             if (item) item.order = index;
-                            if (db) {
-                                updateDoc(doc(db, col, id), { order: index });
-                            }
+                            if (db) updateDoc(doc(db, col, id), { order: index });
                         });
-                        localData[col].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+                        saveLocalFallback();
                     }
                 });
             });
+        }
+
+        // --- AUTO-RESET TÂCHES RÉCURRENTES ---
+        function getISOWeek(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function checkAndAutoResetRecurring() {
+            const now = new Date();
+            const todayStr = now.toLocaleDateString('fr-FR');
+            const currentWeek = `${now.getFullYear()}-W${getISOWeek(now)}`;
+            let changed = false;
+
+            localData.recurring.forEach(item => {
+                if (!item.lastDone) return;
+                const freq = item.frequency || 'Quotidienne';
+                let shouldReset = false;
+
+                if (freq === 'Quotidienne' && item.lastDone !== todayStr) {
+                    shouldReset = true;
+                } else if (freq === 'Hebdomadaire' && item.lastDoneWeek && item.lastDoneWeek !== currentWeek) {
+                    shouldReset = true;
+                }
+
+                if (shouldReset) {
+                    item.lastDone = '';
+                    item.lastDoneWeek = '';
+                    changed = true;
+                    if (db) updateDoc(doc(db, 'recurring', item.id), { lastDone: '', lastDoneWeek: '' });
+                }
+            });
+            if (changed) saveLocalFallback();
+        }
+
+        // --- CLASSIFICATION INTELLIGENTE INBOX ---
+        function detectInboxCategory(text) {
+            const lower = text.toLowerCase();
+            if(lower.includes('form') || lower.includes('travailleur') || lower.includes('simdut') || lower.includes('asp')) return 'training';
+            if(lower.includes('relance') || lower.includes('suivi') || lower.includes('notifier')) return 'followup';
+            if(lower.includes('contact') || lower.includes('appel') || lower.includes('teams') || lower.includes('courriel')) return 'contact';
+            if(lower.includes('it') || lower.includes('bug') || lower.includes('accès') || lower.includes('compte')) return 'it';
+            if(lower.includes('projet')) return 'project';
+            if(lower.includes('tous les') || lower.includes('chaque') || lower.includes('quotidien') || lower.includes('hebdo')) return 'recurring';
+            return 'todo';
         }
 
         window.handleInboxSubmit = async function(e) {
@@ -414,618 +461,491 @@
             const val = input.value.trim();
             if(!val) return;
 
-            let target = 'todo';
-            const lower = val.toLowerCase();
-            if(lower.includes('form') || lower.includes('travailleur') || lower.includes('vérif')) target = 'training';
-            else if(lower.includes('relance') || lower.includes('suivi') || lower.includes('dossier')) target = 'followup';
-            else if(lower.includes('contact') || lower.includes('appel') || lower.includes('email') || lower.includes('teams')) target = 'contact';
-            else if(lower.includes('it') || lower.includes('bug') || lower.includes('ordi')) target = 'it';
-            else if(lower.includes('projet')) target = 'project';
-            else if(lower.includes('tous les') || lower.includes('chaque')) target = 'recurring';
-
-            if(db) {
-                await addDoc(collection(db, 'inbox'), { text: val, suggested: target, timestamp: Date.now(), assignee: 'Non assigné' });
-            } else {
-                localData.inbox.push({ id: 'local_' + Math.random(), text: val, suggested: target, assignee: 'Non assigné' });
-                renderAll();
-            }
+            const payload = { text: val, suggested: detectInboxCategory(val), assignee: 'Non assigné', order: localData.inbox.length };
+            if(db) await addDoc(collection(db, 'inbox'), payload);
+            else { localData.inbox.push({ id: 'local_' + Date.now() + Math.random(), ...payload }); saveLocalFallback(); renderAll(); }
             input.value = '';
         };
 
-        window.triageItem = async function(id, text, selectedTarget) {
-            let maxOrder = localData[selectedTarget].length;
-            let payload = { title: text, completed: false, order: maxOrder, assignee: 'Non assigné' };
-            
-            if(selectedTarget === 'contact') payload = { title: text, channel: 'Teams', message: '', dueDate: '', status: 'À contacter', order: maxOrder, assignee: 'Non assigné' };
-            else if(selectedTarget === 'followup') payload = { title: text, notifyTo: '', dueDate: '', status: 'À relancer', order: maxOrder, assignee: 'Non assigné' };
-            else if(selectedTarget === 'training') payload = { workerName: text, completed: false, order: maxOrder, assignee: 'Non assigné' };
-            else if(selectedTarget === 'it') payload = { title: text, status: 'À transmettre', notes: '', order: maxOrder, assignee: 'Non assigné' };
-            else if(selectedTarget === 'project') payload = { title: text, progress: 0, deadline: '', subtasks: [], order: maxOrder, assignee: 'Non assigné' };
-            else if(selectedTarget === 'recurring') payload = { title: text, frequency: 'Quotidienne', lastDone: '', order: maxOrder, assignee: 'Non assigné' };
-            else if(selectedTarget === 'todo') payload = { title: text, dueDate: '', order: maxOrder, assignee: 'Non assigné' };
+        // --- MODALE CAPTURE MULTI-LIGNES ---
+        window.openBulkInboxModal = function() {
+            document.getElementById('bulk-inbox-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('bulk-inbox-textarea').focus(), 50);
+        };
+        window.closeBulkInboxModal = function() {
+            document.getElementById('bulk-inbox-modal').classList.add('hidden');
+        };
+        window.handleBulkInboxSubmit = async function(e) {
+            e.preventDefault();
+            const textarea = document.getElementById('bulk-inbox-textarea');
+            const lines = textarea.value.split('\n').map(l => l.trim()).filter(Boolean);
+            if (lines.length === 0) return;
 
-            if(db) {
-                await addDoc(collection(db, selectedTarget), payload);
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const payload = { text: line, suggested: detectInboxCategory(line), assignee: 'Non assigné', order: localData.inbox.length + i };
+                if (db) await addDoc(collection(db, 'inbox'), payload);
+                else localData.inbox.push({ id: 'local_' + Date.now() + '_' + i, ...payload });
+            }
+
+            if (!db) { saveLocalFallback(); renderAll(); }
+            textarea.value = '';
+            closeBulkInboxModal();
+        };
+
+        window.triageInboxItem = async function(id, targetCategory) {
+            const item = localData.inbox.find(x => x.id === id);
+            if (!item || !targetCategory) return;
+            const text = item.text;
+
+            let payload = { title: text, assignee: 'Non assigné', completed: false, order: localData[targetCategory]?.length || 0 };
+            if (targetCategory === 'project') { payload.progress = 0; payload.subtasks = []; payload.deadline = ''; }
+            else if (targetCategory === 'contact') { payload.channel = 'Teams'; payload.dueDate = ''; payload.status = 'À contacter'; }
+            else if (targetCategory === 'followup') { payload.notifyTo = ''; payload.dueDate = ''; payload.status = 'À relancer'; }
+            else if (targetCategory === 'recurring') { payload.frequency = 'Quotidienne'; payload.lastDone = ''; }
+            else if (targetCategory === 'training') { payload = { workerName: text, assignee: 'Non assigné', order: localData.training.length, completed: false }; }
+            else if (targetCategory === 'it') { payload.status = 'À transmettre'; }
+
+            if (db) {
+                await addDoc(collection(db, targetCategory), payload);
                 await deleteDoc(doc(db, 'inbox', id));
             } else {
                 localData.inbox = localData.inbox.filter(x => x.id !== id);
-                localData[selectedTarget].push({ id: 'local_' + Math.random(), ...payload });
+                localData[targetCategory].push({ id: 'local_' + Date.now(), ...payload });
+                saveLocalFallback();
                 renderAll();
             }
         };
 
+        // --- MODALES SPÉCIFIQUES ---
+        window.openModal = function(type) {
+            document.getElementById('universal-modal').classList.remove('hidden');
+            document.getElementById('modal-type').value = type;
+            document.getElementById('m-title').value = '';
+            document.getElementById('m-assignee').value = 'Non assigné';
+            const extra = document.getElementById('extra-field-container');
+            extra.innerHTML = '';
+
+            if (type === 'todo') {
+                document.getElementById('modal-title').innerText = "Ajouter une Simple To-Do";
+                document.getElementById('m-title-label').innerText = "Intitulé de la tâche";
+                extra.innerHTML = `<div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date d'échéance</label><input type="date" id="m-dueDate" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"></div>`;
+            } else if (type === 'recurring') {
+                document.getElementById('modal-title').innerText = "Ajouter une Tâche Récurrente";
+                document.getElementById('m-title-label').innerText = "Intitulé du rituel";
+                extra.innerHTML = `<div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Fréquence (Auto-Reset)</label><select id="m-frequency" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"><option value="Quotidienne">Quotidienne (Reset chaque jour)</option><option value="Hebdomadaire">Hebdomadaire (Reset chaque lundi)</option></select></div>`;
+            } else if (type === 'project') {
+                document.getElementById('modal-title').innerText = "Nouveau Projet";
+                document.getElementById('m-title-label').innerText = "Nom du projet";
+                extra.innerHTML = `<div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date limite / Échéance</label><input type="date" id="m-deadline" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"></div>`;
+            } else if (type === 'contact') {
+                document.getElementById('modal-title').innerText = "Ajouter un Contact";
+                document.getElementById('m-title-label').innerText = "Personne / Sujet à contacter";
+                extra.innerHTML = `
+                    <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Canal</label><select id="m-channel" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"><option value="Teams">Teams</option><option value="Appel">Appel</option><option value="Email">Email</option></select></div>
+                    <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date de rappel</label><input type="date" id="m-dueDate" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"></div>
+                `;
+            } else if (type === 'followup') {
+                document.getElementById('modal-title').innerText = "Ajouter Suivi & Relance";
+                document.getElementById('m-title-label').innerText = "Dossier / Conformité à suivre";
+                extra.innerHTML = `
+                    <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Personne / Service à notifier</label><input type="text" id="m-notifyTo" placeholder="Ex: Marc Rivest, Contracteur..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"></div>
+                    <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date limite</label><input type="date" id="m-dueDate" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"></div>
+                `;
+            } else if (type === 'training') {
+                document.getElementById('modal-title').innerText = "Ajouter Formation Travailleur";
+                document.getElementById('m-title-label').innerText = "Nom du travailleur & Module";
+            } else if (type === 'it') {
+                document.getElementById('modal-title').innerText = "Demande / Suivi IT";
+                document.getElementById('m-title-label').innerText = "Ticket / Accès / Problème technique";
+            }
+        };
+
+        window.closeModalWindow = function() { document.getElementById('universal-modal').classList.add('hidden'); };
+
+        window.handleUniversalSubmit = async function(e) {
+            e.preventDefault();
+            const type = document.getElementById('modal-type').value;
+            const title = document.getElementById('m-title').value.trim();
+            const assignee = document.getElementById('m-assignee').value;
+            const maxOrder = localData[type] ? localData[type].length : 0;
+
+            let payload = { title, assignee, order: maxOrder, completed: false };
+
+            if (type === 'todo') {
+                payload.dueDate = document.getElementById('m-dueDate')?.value || '';
+            } else if (type === 'recurring') {
+                payload.frequency = document.getElementById('m-frequency')?.value || 'Quotidienne';
+                payload.lastDone = '';
+                payload.lastDoneWeek = '';
+            } else if (type === 'project') {
+                payload.deadline = document.getElementById('m-deadline')?.value || '';
+                payload.progress = 0;
+                payload.subtasks = [];
+            } else if (type === 'contact') {
+                payload.channel = document.getElementById('m-channel')?.value || 'Teams';
+                payload.dueDate = document.getElementById('m-dueDate')?.value || '';
+                payload.status = 'À contacter';
+            } else if (type === 'followup') {
+                payload.notifyTo = document.getElementById('m-notifyTo')?.value || '';
+                payload.dueDate = document.getElementById('m-dueDate')?.value || '';
+                payload.status = 'À relancer';
+            } else if (type === 'training') {
+                payload = { workerName: title, assignee, order: maxOrder, completed: false };
+            } else if (type === 'it') {
+                payload.status = 'À transmettre';
+            }
+
+            if(db) await addDoc(collection(db, type), payload);
+            else { localData[type].push({ id: 'local_' + Date.now(), ...payload }); saveLocalFallback(); renderAll(); }
+            closeModalWindow();
+        };
+
+        // --- SOUS-PROJETS ---
+        window.openSubprojectModal = function(id) { document.getElementById('parent-project-id').value = id; document.getElementById('subproject-modal').classList.remove('hidden'); };
+        window.closeSubprojectModal = function() { document.getElementById('subproject-modal').classList.add('hidden'); };
+        
+        window.handleSubprojectSubmit = async function(e) {
+            e.preventDefault();
+            const projId = document.getElementById('parent-project-id').value;
+            const subTitle = document.getElementById('subproject-title').value.trim();
+            if(!subTitle) return;
+            let proj = localData.project.find(p => p.id === projId);
+            if(proj) {
+                if(!proj.subtasks) proj.subtasks = [];
+                proj.subtasks.push({ id: 'sub_' + Date.now(), title: subTitle, completed: false });
+                updateProjectProgress(proj);
+                if(db) await updateDoc(doc(db, 'project', projId), { subtasks: proj.subtasks, progress: proj.progress });
+                else { saveLocalFallback(); renderAll(); }
+            }
+            document.getElementById('subproject-title').value = '';
+            closeSubprojectModal();
+        };
+
+        window.toggleSubtask = async function(projId, subId) {
+            let proj = localData.project.find(p => p.id === projId);
+            if(proj && proj.subtasks) {
+                let sub = proj.subtasks.find(s => s.id === subId);
+                if(sub) {
+                    sub.completed = !sub.completed;
+                    updateProjectProgress(proj);
+                    if(db) await updateDoc(doc(db, 'project', projId), { subtasks: proj.subtasks, progress: proj.progress });
+                    else { saveLocalFallback(); renderAll(); }
+                }
+            }
+        };
+
+        window.deleteSubtask = async function(projId, subId) {
+            let proj = localData.project.find(p => p.id === projId);
+            if(proj && proj.subtasks) {
+                proj.subtasks = proj.subtasks.filter(s => s.id !== subId);
+                updateProjectProgress(proj);
+                if(db) await updateDoc(doc(db, 'project', projId), { subtasks: proj.subtasks, progress: proj.progress });
+                else { saveLocalFallback(); renderAll(); }
+            }
+        };
+
+        function updateProjectProgress(proj) {
+            if(!proj.subtasks || proj.subtasks.length === 0) { proj.progress = 0; return; }
+            proj.progress = Math.round((proj.subtasks.filter(s => s.completed).length / proj.subtasks.length) * 100);
+        }
+
+        // --- HISTORIQUE ---
+        window.openHistoryModal = function() { document.getElementById('history-modal').classList.remove('hidden'); };
+        window.closeHistoryModal = function() { document.getElementById('history-modal').classList.add('hidden'); };
+
+        function filterCheck(item) {
+            const query = (document.getElementById('search-bar')?.value || '').toLowerCase();
+            const name = item.title || item.workerName || item.text || '';
+            return name.toLowerCase().includes(query) && (activeAssigneeFilter === 'all' || item.assignee === activeAssigneeFilter);
+        }
+
+        // --- RENDU DE TOUTES LES SECTIONS ---
+        window.renderAll = function() {
+            const catLabels = {
+                todo: 'To-Do',
+                recurring: 'Récurrente',
+                project: 'Projet',
+                contact: 'À Contacter',
+                followup: 'Suivi / Relance',
+                training: 'Formation',
+                it: 'Tableau IT'
+            };
+
+            // 1. INBOX
+            const inboxEl = document.getElementById('inbox-list');
+            if(inboxEl) {
+                inboxEl.innerHTML = localData.inbox.length === 0 ? '<span class="text-xs text-slate-400 italic py-0.5">Aucune idée en attente. Saisis une note ci-dessus ou utilise le mode multi-lignes.</span>' : '';
+                localData.inbox.forEach(item => {
+                    const sug = item.suggested || 'todo';
+                    inboxEl.innerHTML += `
+                        <div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs shadow-2xs">
+                            <span class="font-medium text-slate-800 dark:text-slate-100 max-w-xs truncate" title="${item.text}">${item.text}</span>
+                            <button onclick="triageInboxItem('${item.id}', '${sug}')" class="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 rounded-lg text-[10px] font-bold hover:bg-indigo-200 transition shrink-0" title="Accepter la suggestion automatique">
+                                ✨ ${catLabels[sug] || 'To-Do'}
+                            </button>
+                            <select onchange="triageInboxItem('${item.id}', this.value)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] py-0.5 px-1.5 text-slate-600 dark:text-slate-300 focus:outline-none shrink-0" title="Choisir une catégorie">
+                                <option value="" disabled selected>Ranger...</option>
+                                <option value="todo">Simple To-Do</option>
+                                <option value="recurring">Tâche Récurrente</option>
+                                <option value="project">Projet</option>
+                                <option value="contact">À Contacter</option>
+                                <option value="followup">Suivi & Relances</option>
+                                <option value="training">Formations</option>
+                                <option value="it">Tableau IT</option>
+                            </select>
+                            <button onclick="deleteItem('inbox', '${item.id}')" class="text-slate-400 hover:text-rose-500 text-xs pl-0.5 shrink-0">✕</button>
+                        </div>
+                    `;
+                });
+            }
+
+            // 2. SIMPLE TO-DO
+            const todoEl = document.getElementById('todo-list');
+            if(todoEl) {
+                todoEl.innerHTML = '';
+                localData.todo.filter(filterCheck).forEach(item => {
+                    todoEl.innerHTML += `
+                        <div data-id="${item.id}" class="p-2.5 bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/70 rounded-xl text-xs flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 min-w-0">
+                                <span class="drag-handle text-slate-300 shrink-0">⋮⋮</span>
+                                <input type="checkbox" onchange="completeItem('todo', '${item.id}', '${item.title.replace(/'/g, "\\'")}')" class="rounded border-slate-300 shrink-0 cursor-pointer">
+                                <div class="min-w-0">
+                                    <p class="font-bold truncate">${item.title}</p>
+                                    <p class="text-[10px] text-slate-400">👤 ${item.assignee} ${item.dueDate ? '• 📅 ' + item.dueDate : ''}</p>
+                                </div>
+                            </div>
+                            <button onclick="deleteItem('todo', '${item.id}')" class="text-slate-300 hover:text-rose-500 shrink-0">✕</button>
+                        </div>
+                    `;
+                });
+            }
+
+            // 3. TÂCHES RÉCURRENTES
+            const recEl = document.getElementById('recurring-list');
+            if(recEl) {
+                recEl.innerHTML = '';
+                localData.recurring.filter(filterCheck).forEach(item => {
+                    const isDone = Boolean(item.lastDone);
+                    recEl.innerHTML += `
+                        <div data-id="${item.id}" class="p-2.5 bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/70 rounded-xl text-xs flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 min-w-0">
+                                <span class="drag-handle text-slate-300 shrink-0">⋮⋮</span>
+                                <div class="min-w-0">
+                                    <p class="font-bold truncate ${isDone ? 'line-through text-slate-400' : ''}">${item.title}</p>
+                                    <p class="text-[10px] text-slate-400">👤 ${item.assignee} • ${item.frequency || 'Quotidienne'} ${item.lastDone ? '• ✓ ' + item.lastDone : ''}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="completeRecurringItem('${item.id}')" class="px-2 py-0.5 ${isDone ? 'bg-slate-200 dark:bg-slate-700 text-slate-500' : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'} rounded-lg text-[10px] font-bold">Fait ✓</button>
+                                ${isDone ? `<button onclick="resetRecurringItem('${item.id}')" class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-lg text-[10px]" title="Réinitialiser maintenant">↺</button>` : ''}
+                                <button onclick="deleteItem('recurring', '${item.id}')" class="text-slate-300 hover:text-rose-500 ml-0.5">✕</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // 4. PROJETS & SOUS-PROJETS
+            const projEl = document.getElementById('project-list');
+            if(projEl) {
+                projEl.innerHTML = '';
+                localData.project.filter(filterCheck).forEach(item => {
+                    let subHtml = '';
+                    if(item.subtasks && item.subtasks.length > 0) {
+                        item.subtasks.forEach(s => {
+                            subHtml += `
+                                <div class="flex items-center justify-between pl-3 py-0.5 text-[11px] border-t border-slate-100 dark:border-slate-800/80">
+                                    <label class="flex items-center space-x-1.5 cursor-pointer min-w-0">
+                                        <input type="checkbox" ${s.completed ? 'checked' : ''} onchange="toggleSubtask('${item.id}', '${s.id}')" class="rounded shrink-0">
+                                        <span class="truncate ${s.completed ? 'line-through text-slate-400' : ''}">${s.title}</span>
+                                    </label>
+                                    <button onclick="deleteSubtask('${item.id}', '${s.id}')" class="text-slate-300 hover:text-rose-500 text-[10px] shrink-0 ml-1">✕</button>
+                                </div>
+                            `;
+                        });
+                    }
+                    projEl.innerHTML += `
+                        <div data-id="${item.id}" class="p-2.5 bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/70 rounded-xl text-xs space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-start space-x-1.5 min-w-0">
+                                    <span class="drag-handle text-slate-300 shrink-0 mt-0.5">⋮⋮</span>
+                                    <div class="min-w-0">
+                                        <p class="font-bold text-slate-900 dark:text-white truncate">${item.title}</p>
+                                        <p class="text-[10px] text-slate-400">👤 ${item.assignee} ${item.deadline ? '• 📅 Limite: ' + item.deadline : ''}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-1.5 shrink-0">
+                                    <button onclick="openSubprojectModal('${item.id}')" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">+ Sous-projet</button>
+                                    <button onclick="completeItem('project', '${item.id}', '${item.title.replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold rounded-lg text-[10px]">Terminer</button>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[9px] text-slate-400 font-semibold"><span>Avancement</span><span>${item.progress || 0}%</span></div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-indigo-600 h-full transition-all duration-300" style="width: ${item.progress || 0}%"></div>
+                                </div>
+                            </div>
+                            ${subHtml}
+                        </div>
+                    `;
+                });
+            }
+
+            // 5. À CONTACTER
+            const cntEl = document.getElementById('contact-list');
+            if(cntEl) {
+                cntEl.innerHTML = '';
+                localData.contact.filter(filterCheck).forEach(item => {
+                    cntEl.innerHTML += `
+                        <div data-id="${item.id}" class="p-2.5 bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/70 rounded-xl text-xs flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 min-w-0">
+                                <span class="drag-handle text-slate-300 shrink-0">⋮⋮</span>
+                                <div class="min-w-0">
+                                    <p class="font-bold truncate">${item.title}</p>
+                                    <p class="text-[10px] text-slate-400">Via <strong>${item.channel || 'Teams'}</strong> • 👤 ${item.assignee} ${item.dueDate ? '• 📅 ' + item.dueDate : ''}</p>
+                                </div>
+                            </div>
+                            <button onclick="completeItem('contact', '${item.id}', '${item.title.replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold rounded-lg text-[10px] shrink-0">Fait ✓</button>
+                        </div>
+                    `;
+                });
+            }
+
+            // 6. SUIVI & RELANCES
+            const folEl = document.getElementById('followup-list');
+            if(folEl) {
+                folEl.innerHTML = '';
+                localData.followup.filter(filterCheck).forEach(item => {
+                    folEl.innerHTML += `
+                        <div data-id="${item.id}" class="p-2.5 bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/70 rounded-xl text-xs flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 min-w-0">
+                                <span class="drag-handle text-slate-300 shrink-0">⋮⋮</span>
+                                <div class="min-w-0">
+                                    <p class="font-bold text-rose-600 dark:text-rose-400 truncate">${item.title}</p>
+                                    <p class="text-[10px] text-slate-400">Notifier : <strong>${item.notifyTo || 'N/A'}</strong> • 👤 ${item.assignee} ${item.dueDate ? '• 📅 ' + item.dueDate : ''}</p>
+                                </div>
+                            </div>
+                            <button onclick="completeItem('followup', '${item.id}', '${item.title.replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-bold rounded-lg text-[10px] shrink-0">Relancé ✓</button>
+                        </div>
+                    `;
+                });
+            }
+
+            // 7. FORMATIONS TRAVAILLEURS
+            const trnEl = document.getElementById('training-list');
+            if(trnEl) {
+                trnEl.innerHTML = '';
+                localData.training.filter(filterCheck).forEach(item => {
+                    trnEl.innerHTML += `
+                        <div data-id="${item.id}" class="p-2.5 bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/70 rounded-xl text-xs flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 min-w-0">
+                                <span class="drag-handle text-slate-300 shrink-0">⋮⋮</span>
+                                <div class="min-w-0">
+                                    <p class="font-bold truncate">👤 ${item.workerName}</p>
+                                    <p class="text-[10px] text-slate-400">Suivi : ${item.assignee}</p>
+                                </div>
+                            </div>
+                            <button onclick="completeItem('training', '${item.id}', '${item.workerName.replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold rounded-lg text-[10px] shrink-0">Validé ✓</button>
+                        </div>
+                    `;
+                });
+            }
+
+            // 8. TABLEAU IT
+            const itEl = document.getElementById('it-list');
+            if(itEl) {
+                itEl.innerHTML = '';
+                localData.it.filter(filterCheck).forEach(item => {
+                    itEl.innerHTML += `
+                        <div data-id="${item.id}" class="p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs flex items-center justify-between gap-2 text-white">
+                            <div class="flex items-center space-x-2 min-w-0">
+                                <span class="drag-handle text-slate-500 shrink-0">⋮⋮</span>
+                                <div class="min-w-0">
+                                    <p class="font-mono text-indigo-300 truncate">${item.title}</p>
+                                    <p class="text-[10px] text-slate-400">👤 ${item.assignee}</p>
+                                </div>
+                            </div>
+                            <button onclick="completeItem('it', '${item.id}', '${item.title.replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-indigo-300 rounded-lg text-[10px] font-bold shrink-0">Résolu ✓</button>
+                        </div>
+                    `;
+                });
+            }
+
+            // 9. HISTORIQUE
+            const histEl = document.getElementById('history-list');
+            if(histEl) {
+                document.getElementById('history-count').innerText = localData.history.length;
+                histEl.innerHTML = localData.history.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche archivée.</p>' : '';
+                localData.history.slice().reverse().forEach(item => {
+                    histEl.innerHTML += `
+                        <div class="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-xs flex justify-between items-center">
+                            <span class="line-through text-slate-500">${item.title}</span>
+                            <span class="text-[10px] text-slate-400">${item.completedAt}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            lucide.createIcons();
+        };
+
+        // --- ACTIONS ---
         window.completeRecurringItem = async function(id) {
-            const todayStr = new Date().toLocaleDateString('fr-FR');
-            if(db) {
-                await updateDoc(doc(db, 'recurring', id), { lastDone: todayStr });
-            } else {
-                let item = localData.recurring.find(x => x.id === id);
-                if(item) item.lastDone = todayStr;
+            const now = new Date();
+            const todayStr = now.toLocaleDateString('fr-FR');
+            const currentWeek = `${now.getFullYear()}-W${getISOWeek(now)}`;
+            if(db) await updateDoc(doc(db, 'recurring', id), { lastDone: todayStr, lastDoneWeek: currentWeek });
+            else {
+                let it = localData.recurring.find(x => x.id === id);
+                if(it) { it.lastDone = todayStr; it.lastDoneWeek = currentWeek; }
+                saveLocalFallback();
                 renderAll();
             }
         };
 
         window.resetRecurringItem = async function(id) {
-            if(db) {
-                await updateDoc(doc(db, 'recurring', id), { lastDone: '' });
-            } else {
-                let item = localData.recurring.find(x => x.id === id);
-                if(item) item.lastDone = '';
+            if(db) await updateDoc(doc(db, 'recurring', id), { lastDone: '', lastDoneWeek: '' });
+            else {
+                let it = localData.recurring.find(x => x.id === id);
+                if(it) { it.lastDone = ''; it.lastDoneWeek = ''; }
+                saveLocalFallback();
                 renderAll();
             }
         };
 
         window.completeItem = async function(col, id, titleOrWorker) {
+            const today = new Date().toLocaleDateString('fr-FR');
             if(db) {
-                await addDoc(collection(db, 'history'), {
-                    title: titleOrWorker,
-                    originalCol: col,
-                    completedAt: new Date().toLocaleDateString('fr-FR')
-                });
+                await addDoc(collection(db, 'history'), { title: titleOrWorker, completedAt: today });
                 await deleteDoc(doc(db, col, id));
             } else {
                 localData[col] = localData[col].filter(x => x.id !== id);
-                localData.history.push({
-                    id: 'local_' + Math.random(),
-                    title: titleOrWorker,
-                    originalCol: col,
-                    completedAt: new Date().toLocaleDateString('fr-FR')
-                });
+                localData.history.push({ id: 'local_' + Date.now(), title: titleOrWorker, completedAt: today });
+                saveLocalFallback();
                 renderAll();
             }
         };
 
         window.deleteItem = async function(col, id) {
             if(db) await deleteDoc(doc(db, col, id));
-            else {
-                localData[col] = localData[col].filter(x => x.id !== id);
-                renderAll();
-            }
+            else { localData[col] = localData[col].filter(x => x.id !== id); saveLocalFallback(); renderAll(); }
         };
 
-        window.addSubtask = async function(projId) {
-            const text = prompt("Titre de la nouvelle sous-tâche :");
-            if(!text) return;
-            const proj = localData.project.find(p => p.id === projId);
-            if(!proj) return;
-
-            const subtasks = proj.subtasks || [];
-            subtasks.push({ id: 'sub_' + Date.now(), title: text, done: false });
-            
-            const doneCount = subtasks.filter(s => s.done).length;
-            const progress = Math.round((doneCount / subtasks.length) * 100);
-
-            if(db) {
-                await updateDoc(doc(db, 'project', projId), { subtasks, progress });
-            } else {
-                proj.subtasks = subtasks;
-                proj.progress = progress;
-                renderAll();
-            }
-        };
-
-        window.toggleSubtask = async function(projId, subId) {
-            const proj = localData.project.find(p => p.id === projId);
-            if(!proj || !proj.subtasks) return;
-
-            const subtasks = proj.subtasks.map(s => s.id === subId ? { ...s, done: !s.done } : s);
-            const doneCount = subtasks.filter(s => s.done).length;
-            const progress = Math.round((doneCount / subtasks.length) * 100);
-
-            if(db) {
-                await updateDoc(doc(db, 'project', projId), { subtasks, progress });
-            } else {
-                proj.subtasks = subtasks;
-                proj.progress = progress;
-                renderAll();
-            }
-        };
-
-        window.checkAssigneeCustom = function(val) {
-            const customContainer = document.getElementById('custom-assignee-container');
-            if (val === 'custom') {
-                customContainer.classList.remove('hidden');
-                document.getElementById('m-custom-assignee').focus();
-            } else {
-                customContainer.classList.add('hidden');
-            }
-        };
-
-        window.openModal = function(type, editId = null) {
-            document.getElementById('universal-modal').classList.remove('hidden');
-            document.getElementById('modal-type').value = type;
-            document.getElementById('modal-edit-id').value = editId || '';
-            const container = document.getElementById('extra-field-container');
-            container.innerHTML = '';
-
-            let existing = editId ? localData[type].find(x => x.id === editId) : null;
-            document.getElementById('m-title-label').innerText = type === 'training' ? "Nom du travailleur" : "Intitulé / Titre";
-            document.getElementById('m-title').value = existing ? (existing.title || existing.workerName || '') : '';
-            
-            const assigneeSelect = document.getElementById('m-assignee');
-            const customContainer = document.getElementById('custom-assignee-container');
-            const customInput = document.getElementById('m-custom-assignee');
-
-            const currentAssignee = existing?.assignee || 'Non assigné';
-            if (['Non assigné', 'Mickaela', 'Koloina', 'Les deux'].includes(currentAssignee)) {
-                assigneeSelect.value = currentAssignee;
-                customContainer.classList.add('hidden');
-                customInput.value = '';
-            } else {
-                assigneeSelect.value = 'custom';
-                customContainer.classList.remove('hidden');
-                customInput.value = currentAssignee;
-            }
-
-            if(type === 'contact') {
-                document.getElementById('modal-title').innerText = editId ? "Modifier le contact" : "Ajouter un contact";
-                container.innerHTML = `
-                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Canal</label>
-                    <select id="m-channel" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"><option ${existing?.channel==='Teams'?'selected':''}>Teams</option><option ${existing?.channel==='Téléphone'?'selected':''}>Téléphone</option><option ${existing?.channel==='Courriel'?'selected':''}>Courriel</option></select></div>
-                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date de rappel / suivi</label><input type="date" id="m-duedate" value="${existing?.dueDate || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
-                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Message / Notes</label><input type="text" id="m-message" value="${existing?.message || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
-                `;
-            } else if(type === 'followup') {
-                document.getElementById('modal-title').innerText = editId ? "Modifier le suivi" : "Nouveau suivi & relance";
-                container.innerHTML = `
-                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Personnes à informer / notifier</label><input type="text" id="m-notifyto" value="${existing?.notifyTo || ''}" placeholder="Ex: Marc, Gillian..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
-                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date limite de relance</label><input type="date" id="m-duedate" value="${existing?.dueDate || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
-                `;
-            } else if(type === 'todo') {
-                document.getElementById('modal-title').innerText = editId ? "Modifier la To-Do" : "Ajouter une To-Do";
-                container.innerHTML = `
-                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date d'échéance</label><input type="date" id="m-duedate" value="${existing?.dueDate || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
-                `;
-            } else if(type === 'recurring') {
-                document.getElementById('modal-title').innerText = editId ? "Modifier la tâche récurrente" : "Nouvelle tâche récurrente";
-                container.innerHTML = `
-                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Fréquence</label>
-                    <select id="m-frequency" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
-                        <option ${existing?.frequency==='Quotidienne'?'selected':''}>Quotidienne</option>
-                        <option ${existing?.frequency==='Hebdomadaire'?'selected':''}>Hebdomadaire</option>
-                        <option ${existing?.frequency==='Mensuelle'?'selected':''}>Mensuelle</option>
-                    </select></div>
-                `;
-            } else if(type === 'training') {
-                document.getElementById('modal-title').innerText = editId ? "Modifier le travailleur" : "Ajouter un travailleur";
-            } else if(type === 'it') {
-                document.getElementById('modal-title').innerText = editId ? "Modifier la demande IT" : "Nouvelle demande IT";
-                container.innerHTML = `<div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Notes de suivi</label><input type="text" id="m-notes" value="${existing?.notes || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>`;
-            } else if(type === 'project') {
-                document.getElementById('modal-title').innerText = editId ? "Modifier le projet" : "Nouveau Projet";
-                container.innerHTML = `
-                    <div class="mt-2"><label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date Limite (Deadline)</label><input type="date" id="m-deadline" value="${existing?.deadline || ''}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"></div>
-                `;
-            } else {
-                document.getElementById('modal-title').innerText = editId ? "Modifier l'élément" : "Ajouter un élément";
-            }
-        };
-
-        window.closeModalWindow = function() {
-            document.getElementById('universal-modal').classList.add('hidden');
-            document.getElementById('m-title').value = '';
-            document.getElementById('modal-edit-id').value = '';
-        };
-
-        window.handleUniversalSubmit = async function(e) {
-            e.preventDefault();
-            const type = document.getElementById('modal-type').value;
-            const editId = document.getElementById('modal-edit-id').value;
-            const titleVal = document.getElementById('m-title').value;
-            
-            let assigneeVal = document.getElementById('m-assignee').value;
-            if (assigneeVal === 'custom') {
-                assigneeVal = document.getElementById('m-custom-assignee').value.trim() || 'Non assigné';
-            }
-
-            let payload = { assignee: assigneeVal };
-            if(type === 'training') payload.workerName = titleVal;
-            else payload.title = titleVal;
-
-            if(type === 'contact') {
-                payload.channel = document.getElementById('m-channel').value;
-                payload.dueDate = document.getElementById('m-duedate')?.value || '';
-                payload.message = document.getElementById('m-message').value;
-            } else if(type === 'followup') {
-                payload.notifyTo = document.getElementById('m-notifyto')?.value || '';
-                payload.dueDate = document.getElementById('m-duedate')?.value || '';
-            } else if(type === 'todo') {
-                payload.dueDate = document.getElementById('m-duedate')?.value || '';
-            } else if(type === 'recurring') {
-                payload.frequency = document.getElementById('m-frequency').value;
-                if(!editId) payload.lastDone = '';
-            } else if(type === 'it') {
-                payload.notes = document.getElementById('m-notes').value || '';
-            } else if(type === 'project') {
-                payload.deadline = document.getElementById('m-deadline').value || '';
-            }
-
-            if(db) {
-                if(editId) {
-                    await updateDoc(doc(db, type, editId), payload);
-                } else {
-                    payload.order = localData[type].length;
-                    if(type === 'project') { payload.progress = 0; payload.subtasks = []; }
-                    await addDoc(collection(db, type), payload);
-                }
-            } else {
-                if(editId) {
-                    let idx = localData[type].findIndex(x => x.id === editId);
-                    if(idx !== -1) localData[type][idx] = { ...localData[type][idx], ...payload };
-                } else {
-                    payload.order = localData[type].length;
-                    localData[type].push({ id: 'local_' + Math.random(), ...payload });
-                }
-                renderAll();
-            }
-            closeModalWindow();
-        };
-
-        function getAssigneeBadge(assignee) {
-            if (!assignee || assignee === 'Non assigné') return '';
-            let color = 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700';
-            if (assignee === 'Mickaela') color = 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
-            else if (assignee === 'Koloina') color = 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
-            else if (assignee === 'Les deux') color = 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
-
-            return `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md border ${color} shrink-0">👤 ${assignee}</span>`;
-        }
-
-        function getDateBadge(dateStr) {
-            if (!dateStr) return '';
-            const today = new Date().toISOString().slice(0,10);
-            if (dateStr < today) {
-                return `<span class="px-1.5 py-0.5 bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 rounded text-[10px] font-bold shrink-0">⚠️ ${dateStr}</span>`;
-            }
-            return `<span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded text-[10px] shrink-0">🗓️ ${dateStr}</span>`;
-        }
-
-        function filterByAssignee(items) {
-            if (activeAssigneeFilter === 'all') return items;
-            return items.filter(x => (x.assignee || 'Non assigné') === activeAssigneeFilter);
-        }
-
-        function updateUrgentCount() {
-            const today = new Date().toISOString().slice(0,10);
-            let urgentCount = 0;
-            const checkDate = (d) => { if(d && d <= today) urgentCount++; };
-
-            localData.todo.forEach(x => checkDate(x.dueDate));
-            localData.contact.forEach(x => checkDate(x.dueDate));
-            localData.followup.forEach(x => checkDate(x.dueDate));
-            localData.project.forEach(x => checkDate(x.deadline));
-
-            const badge = document.getElementById('urgent-badge');
-            const text = document.getElementById('urgent-text');
-
-            if (urgentCount > 0) {
-                badge.classList.remove('hidden');
-                badge.classList.add('flex');
-                text.innerText = `${urgentCount} urgence${urgentCount > 1 ? 's' : ''}`;
-            } else {
-                badge.classList.add('hidden');
-                badge.classList.remove('flex');
-            }
-        }
-
-        function renderAll() {
-            const query = (document.getElementById('search-bar')?.value || '').toLowerCase();
-            updateUrgentCount();
-
-            // Inbox
-            const inboxEl = document.getElementById('inbox-list');
-            let inboxItems = filterByAssignee(localData.inbox);
-            inboxEl.innerHTML = inboxItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Inbox vide. Tout est trié !</p>' : '';
-            inboxItems.forEach(item => {
-                if(query && !item.text.toLowerCase().includes(query)) return;
-                const safeText = item.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                inboxEl.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
-                        <span class="font-medium text-slate-700 dark:text-slate-200 flex-1">${item.text}</span>
-                        <div class="flex items-center space-x-1 shrink-0">
-                            <select id="target-${item.id}" class="text-[11px] py-1 px-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-200">
-                                <option value="todo" ${item.suggested==='todo'?'selected':''}>To-Do</option>
-                                <option value="contact" ${item.suggested==='contact'?'selected':''}>À contacter</option>
-                                <option value="followup" ${item.suggested==='followup'?'selected':''}>Suivi & Relances</option>
-                                <option value="recurring" ${item.suggested==='recurring'?'selected':''}>Récurrentes</option>
-                                <option value="training" ${item.suggested==='training'?'selected':''}>Formations</option>
-                                <option value="project" ${item.suggested==='project'?'selected':''}>Projet</option>
-                                <option value="it" ${item.suggested==='it'?'selected':''}>Tableau IT</option>
-                            </select>
-                            <button onclick="triageItem('${item.id}', '${safeText}', document.getElementById('target-${item.id}').value)" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 rounded-lg font-medium transition">Trier →</button>
-                            <button onclick="deleteItem('inbox', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Formations
-            const trainEl = document.getElementById('training-list');
-            let trainItems = filterByAssignee(localData.training);
-            trainEl.innerHTML = trainItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun travailleur à vérifier.</p>' : '';
-            trainItems.forEach(item => {
-                if(query && !item.workerName.toLowerCase().includes(query)) return;
-                const safeWorker = item.workerName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                trainEl.innerHTML += `
-                    <div class="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
-                        <div class="flex items-start space-x-2 flex-1">
-                            <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
-                            <div class="w-2 h-2 rounded-full bg-purple-500 mt-1.5 shrink-0"></div>
-                            <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                <span class="font-bold text-slate-800 dark:text-slate-200">${item.workerName}</span>
-                                ${getAssigneeBadge(item.assignee)}
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-1 shrink-0">
-                            <button onclick="openModal('training', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="completeItem('training', '${item.id}', '${safeWorker}')" class="px-2 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 rounded-lg font-medium text-[11px]">Validé ✓</button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Contact
-            const contactEl = document.getElementById('contact-list');
-            let contactItems = filterByAssignee(localData.contact);
-            contactEl.innerHTML = contactItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun contact en attente.</p>' : '';
-            contactItems.forEach(item => {
-                if(query && !item.title.toLowerCase().includes(query)) return;
-                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                contactEl.innerHTML += `
-                    <div class="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs space-y-1.5" data-id="${item.id}">
-                        <div class="flex items-start justify-between font-semibold text-slate-800 dark:text-slate-200 gap-2">
-                            <div class="flex items-start space-x-2 flex-1">
-                                <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
-                                <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                    <span>${item.title}</span>
-                                    ${getAssigneeBadge(item.assignee)}
-                                    ${getDateBadge(item.dueDate)}
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-1 shrink-0">
-                                <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-md text-[10px]">${item.channel}</span>
-                                <button onclick="openModal('contact', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            </div>
-                        </div>
-                        ${item.message ? `<p class="text-slate-500 dark:text-slate-400 italic pl-5">"${item.message}"</p>` : ''}
-                        <div class="flex justify-end pt-1">
-                            <button onclick="completeItem('contact', '${item.id}', '${safeTitle}')" class="text-emerald-600 font-semibold hover:underline text-[11px]">Terminé ✓</button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Suivi & Relances (Nouveau module)
-            const followupEl = document.getElementById('followup-list');
-            let followupItems = filterByAssignee(localData.followup);
-            followupEl.innerHTML = followupItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun suivi en cours.</p>' : '';
-            followupItems.forEach(item => {
-                if(query && !item.title.toLowerCase().includes(query)) return;
-                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                followupEl.innerHTML += `
-                    <div class="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs space-y-1.5" data-id="${item.id}">
-                        <div class="flex items-start justify-between font-semibold text-slate-800 dark:text-slate-200 gap-2">
-                            <div class="flex items-start space-x-2 flex-1">
-                                <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
-                                <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                    <span>${item.title}</span>
-                                    ${getAssigneeBadge(item.assignee)}
-                                    ${getDateBadge(item.dueDate)}
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-1 shrink-0">
-                                <button onclick="openModal('followup', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            </div>
-                        </div>
-                        ${item.notifyTo ? `<p class="text-rose-600 dark:text-rose-400 text-[11px] pl-5">📢 À informer : ${item.notifyTo}</p>` : ''}
-                        <div class="flex justify-end pt-1">
-                            <button onclick="completeItem('followup', '${item.id}', '${safeTitle}')" class="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline text-[11px]">Résolu / Terminé ✓</button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Projets
-            const projEl = document.getElementById('project-list');
-            let projectItems = filterByAssignee(localData.project);
-            projEl.innerHTML = projectItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun projet en cours.</p>' : '';
-            projectItems.forEach(item => {
-                if(query && !item.title.toLowerCase().includes(query)) return;
-                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const subtasks = item.subtasks || [];
-                
-                projEl.innerHTML += `
-                    <div class="p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs space-y-2.5" data-id="${item.id}">
-                        <div class="flex items-start justify-between font-bold text-slate-800 dark:text-slate-200 gap-2">
-                            <div class="flex items-start space-x-2 flex-1">
-                                <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
-                                <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                    <span class="text-sm">${item.title}</span>
-                                    ${getAssigneeBadge(item.assignee)}
-                                    ${getDateBadge(item.deadline)}
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-1 shrink-0">
-                                <button onclick="openModal('project', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                                <button onclick="completeItem('project', '${item.id}', '${safeTitle}')" class="p-1 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"><i data-lucide="check-circle" class="w-4 h-4"></i></button>
-                            </div>
-                        </div>
-
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-[10px] text-slate-500 dark:text-slate-400">
-                                <span>Progression</span>
-                                <span class="font-bold text-cyan-600 dark:text-cyan-400">${item.progress || 0}%</span>
-                            </div>
-                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                                <div class="bg-cyan-500 h-full rounded-full transition-all duration-300" style="width: ${item.progress || 0}%"></div>
-                            </div>
-                        </div>
-
-                        <div class="pt-1 space-y-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Sous-tâches (${subtasks.filter(s=>s.done).length}/${subtasks.length})</span>
-                                <button onclick="addSubtask('${item.id}')" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium hover:underline">+ Sous-tâche</button>
-                            </div>
-                            ${subtasks.map(s => `
-                                <div class="flex items-center space-x-2 text-[11px]">
-                                    <input type="checkbox" ${s.done ? 'checked' : ''} onclick="toggleSubtask('${item.id}', '${s.id}')" class="w-3.5 h-3.5 text-cyan-600 rounded">
-                                    <span class="${s.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}">${s.title}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Tâches Récurrentes
-            const recEl = document.getElementById('recurring-list');
-            let recurringItems = filterByAssignee(localData.recurring);
-            recEl.innerHTML = recurringItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune tâche récurrente.</p>' : '';
-            recurringItems.forEach(item => {
-                if(query && !item.title.toLowerCase().includes(query)) return;
-                const todayStr = new Date().toLocaleDateString('fr-FR');
-                const isDoneToday = item.lastDone === todayStr;
-
-                recEl.innerHTML += `
-                    <div class="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
-                        <div class="flex items-start space-x-2.5 flex-1">
-                            <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
-                            <button onclick="completeRecurringItem('${item.id}')" class="w-4 h-4 mt-0.5 flex items-center justify-center rounded border shrink-0 ${isDoneToday ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}">
-                                ${isDoneToday ? '✓' : ''}
-                            </button>
-                            <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                <span class="font-medium ${isDoneToday ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'}">${item.title}</span>
-                                <span class="px-1.5 py-0.5 text-[9px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded shrink-0">🔄 ${item.frequency || 'Quotidienne'}</span>
-                                ${getAssigneeBadge(item.assignee)}
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-1 shrink-0">
-                            ${item.lastDone ? `<span class="text-[10px] text-slate-400 mr-1 hidden sm:inline">Fait le ${item.lastDone}</span>` : ''}
-                            <button onclick="resetRecurringItem('${item.id}')" title="Rafraîchir / Relancer la tâche" class="p-1 text-slate-400 hover:text-emerald-600"><i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="openModal('recurring', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="deleteItem('recurring', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // To-Do
-            const todoEl = document.getElementById('todo-list');
-            let todoItems = filterByAssignee(localData.todo);
-            todoEl.innerHTML = todoItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Rien pour le moment.</p>' : '';
-            todoItems.forEach(item => {
-                if(query && !item.title.toLowerCase().includes(query)) return;
-                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                todoEl.innerHTML += `
-                    <div class="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl text-xs gap-2" data-id="${item.id}">
-                        <div class="flex items-start space-x-2.5 flex-1">
-                            <span class="drag-handle text-slate-300 dark:text-slate-600 hover:text-slate-500 font-bold px-0.5 mt-0.5">⋮⋮</span>
-                            <input type="checkbox" onclick="completeItem('todo', '${item.id}', '${safeTitle}')" class="w-4 h-4 mt-0.5 text-indigo-600 rounded border-slate-300 shrink-0">
-                            <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                <span class="font-medium text-slate-700 dark:text-slate-200">${item.title}</span>
-                                ${getAssigneeBadge(item.assignee)}
-                                ${getDateBadge(item.dueDate)}
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-1 shrink-0">
-                            <button onclick="openModal('todo', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="deleteItem('todo', '${item.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // IT
-            const itEl = document.getElementById('it-list');
-            let itItems = filterByAssignee(localData.it);
-            itEl.innerHTML = itItems.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucune demande IT.</p>' : '';
-            itItems.forEach(item => {
-                if(query && !item.title.toLowerCase().includes(query)) return;
-                const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                itEl.innerHTML += `
-                    <div class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs space-y-1.5" data-id="${item.id}">
-                        <div class="flex items-start justify-between font-medium text-slate-200 gap-2">
-                            <div class="flex items-start space-x-2 flex-1">
-                                <span class="drag-handle text-slate-600 hover:text-slate-400 font-bold px-0.5 mt-0.5">⋮⋮</span>
-                                <div class="flex flex-wrap items-center gap-1.5 flex-1">
-                                    <span>${item.title}</span>
-                                    ${getAssigneeBadge(item.assignee)}
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-1 shrink-0">
-                                <button onclick="openModal('it', '${item.id}')" class="p-1 text-slate-400 hover:text-indigo-300"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                                <button onclick="completeItem('it', '${item.id}', '${safeTitle}')" class="p-1 text-emerald-400 hover:text-emerald-300"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
-                            </div>
-                        </div>
-                        ${item.notes ? `<p class="text-slate-400 text-[11px] pl-5">Suivi : ${item.notes}</p>` : ''}
-                    </div>
-                `;
-            });
-
-            // Historique
-            const histEl = document.getElementById('history-list');
-            document.getElementById('history-count').innerText = localData.history.length;
-            histEl.innerHTML = localData.history.length === 0 ? '<p class="text-xs text-slate-400 italic">Aucun élément archivé.</p>' : '';
-            localData.history.forEach(item => {
-                histEl.innerHTML += `
-                    <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/60 rounded-lg text-xs">
-                        <div class="flex items-center space-x-2">
-                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-500"></i>
-                            <span class="line-through text-slate-500 dark:text-slate-400">${item.title}</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-[10px] text-slate-400">${item.completedAt}</span>
-                            <button onclick="deleteItem('history', '${item.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            lucide.createIcons();
-        }
-
-        // EXPORTATION EXCEL (CSV)
         window.exportToExcel = function() {
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-            csvContent += "Module;Intitulé / Travailleur;Responsable;Date / Échéance;Détail / Personnes à informer;Statut\n";
-
-            localData.inbox.forEach(item => csvContent += `Inbox;"${item.text.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Suggéré: ${item.suggested}";En attente\n`);
-            localData.todo.forEach(item => csvContent += `To-Do;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.dueDate || 'Aucune'}";"-";En cours\n`);
-            localData.contact.forEach(item => csvContent += `Contact;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.dueDate || 'Aucune'}";"Canal: ${item.channel} | ${item.message || ''}";À contacter\n`);
-            localData.followup.forEach(item => csvContent += `Suivi & Relances;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.dueDate || 'Aucune'}";"À informer: ${item.notifyTo || 'Aucune'}";En cours\n`);
-            localData.recurring.forEach(item => csvContent += `Récurrentes;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Fréquence: ${item.frequency || 'Quotidienne'}";Actif\n`);
-            localData.training.forEach(item => csvContent += `Formations;"${item.workerName.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Groupe unique";À vérifier\n`);
-            localData.project.forEach(item => csvContent += `Projets;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"${item.deadline || 'Aucune'}";"Progression: ${item.progress}%";En cours\n`);
-            localData.it.forEach(item => csvContent += `IT;"${item.title.replace(/"/g, '""')}";"${item.assignee || 'Non assigné'}";"-";"Notes: ${item.notes || ''}";En cours\n`);
-            localData.history.forEach(item => csvContent += `Historique;"${item.title.replace(/"/g, '""')}";"-";"Fait le: ${item.completedAt}";"-";Terminé\n`);
-
-            const encodedUri = encodeURI(csvContent);
+            let csv = "Categorie;Titre;Responsable;Details\n";
+            ['todo', 'recurring', 'project', 'contact', 'followup', 'training', 'it'].forEach(cat => {
+                localData[cat].forEach(item => {
+                    const name = (item.title || item.workerName || '').replace(/;/g, ',');
+                    const details = item.dueDate || item.deadline || item.frequency || item.channel || item.notifyTo || '';
+                    csv += `${cat};${name};${item.assignee || ''};${details}\n`;
+                });
+            });
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `DuoSync_Export_${new Date().toISOString().slice(0, 10)}.csv`);
-            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = `DuoSync_Export_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.csv`;
             link.click();
-            document.body.removeChild(link);
         };
     </script>
 </body>
