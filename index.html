@@ -34,7 +34,7 @@
 </head>
 <body class="min-h-screen lg:h-screen flex flex-col text-slate-800 dark:text-slate-100 dark:bg-slate-950 antialiased overflow-y-auto lg:overflow-hidden">
 
-    <!-- HEADER ADAPTATIF AVEC NY AKAMA (AVATAR PERSONNALISÉ) -->
+    <!-- HEADER ADAPTATIF AVEC NY AKAMA -->
     <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3.5 sm:px-5 py-2.5 lg:py-0 lg:h-14 flex flex-wrap lg:flex-nowrap items-center justify-between shrink-0 z-20 gap-2.5 lg:gap-4 sticky top-0 lg:static">
         
         <!-- Logo & Titre + NY AKAMA -->
@@ -47,7 +47,7 @@
                 <p class="text-[10px] text-slate-400 mt-0.5">Cockpit collaboratif</p>
             </div>
 
-            <!-- BOUTON NY AKAMA AVEC L'IMAGE DE L'AVATAR -->
+            <!-- BOUTON NY AKAMA -->
             <button onclick="openAkamaModal('briefing')" class="flex items-center space-x-2 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 px-2.5 py-1 rounded-xl cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-2xs group" title="Discuter avec Ny Akama">
                 <div class="w-7 h-7 rounded-full overflow-hidden shadow-xs border border-indigo-300 dark:border-indigo-700 shrink-0 avatar-float">
                     <img src="ny_akama.png" alt="Ny Akama" class="w-full h-full object-cover">
@@ -224,7 +224,7 @@
         </div>
     </main>
 
-    <!-- POP-UP INTERACTIVE NY AKAMA (AVEC TON AVATAR IMAGE) -->
+    <!-- POP-UP INTERACTIVE NY AKAMA -->
     <div id="akama-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border border-indigo-100 dark:border-indigo-900/60 flex flex-col gap-3.5">
             <!-- Header Ny Akama -->
@@ -346,7 +346,7 @@
         </div>
     </div>
 
-    <!-- MODALE PARAMÈTRES (FIREBASE + CLÉ API GEMINI 3.8-FLASH) -->
+    <!-- MODALE PARAMÈTRES (FIREBASE + CLÉ API GEMINI) -->
     <div id="config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-4">
             <h3 class="text-sm font-bold">Paramètres Cloud & IA Ny Akama</h3>
@@ -369,7 +369,7 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT & CERVEAU IA (MIS À JOUR AVEC GEMINI-3.8-FLASH) -->
+    <!-- LOGIQUE JAVASCRIPT & CERVEAU IA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -500,25 +500,40 @@ Données actuelles du cockpit DuoSync (équipe : Mickaela et Koloina) :
 
             const prompt = `Tu es "Ny Akama" (l'ami/complice en malgache), un petit assistant compagnon bienveillant coiffé d'un chapeau traditionnel 👒, intégré dans l'application DuoSync (utilisée par Mickaela et Koloina). Sois concis (max 5-6 lignes), utilise quelques emojis, tutoie l'utilisatrice.\n\n${context}\n\nConsigne : ${instruction}`;
 
-            try {
-                // Utilisation du modèle gemini-3.8-flash mis à jour
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
-                });
+            let attempts = 0;
+            const maxAttempts = 3;
 
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
+            while (attempts < maxAttempts) {
+                try {
+                    attempts++;
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }]
+                        })
+                    });
 
-                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || generateLocalFallback(mode, userMessage);
-                box.innerText = aiText.trim();
-                if (preview) preview.innerText = aiText.trim().split('\n')[0];
-            } catch (err) {
-                const fallback = generateLocalFallback(mode, userMessage);
-                box.innerText = fallback + `\n\n(Note : Erreur API Gemini - ${err.message})`;
+                    const data = await response.json();
+                    if (data.error) {
+                        if ((data.error.code === 429 || data.error.message.includes('high demand') || data.error.message.includes('overloaded')) && attempts < maxAttempts) {
+                            await new Promise(resolve => setTimeout(resolve, 2000 * attempts));
+                            continue;
+                        }
+                        throw new Error(data.error.message);
+                    }
+
+                    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || generateLocalFallback(mode, userMessage);
+                    box.innerText = aiText.trim();
+                    if (preview) preview.innerText = aiText.trim().split('\n')[0];
+                    return;
+
+                } catch (err) {
+                    if (attempts >= maxAttempts) {
+                        const fallback = generateLocalFallback(mode, userMessage);
+                        box.innerText = fallback + `\n\n(Note : Serveur Gemini temporairement occupé. Utilisation du mode local de secours.)`;
+                    }
+                }
             }
         };
 
