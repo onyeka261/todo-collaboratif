@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DuoSync Workspace Pro — Cockpit</title>
     
-    <!-- Favicon & Icône d'application mobile -->
     <link rel="icon" type="image/jpeg" href="watermarked_img_2931171897751656122.jpg">
     <link rel="apple-touch-icon" href="watermarked_img_2931171897751656122.jpg">
     <link rel="manifest" href="manifest.json">
@@ -29,15 +28,17 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        .avatar-float { animation: float 3s ease-in-out infinite; }
     </style>
 </head>
 <body class="min-h-screen lg:h-screen flex flex-col text-slate-800 dark:text-slate-100 dark:bg-slate-950 antialiased overflow-y-auto lg:overflow-hidden">
 
-    <!-- HEADER ADAPTATIF MOBILE & DESKTOP -->
+    <!-- HEADER ADAPTATIF AVEC NY AKAMA (AVATAR PERSONNALISÉ) -->
     <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3.5 sm:px-5 py-2.5 lg:py-0 lg:h-14 flex flex-wrap lg:flex-nowrap items-center justify-between shrink-0 z-20 gap-2.5 lg:gap-4 sticky top-0 lg:static">
         
-        <!-- Logo & Titre -->
-        <div class="flex items-center space-x-2.5 shrink-0">
+        <!-- Logo & Titre + NY AKAMA -->
+        <div class="flex items-center space-x-3 shrink-0">
             <div class="w-8 h-8 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
                 <img src="watermarked_img_2931171897751656122.jpg" alt="DuoSync Logo" class="w-full h-full object-cover">
             </div>
@@ -45,9 +46,23 @@
                 <h1 class="text-sm font-bold text-slate-900 dark:text-white leading-none">DuoSync Workspace</h1>
                 <p class="text-[10px] text-slate-400 mt-0.5">Cockpit collaboratif</p>
             </div>
+
+            <!-- BOUTON NY AKAMA AVEC L'IMAGE DE L'AVATAR -->
+            <button onclick="openAkamaModal('briefing')" class="flex items-center space-x-2 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 px-2.5 py-1 rounded-xl cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-2xs group" title="Discuter avec Ny Akama">
+                <div class="w-7 h-7 rounded-full overflow-hidden shadow-xs border border-indigo-300 dark:border-indigo-700 shrink-0 avatar-float">
+                    <img src="ny_akama.png" alt="Ny Akama" class="w-full h-full object-cover">
+                </div>
+                <div class="text-left">
+                    <div class="flex items-center space-x-1">
+                        <span class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Ny Akama</span>
+                        <span id="ai-badge" class="text-[9px] px-1 rounded bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 font-semibold">IA</span>
+                    </div>
+                    <p id="header-akama-preview" class="hidden xl:block text-[10px] text-indigo-600/80 dark:text-indigo-400 max-w-[180px] truncate">Clique pour ton briefing...</p>
+                </div>
+            </button>
         </div>
 
-        <!-- Boutons d'action rapides (en haut à droite sur mobile) -->
+        <!-- Boutons d'action rapides -->
         <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0 lg:order-3">
             <div id="sync-status" class="flex items-center space-x-1.5 px-2 sm:px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-[10px] font-semibold border border-amber-200 dark:border-amber-800">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
@@ -64,7 +79,7 @@
                 <span class="hidden xl:inline">Excel</span>
             </button>
 
-            <button onclick="openConfigModal()" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition" title="Configuration Firebase">
+            <button onclick="openConfigModal()" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition" title="Paramètres Firebase & IA">
                 <i data-lucide="settings" class="w-4 h-4"></i>
             </button>
 
@@ -74,7 +89,7 @@
             </button>
         </div>
 
-        <!-- Filtres & Recherche (pleine largeur sur mobile, centré sur desktop) -->
+        <!-- Filtres & Recherche -->
         <div class="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:order-2">
             <div class="flex items-center justify-between sm:justify-start space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto">
                 <button onclick="setFilterAssignee('all')" id="filter-all" class="flex-1 sm:flex-none px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-600 text-white transition whitespace-nowrap">Tous</button>
@@ -86,10 +101,10 @@
         </div>
     </header>
 
-    <!-- ZONE PRINCIPALE (SCROLL NATUREL SUR MOBILE, COCKPIT FIXE SUR DESKTOP) -->
+    <!-- ZONE PRINCIPALE -->
     <main class="flex-1 p-3 sm:p-3.5 lg:overflow-hidden flex flex-col gap-3.5 min-h-0">
 
-        <!-- CAPTURE D'IDÉES AGRANDIE ET RESPONSIVE -->
+        <!-- CAPTURE D'IDÉES -->
         <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 shadow-2xs shrink-0 flex flex-col gap-2.5">
             <form id="inbox-form" onsubmit="handleInboxSubmit(event)" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5">
                 <div class="flex items-center gap-2 flex-1">
@@ -116,7 +131,7 @@
             <div id="inbox-list" class="flex flex-wrap items-center gap-2 max-h-32 lg:max-h-20 overflow-y-auto pt-1.5 border-t border-slate-100 dark:border-slate-800/80"></div>
         </section>
 
-        <!-- GRILLE 3 COLONNES (1 COLONNE SUR MOBILE, 3 SUR GRAND ÉCRAN) -->
+        <!-- GRILLE 3 COLONNES -->
         <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-3.5 min-h-0 lg:overflow-hidden pb-6 lg:pb-0">
 
             <!-- COLONNE 1 -->
@@ -209,7 +224,54 @@
         </div>
     </main>
 
-    <!-- MODALE CAPTURE MULTI-LIGNES -->
+    <!-- POP-UP INTERACTIVE NY AKAMA (AVEC TON AVATAR IMAGE) -->
+    <div id="akama-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border border-indigo-100 dark:border-indigo-900/60 flex flex-col gap-3.5">
+            <!-- Header Ny Akama -->
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-10 h-10 rounded-full overflow-hidden shadow-xs border border-indigo-300 dark:border-indigo-700 shrink-0 avatar-float">
+                        <img src="ny_akama.png" alt="Ny Akama" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-1.5">
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Ny Akama</h3>
+                            <span id="akama-mode-tag" class="text-[10px] px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-semibold">IA Active</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Ton copilote DuoSync</p>
+                    </div>
+                </div>
+                <button onclick="closeAkamaModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg text-sm">✕</button>
+            </div>
+
+            <!-- Bulle de réponse de Ny Akama -->
+            <div id="akama-response-box" class="bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-3.5 text-xs leading-relaxed text-slate-700 dark:text-slate-200 max-h-60 overflow-y-auto whitespace-pre-line">
+                Salama tsara e ! Je prépare ton point du jour...
+            </div>
+
+            <!-- Boutons d'actions rapides -->
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="askAkama('summary')" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl transition flex items-center justify-center space-x-1.5 border border-slate-200/70 dark:border-slate-700">
+                    <span>📊</span>
+                    <span>Résumer priorités</span>
+                </button>
+                <button type="button" onclick="askAkama('motivate')" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl transition flex items-center justify-center space-x-1.5 border border-slate-200/70 dark:border-slate-700">
+                    <span>⚡</span>
+                    <span>Me remotiver</span>
+                </button>
+            </div>
+
+            <!-- Champ de réponse interactive -->
+            <form onsubmit="handleAkamaChat(event)" class="flex items-center gap-2 pt-1">
+                <input type="text" id="akama-user-input" placeholder="Réponds à Ny Akama ou pose une question..." class="flex-1 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="submit" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition shrink-0">
+                    Envoyer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- AUTRES MODALES -->
     <div id="bulk-inbox-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800">
             <div class="flex items-center justify-between mb-2">
@@ -219,9 +281,9 @@
                 </h3>
                 <button onclick="closeBulkInboxModal()" class="text-slate-400 hover:text-slate-600 p-1 text-sm">✕</button>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Écris ou colle tes notes librement (<strong>1 ligne = 1 idée capturée</strong> avec tri intelligent automatique).</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Écris ou colle tes notes librement (<strong>1 ligne = 1 idée capturée</strong>).</p>
             <form onsubmit="handleBulkInboxSubmit(event)" class="space-y-3">
-                <textarea id="bulk-inbox-textarea" rows="6" required placeholder="Ex:&#10;Relancer contracteur pour carte ASP&#10;Formation SIMDUT Jean Tremblay&#10;Vérifier accès Cognibox avec IT&#10;Préparer module sécurité Casa Berardi" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                <textarea id="bulk-inbox-textarea" rows="6" required placeholder="Relancer contracteur pour carte ASP&#10;Formation SIMDUT Jean Tremblay" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
                 <div class="flex justify-end space-x-2">
                     <button type="button" onclick="closeBulkInboxModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl">Annuler</button>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">Tout capturer</button>
@@ -230,7 +292,6 @@
         </div>
     </div>
 
-    <!-- MODALE UNIVERSELLE -->
     <div id="universal-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
             <h3 id="modal-title" class="text-base font-bold text-slate-900 dark:text-white mb-3">Ajouter un élément</h3>
@@ -258,7 +319,6 @@
         </div>
     </div>
 
-    <!-- MODALE SOUS-PROJET -->
     <div id="subproject-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800">
             <h3 class="text-sm font-bold mb-3">Ajouter un sous-projet</h3>
@@ -273,7 +333,6 @@
         </div>
     </div>
 
-    <!-- MODALE HISTORIQUE -->
     <div id="history-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh]">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -287,11 +346,22 @@
         </div>
     </div>
 
-    <!-- MODALE CONFIG FIREBASE -->
+    <!-- MODALE PARAMÈTRES (FIREBASE + CLÉ API GEMINI 3.8-FLASH) -->
     <div id="config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800">
-            <h3 class="text-sm font-bold mb-2">Configuration Firebase</h3>
-            <textarea id="config-json-input" rows="6" placeholder='{"apiKey": "...", "projectId": "..."}' class="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl mb-3"></textarea>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-4">
+            <h3 class="text-sm font-bold">Paramètres Cloud & IA Ny Akama</h3>
+            
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">👒 Clé API Google Gemini (pour Ny Akama)</label>
+                <input type="password" id="gemini-key-input" placeholder="AIzaSy..." class="w-full font-mono text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <p class="text-[10px] text-slate-400 mt-1">Permet à Ny Akama de générer des résumés et questions uniques en temps réel.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">☁️ Configuration Firebase (JSON)</label>
+                <textarea id="config-json-input" rows="4" placeholder='{"apiKey": "...", "projectId": "..."}' class="w-full font-mono text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            </div>
+
             <div class="flex justify-end space-x-2">
                 <button onclick="closeConfigModal()" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 text-xs font-semibold rounded-xl">Annuler</button>
                 <button onclick="saveConfig()" class="px-3.5 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl">Enregistrer</button>
@@ -299,7 +369,7 @@
         </div>
     </div>
 
-    <!-- LOGIQUE JAVASCRIPT -->
+    <!-- LOGIQUE JAVASCRIPT & CERVEAU IA (MIS À JOUR AVEC GEMINI-3.8-FLASH) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -326,6 +396,130 @@
             checkAndAutoResetRecurring();
             initSortable();
             renderAll();
+            updateAkamaBadge();
+
+            setTimeout(() => {
+                openAkamaModal('briefing');
+            }, 600);
+        };
+
+        function updateAkamaBadge() {
+            const hasKey = Boolean(localStorage.getItem('duo_gemini_api_key'));
+            const badge = document.getElementById('ai-badge');
+            const tag = document.getElementById('akama-mode-tag');
+            if (hasKey) {
+                if (badge) badge.innerText = "Gemini IA";
+                if (tag) tag.innerText = "Propulsé par Gemini IA";
+            } else {
+                if (badge) badge.innerText = "Local";
+                if (tag) tag.innerText = "Mode Local (Ajoute ta clé IA dans ⚙️)";
+            }
+        }
+
+        function buildWorkspaceContext() {
+            const pendingRecurring = localData.recurring.filter(r => !r.lastDone).map(r => r.title);
+            const todos = localData.todo.map(t => `${t.title}${t.dueDate ? ' (échéance: ' + t.dueDate + ')' : ''}`);
+            const followups = localData.followup.map(f => `${f.title} (notifier: ${f.notifyTo || 'N/A'})`);
+            const contacts = localData.contact.map(c => `${c.title} via ${c.channel}`);
+            const projects = localData.project.map(p => `${p.title} (${p.progress || 0}%)`);
+            const trainings = localData.training.map(tr => tr.workerName);
+            const itItems = localData.it.map(i => i.title);
+
+            return `
+Données actuelles du cockpit DuoSync (équipe : Mickaela et Koloina) :
+- Inbox à trier (${localData.inbox.length}) : ${localData.inbox.map(i => i.text).join(', ') || 'vide'}
+- Simple To-Do (${todos.length}) : ${todos.join(', ') || 'aucune'}
+- Tâches récurrentes non faites (${pendingRecurring.length}) : ${pendingRecurring.join(', ') || 'toutes faites !'}
+- Projets en cours (${projects.length}) : ${projects.join(', ') || 'aucun'}
+- Suivi & Relances (${followups.length}) : ${followups.join(', ') || 'aucune'}
+- À Contacter (${contacts.length}) : ${contacts.join(', ') || 'personne'}
+- Formations travailleurs (${trainings.length}) : ${trainings.join(', ') || 'aucune'}
+- Tickets IT (${itItems.length}) : ${itItems.join(', ') || 'aucun'}
+            `.trim();
+        }
+
+        function generateLocalFallback(mode, userMessage = '') {
+            const totalTasks = localData.todo.length + localData.followup.length + localData.contact.length + localData.recurring.filter(r => !r.lastDone).length;
+            if (mode === 'motivate') {
+                const quotes = [
+                    "Salama tsara e ! Même les plus gros dossiers avancent une case cochée à la fois. Tu gères comme une cheffe sous ton chapeau ! 👒🚀\n\n👉 Quelle petite tâche rapide tu veux expédier dans les 10 prochaines minutes ?",
+                    "Mickaela & Koloina, l'équipe de choc ! 💪 Respire un bon coup, prends une gorgée d'eau et attaque ta priorité n°1.\n\n👉 Quel dossier te donnera le plus de satisfaction une fois bouclé aujourd'hui ?",
+                    "Pas de panique devant la liste : chaque validation te rapproche de la tranquillité d'esprit ! ✨\n\n👉 On commence par une relance ou une tâche récurrente ?"
+                ];
+                return quotes[Math.floor(Math.random() * quotes.length)];
+            }
+            if (userMessage) {
+                return `C'est bien noté pour "${userMessage}". On avance ensemble ! 👒\n\n(Astuce : ajoute ta clé API Gemini dans ⚙️ Paramètres pour que je puisse converser librement avec toi !)`;
+            }
+            return `Salama tsara e ! C'est Ny Akama 👒. Voici ton point flash :\n• ${totalTasks} action(s) active(s) à traiter\n• ${localData.followup.length} relance(s) en attente\n• ${localData.project.length} projet(s) en cours\n\n👉 Par quel point important veux-tu commencer maintenant ?`;
+        }
+
+        window.openAkamaModal = function(initialMode = 'briefing') {
+            document.getElementById('akama-modal').classList.remove('hidden');
+            askAkama(initialMode);
+        };
+
+        window.closeAkamaModal = function() {
+            document.getElementById('akama-modal').classList.add('hidden');
+        };
+
+        window.handleAkamaChat = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('akama-user-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            askAkama('chat', msg);
+        };
+
+        window.askAkama = async function(mode, userMessage = '') {
+            const box = document.getElementById('akama-response-box');
+            const preview = document.getElementById('header-akama-preview');
+            const apiKey = localStorage.getItem('duo_gemini_api_key');
+
+            box.innerHTML = `<span class="inline-flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 font-medium animate-pulse"><span>👒 Ny Akama réfléchit...</span></span>`;
+
+            if (!apiKey) {
+                const reply = generateLocalFallback(mode, userMessage);
+                box.innerText = reply;
+                if (preview) preview.innerText = reply.split('\n')[0];
+                return;
+            }
+
+            const context = buildWorkspaceContext();
+            let instruction = "";
+            if (mode === 'briefing') {
+                instruction = "Fais un accueil chaleureux avec une touche malgache (ex: Salama tsara e !), résume en 3 puces ultra-courtes les points les plus importants à faire selon les données du cockpit, ajoute une touche de motivation fun avec ton chapeau traditionnel, et termine par UNE question courte et engageante pour aider l'utilisatrice à choisir sa première action.";
+            } else if (mode === 'summary') {
+                instruction = "Résume clairement et de façon structurée les priorités importantes à faire maintenant d'après les données du cockpit, puis demande sur quoi elle veut se concentrer.";
+            } else if (mode === 'motivate') {
+                instruction = "Donne un boost de motivation drôle, bienveillant et énergique adapté à sa charge de travail actuelle, puis pose-lui une petite question dynamique pour lancer son élan.";
+            } else {
+                instruction = `Réponds directement à ce message de l'utilisatrice : "${userMessage}", en tenant compte de ses tâches actuelles, avec bienveillance, concision et une question de suivi utile.`;
+            }
+
+            const prompt = `Tu es "Ny Akama" (l'ami/complice en malgache), un petit assistant compagnon bienveillant coiffé d'un chapeau traditionnel 👒, intégré dans l'application DuoSync (utilisée par Mickaela et Koloina). Sois concis (max 5-6 lignes), utilise quelques emojis, tutoie l'utilisatrice.\n\n${context}\n\nConsigne : ${instruction}`;
+
+            try {
+                // Utilisation du modèle gemini-3.8-flash mis à jour
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+
+                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || generateLocalFallback(mode, userMessage);
+                box.innerText = aiText.trim();
+                if (preview) preview.innerText = aiText.trim().split('\n')[0];
+            } catch (err) {
+                const fallback = generateLocalFallback(mode, userMessage);
+                box.innerText = fallback + `\n\n(Note : Erreur API Gemini - ${err.message})`;
+            }
         };
 
         function saveLocalFallback() {
@@ -353,15 +547,30 @@
             renderAll();
         };
 
-        window.openConfigModal = function() { document.getElementById('config-modal').classList.remove('hidden'); };
+        window.openConfigModal = function() {
+            document.getElementById('gemini-key-input').value = localStorage.getItem('duo_gemini_api_key') || '';
+            document.getElementById('config-json-input').value = localStorage.getItem('duo_firebase_config') || '';
+            document.getElementById('config-modal').classList.remove('hidden');
+        };
         window.closeConfigModal = function() { document.getElementById('config-modal').classList.add('hidden'); };
         window.saveConfig = function() {
+            const geminiKey = document.getElementById('gemini-key-input').value.trim();
+            if (geminiKey) localStorage.setItem('duo_gemini_api_key', geminiKey);
+            else localStorage.removeItem('duo_gemini_api_key');
+            updateAkamaBadge();
+
             const val = document.getElementById('config-json-input').value.trim();
-            try {
-                const cfg = JSON.parse(val);
-                localStorage.setItem('duo_firebase_config', JSON.stringify(cfg));
-                closeConfigModal(); initFirebase(cfg);
-            } catch(e) { alert("Format JSON invalide."); }
+            if (val) {
+                try {
+                    const cfg = JSON.parse(val);
+                    localStorage.setItem('duo_firebase_config', JSON.stringify(cfg));
+                    initFirebase(cfg);
+                } catch(e) {
+                    alert("Format JSON Firebase invalide.");
+                    return;
+                }
+            }
+            closeConfigModal();
         };
 
         function initFirebase(config) {
